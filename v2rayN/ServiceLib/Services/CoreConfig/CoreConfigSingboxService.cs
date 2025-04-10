@@ -735,6 +735,11 @@ public class CoreConfigSingboxService
                         outbound.mtu = node.ShortId.IsNullOrEmpty() ? Global.TunMtus.First() : node.ShortId.ToInt();
                         break;
                     }
+                case EConfigType.Anytls:
+                    {
+                        outbound.password = node.Id;
+                        break;
+                    }
             }
 
             await GenOutboundTls(node, outbound);
