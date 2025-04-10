@@ -1395,4 +1395,7 @@
   <data name="SudoIncorrectPasswordTip" xml:space="preserve">
     <value>密码错误，请重试。</value>
   </data>
+  <data name="menuAddAnytlsServer" xml:space="preserve">
+    <value>添加 [Anytls] 配置文件</value>
+  </data>
 </root>
