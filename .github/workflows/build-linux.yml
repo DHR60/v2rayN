@@ -9,6 +9,10 @@ on:
   push:
     branches:
       - master
+      - build
+
+permissions:
+  contents: write
 
 env:
   OutputArch: "linux-64"
@@ -97,5 +101,45 @@ jobs:
       with:
         file: ${{ github.workspace }}/v2rayN*.zip
         tag: ${{ github.event.inputs.release_tag }}
+        file_glob: true
+        prerelease: true
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Package release 7z archive
+      run: |
+        chmod 755 package-release-7z.sh
+        ./package-release-7z.sh $OutputArch $OutputPath64
+        ./package-release-7z.sh $OutputArchArm $OutputPathArm64
+
+    - name: Create git tag
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: ${{ github.workspace }}/v2rayN*.7z
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
         file_glob: true
         prerelease: true
