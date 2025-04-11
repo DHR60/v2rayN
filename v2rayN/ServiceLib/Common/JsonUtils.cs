@@ -2,6 +2,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
+using System.Text.Json.Serialization.Metadata;
 
 namespace ServiceLib.Common;
 
@@ -38,6 +39,7 @@ public class JsonUtils
             {
                 PropertyNameCaseInsensitive = true
             };
+            EnsureResolver(options);
             return JsonSerializer.Deserialize<T>(strJson, options);
         }
         catch
@@ -90,6 +92,7 @@ public class JsonUtils
                 DefaultIgnoreCondition = nullValue ? JsonIgnoreCondition.Never : JsonIgnoreCondition.WhenWritingNull,
                 Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
             };
+            EnsureResolver(options);
             result = JsonSerializer.Serialize(obj, options);
         }
         catch (Exception ex)
@@ -114,6 +117,7 @@ public class JsonUtils
             {
                 return result;
             }
+            EnsureResolver(options);
             result = JsonSerializer.Serialize(obj, options);
         }
         catch (Exception ex)
@@ -130,6 +134,21 @@ public class JsonUtils
     /// <returns></returns>
     public static JsonNode? SerializeToNode(object? obj, JsonSerializerOptions? options = null)
     {
+        if (options is null)
+        {
+            options = new JsonSerializerOptions();
+        }
+        EnsureResolver(options);
         return JsonSerializer.SerializeToNode(obj, options);
+    }
+
+    private static void EnsureResolver(JsonSerializerOptions options)
+    {
+        // In trimmed/AOT builds, reflection-based serialization is disabled by default.
+        // Opt-in explicitly so generic helpers continue to work.
+        if (options.TypeInfoResolverChain.Count == 0)
+        {
+            options.TypeInfoResolverChain.Add(new DefaultJsonTypeInfoResolver());
+        }
     }
 }
