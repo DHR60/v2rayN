@@ -1470,7 +1470,7 @@ public class CoreConfigSingboxService
         var tag = "local_local";
         var localDnsAddress = string.IsNullOrEmpty(dNSItem?.DomainDNSAddress) ? Global.SingboxDomainDNSAddress.FirstOrDefault() : dNSItem?.DomainDNSAddress;
         string? localDnsType = null;
-        //string? dhcpDnsInterface = null;
+        string? dhcpDnsInterface = null;
         if (localDnsAddress == "local")
         {
             localDnsType = "local";
@@ -1479,8 +1479,12 @@ public class CoreConfigSingboxService
         else if (localDnsAddress.StartsWith("dhcp") && localDnsAddress.Length > 7)
         {
             localDnsType = "dhcp";
-            // // dhcp://
-            // dhcpDnsInterface = localDnsAddress.Substring(7);
+            // dhcp://
+            dhcpDnsInterface = localDnsAddress.Substring(7);
+            if (dhcpDnsInterface == "auto")
+            {
+                dhcpDnsInterface = null;
+            }
             localDnsAddress = null;
         }
         else if (localDnsAddress.StartsWith("tcp") && localDnsAddress.Length > 6)
@@ -1516,7 +1520,8 @@ public class CoreConfigSingboxService
         {
             tag = tag,
             type = localDnsType,
-            server = localDnsAddress
+            server = localDnsAddress,
+            Interface = dhcpDnsInterface
         });
         dns4Sbox.rules.Insert(0, new()
         {
