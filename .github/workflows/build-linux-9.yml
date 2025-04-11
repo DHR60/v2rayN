@@ -1,4 +1,4 @@
-name: release macOS
+name: release Linux dotnet 9
 
 on:
   workflow_dispatch:
@@ -19,11 +19,13 @@ jobs:
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"osx-x64",  "package_arch":"macos-64",   "self_contained":true},
-          {"runtime":"osx-arm64","package_arch":"macos-arm64","self_contained":true}
+          {"runtime":"linux-x64",  "package_arch":"linux-64-dotnet9",   "self_contained":true},
+          {"runtime":"linux-arm64","package_arch":"linux-arm64-dotnet9","self_contained":true},
+          {"runtime":"linux-arm",  "package_arch":"linux-arm-dotnet9",  "self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
-    runs-on: macos-latest
+
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -35,12 +37,18 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v5.0.0
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
+
+    - name: Replace net8.0 with net9.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net9\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net9\.0/g'
 
     - name: Ensure jq
       run: |
-        brew update
-        brew install jq
+        sudo apt-get update
+        sudo apt-get install -y jq
 
     - name: Build all variants
       shell: bash
@@ -71,28 +79,49 @@ jobs:
     - name: Upload build artifacts (all variants)
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: v2rayN-all-macos
+        name: v2rayN-all-linux
         path: "${{ env.OUTPUT_BASE }}/**"
-    
-    # release osx package
-    - name: Package osx
+
+    # release debian package
+    - name: Package debian
       if: github.event.inputs.release_tag != ''
       shell: bash
       run: |
         set -euo pipefail
-        brew install create-dmg
-        chmod 755 package-osx.sh
+        chmod 755 package-debian.sh
         echo "$BUILD_MATRIX" | jq -c '.[]' | while read -r row; do
           package_arch=$(echo "$row" | jq -r '.package_arch')
           out_dir="${OUTPUT_BASE}/${package_arch}"
-          ./package-osx.sh "${package_arch}" "${out_dir}" "${{ github.event.inputs.release_tag }}"
+          ./package-debian.sh "${package_arch}" "${out_dir}" "${{ github.event.inputs.release_tag }}"
         done
 
-    - name: Upload dmg to release
+    - name: Upload deb to release
       uses: svenstaro/upload-release-action@v2
       if: github.event.inputs.release_tag != ''
       with:
-        file: ${{ github.workspace }}/v2rayN*.dmg
+        file: ${{ github.workspace }}/v2rayN*.deb
+        tag: ${{ github.event.inputs.release_tag }}
+        file_glob: true
+        prerelease: true
+
+    - name: Package AppImage
+      if: github.event.inputs.release_tag != ''
+      shell: bash
+      run: |
+        set -euo pipefail
+        chmod a+x package-appimage.sh
+        # AppImage 打包脚本会下载外部 zip 并复制到指定 OutputPath，再产出两个架构的 AppImage
+        export OutputArch=linux-64
+        export OutputPath64="${OUTPUT_BASE}/linux-64"
+        export OutputArchArm=linux-arm64
+        export OutputPathArm64="${OUTPUT_BASE}/linux-arm64"
+        ./package-appimage.sh
+
+    - name: Upload AppImage to release
+      uses: svenstaro/upload-release-action@v2
+      if: github.event.inputs.release_tag != ''
+      with:
+        file: ${{ github.workspace }}/v2rayN*.AppImage
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
         prerelease: true
@@ -109,12 +138,46 @@ jobs:
           out_dir="${OUTPUT_BASE}/${package_arch}"
           ./package-release-zip.sh "${package_arch}" "${out_dir}"
         done
-
+    
     - name: Upload zip archive to release
       uses: svenstaro/upload-release-action@v2
       if: github.event.inputs.release_tag != ''
       with:
         file: ${{ github.workspace }}/v2rayN*.zip
+        tag: ${{ github.event.inputs.release_tag }}
+        file_glob: true
+        prerelease: true
+
+    # release RHEL package
+    - name: Package RPM (RHEL-family)
+      if: github.event.inputs.release_tag != ''
+      run: |
+        chmod 755 package-rhel.sh
+        # Build for both x86_64 and aarch64 in one go (explicit version passed; no --buildfrom)
+        ./package-rhel.sh "${{ github.event.inputs.release_tag }}" --arch all
+
+    - name: Collect RPMs into workspace
+      if: github.event.inputs.release_tag != ''
+      run: |
+        mkdir -p "${{ github.workspace }}/dist/rpm"
+        rsync -av "$HOME/rpmbuild/RPMS/" "${{ github.workspace }}/dist/rpm/"
+        # Rename to requested filenames
+        find "${{ github.workspace }}/dist/rpm" -name "v2rayN-*-1.x86_64.rpm" -exec mv {} "${{ github.workspace }}/dist/rpm/v2rayN-linux-rhel-x64.rpm" \; || true
+        find "${{ github.workspace }}/dist/rpm" -name "v2rayN-*-1.aarch64.rpm" -exec mv {} "${{ github.workspace }}/dist/rpm/v2rayN-linux-rhel-arm64.rpm" \; || true
+
+    - name: Upload RPM artifacts
+      if: github.event.inputs.release_tag != ''
+      uses: actions/upload-artifact@v4.6.2
+      with:
+        name: v2rayN-rpm
+        path: |
+          ${{ github.workspace }}/dist/rpm/**/*.rpm
+
+    - name: Upload RPMs to release
+      uses: svenstaro/upload-release-action@v2
+      if: github.event.inputs.release_tag != ''
+      with:
+        file: ${{ github.workspace }}/dist/rpm/**/*.rpm
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
         prerelease: true
