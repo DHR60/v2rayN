@@ -9,20 +9,26 @@ on:
   push:
     branches:
       - master
+      - build
 
-env:
-  OutputArch: "windows-64"
-  OutputArchArm: "windows-arm64"
-  OutputPath64:  "${{ github.workspace }}/v2rayN/Release/windows-64"
-  OutputPathArm64:  "${{ github.workspace }}/v2rayN/Release/windows-arm64"
+permissions:
+  contents: write
 
 jobs:
   build:
-    strategy:
-      matrix:
-        configuration: [Release]
+    runs-on: windows-latest
 
-    runs-on: ubuntu-latest
+    env:
+      BUILD_MATRIX: |
+        [
+          {"runtime":"win-x64",  "package_arch":"windows-64",                      "self_contained":false, "optimize":false},
+          {"runtime":"win-arm64","package_arch":"windows-arm64",                   "self_contained":false, "optimize":false},
+          {"runtime":"win-x64",  "package_arch":"windows-64-SelfContained",        "self_contained":true,  "optimize":false},
+          {"runtime":"win-arm64","package_arch":"windows-arm64-SelfContained",     "self_contained":true,  "optimize":false},
+          {"runtime":"win-x64",  "package_arch":"windows-64-r2r",                  "self_contained":false, "optimize":true},
+          {"runtime":"win-arm64","package_arch":"windows-arm64-r2r",               "self_contained":false, "optimize":true}
+        ]
+      OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
 
     steps:
     - name: Checkout
@@ -31,41 +37,127 @@ jobs:
         submodules: 'recursive'
         fetch-depth: '0'
 
-    - name: Setup
+    - name: Setup .NET
       uses: actions/setup-dotnet@v4.3.1
       with:
         dotnet-version: '8.0.x'
 
-    - name: Build
+    - name: Build all variants
+      shell: pwsh
       run: |
-        cd v2rayN 
-        dotnet publish ./v2rayN.Desktop/v2rayN.Desktop.csproj -c Release -r win-x64   --self-contained=true -p:EnableWindowsTargeting=true -o $OutputPath64
-        dotnet publish ./v2rayN.Desktop/v2rayN.Desktop.csproj -c Release -r win-arm64 --self-contained=true -p:EnableWindowsTargeting=true -o $OutputPathArm64
-        dotnet publish ./AmazTool/AmazTool.csproj             -c Release -r win-x64   --self-contained=true -p:EnableWindowsTargeting=true -p:PublishTrimmed=true -o $OutputPath64
-        dotnet publish ./AmazTool/AmazTool.csproj             -c Release -r win-arm64 --self-contained=true -p:EnableWindowsTargeting=true -p:PublishTrimmed=true -o $OutputPathArm64
+        Set-StrictMode -Version Latest
+        $ErrorActionPreference = 'Stop'
+        Push-Location v2rayN
 
-    - name: Upload build artifacts
+        $matrix = $env:BUILD_MATRIX | ConvertFrom-Json
+        foreach ($row in $matrix) {
+          $runtime = $row.runtime
+          $package_arch = $row.package_arch
+          $self_contained = [bool]$row.self_contained
+          $optimize = [bool]$row.optimize
+
+          $outDir = "$env:OUTPUT_BASE/$package_arch"
+          New-Item -ItemType Directory -Path $outDir -Force | Out-Null
+
+          Write-Host "==> Building $package_arch (RID=$runtime, SC=$self_contained, OPT=$optimize)"
+
+          # Build args base
+          $baseArgs = @("-c","Release","-r",$runtime,"-p:EnableWindowsTargeting=true","-o",$outDir)
+          if ($self_contained) { $baseArgs += @("--self-contained","true") } else { $baseArgs += @("--self-contained","false") }
+
+          # v2rayN.Desktop (Avalonia)
+          $v2Args = @("./v2rayN.Desktop/v2rayN.Desktop.csproj") + $baseArgs
+          if ($optimize) {
+            $v2Args += @("-p:PublishReadyToRun=true","-p:PublishReadyToRunComposite=true")
+          }
+          & dotnet publish @v2Args
+
+          # AmazTool：自包含时 Trim
+          $amazArgs = @("./AmazTool/AmazTool.csproj") + $baseArgs
+          if ($self_contained) {
+            $amazArgs += @("-p:PublishTrimmed=true")
+          }
+          & dotnet publish @amazArgs
+        }
+        Pop-Location
+
+    - name: Upload build artifacts (all variants)
       uses: actions/upload-artifact@v4.6.2
       with:
-        name: v2rayN-windows-desktop
-        path: |
-          ${{ github.workspace }}/v2rayN/Release/windows*
+        name: v2rayN-all-desktop
+        path: "${{ env.OUTPUT_BASE }}/**"
+        compression-level: 6
 
     # release zip archive
-    - name: Package release zip archive
+    - name: Package release zip archives
       if: github.event.inputs.release_tag != ''
+      shell: pwsh
       run: |
-        chmod 755 package-release-zip.sh
-        ./package-release-zip.sh $OutputArch $OutputPath64
-        mv "v2rayN-${OutputArch}.zip" "v2rayN-${OutputArch}-desktop.zip"
-        ./package-release-zip.sh $OutputArchArm $OutputPathArm64
-        mv "v2rayN-${OutputArchArm}.zip" "v2rayN-${OutputArchArm}-desktop.zip"
+        Set-StrictMode -Version Latest
+        $matrix = $env:BUILD_MATRIX | ConvertFrom-Json
+        foreach ($row in $matrix) {
+          $package_arch = $row.package_arch
+          $outDir = "$env:OUTPUT_BASE/$package_arch"
+          bash package-release-zip.sh "$package_arch" "$outDir"
+          $src = "v2rayN-$package_arch.zip"
+          $dst = "v2rayN-$package_arch-desktop.zip"
+          if (Test-Path $src) { Remove-Item -Force $dst -ErrorAction SilentlyContinue; Rename-Item -Force $src $dst }
+        }
 
     - name: Upload zip archive to release
       uses: svenstaro/upload-release-action@v2
       if: github.event.inputs.release_tag != ''
       with:
-        file: ${{ github.workspace }}/v2rayN*.zip
+        file: ${{ github.workspace }}/v2rayN-*-desktop.zip
         tag: ${{ github.event.inputs.release_tag }}
+        file_glob: true
+        prerelease: true
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Package release 7z archives
+      shell: pwsh
+      run: |
+        Set-StrictMode -Version Latest
+        $matrix = $env:BUILD_MATRIX | ConvertFrom-Json
+        foreach ($row in $matrix) {
+          $package_arch = $row.package_arch
+          $outDir = "$env:OUTPUT_BASE/$package_arch"
+          bash package-release-7z.sh "$package_arch" "$outDir"
+          $src = "v2rayN-$package_arch.7z"
+          $dst = "v2rayN-$package_arch-desktop.7z"
+          if (Test-Path $src) { Remove-Item -Force $dst -ErrorAction SilentlyContinue; Rename-Item -Force $src $dst }
+        }
+
+    - name: Create git tag
+      uses: actions/github-script@v7
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      if: github.event_name == 'push'
+      with:
+        file: ${{ github.workspace }}/v2rayN-*-desktop.7z
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
         file_glob: true
         prerelease: true
