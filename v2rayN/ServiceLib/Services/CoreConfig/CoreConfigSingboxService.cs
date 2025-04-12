@@ -1118,6 +1118,7 @@ public class CoreConfigSingboxService
     {
         try
         {
+            singboxConfig.route.final = Global.ProxyTag;
             singboxConfig.route.rules.Insert(0, new()
             {
                 outbound = Global.DirectTag,
