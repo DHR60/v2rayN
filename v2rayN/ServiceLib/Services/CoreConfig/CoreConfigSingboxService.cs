@@ -1243,6 +1243,8 @@ public class CoreConfigSingboxService
     {
         try
         {
+            singboxConfig.route.final = Global.ProxyTag;
+
             if (_config.TunModeItem.EnableTun)
             {
                 singboxConfig.route.auto_detect_interface = true;
