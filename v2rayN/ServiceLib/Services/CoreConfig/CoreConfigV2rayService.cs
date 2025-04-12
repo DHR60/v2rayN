@@ -1425,7 +1425,8 @@ public class CoreConfigV2rayService
                         if (prevNode is not null
                             && prevNode.ConfigType != EConfigType.Custom
                             && prevNode.ConfigType != EConfigType.Hysteria2
-                            && prevNode.ConfigType != EConfigType.TUIC)
+                            && prevNode.ConfigType != EConfigType.TUIC
+                            && prevNode.ConfigType != EConfigType.Anytls)
                         {
                             var prevOutbound = JsonUtils.Deserialize<Outbounds4Ray>(txtOutbound);
                             await GenOutbound(prevNode, prevOutbound);
@@ -1494,7 +1495,8 @@ public class CoreConfigV2rayService
             if (nextNode is not null
                 && nextNode.ConfigType != EConfigType.Custom
                 && nextNode.ConfigType != EConfigType.Hysteria2
-                && nextNode.ConfigType != EConfigType.TUIC)
+                && nextNode.ConfigType != EConfigType.TUIC
+                && nextNode.ConfigType != EConfigType.Anytls)
             {
                 if (nextOutbound == null)
                 {
