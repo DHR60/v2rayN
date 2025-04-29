@@ -1416,4 +1416,16 @@
   <data name="menuExportConfig" xml:space="preserve">
     <value>صادر کردن سرور</value>
   </data>
+  <data name="TbRoutingCustomEnable" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TbRoutingRayCustom" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TbRoutingSingboxCustom" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FillCorrectRoutingText" xml:space="preserve">
+    <value />
+  </data>
 </root>
