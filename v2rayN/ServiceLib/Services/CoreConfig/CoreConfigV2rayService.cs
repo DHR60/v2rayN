@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
+using ServiceLib.Models;
 
 namespace ServiceLib.Services.CoreConfig;
 
@@ -520,6 +521,12 @@ public class CoreConfigV2rayService
     {
         try
         {
+            var rawRouteItem = await AppHandler.Instance.GetRawRouteItem(ECoreType.Xray);
+            if (rawRouteItem.Enabled == true)
+            {
+                v2rayConfig.routing = JsonUtils.Deserialize<Routing4Ray>(rawRouteItem.Route);
+                return 0;
+            }
             if (v2rayConfig.routing?.rules != null)
             {
                 v2rayConfig.routing.domainStrategy = _config.RoutingBasicItem.DomainStrategy;

@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace ServiceLib.Models;
 
 public class SingboxConfig
@@ -51,21 +53,37 @@ public class Rule4Sbox
     public string? client_subnet { get; set; }
     public bool? invert { get; set; }
     public string? clash_mode { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? inbound { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? protocol { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? network { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<int>))]
     public List<int>? port { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? port_range { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? geosite { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_suffix { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_keyword { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_regex { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? geoip { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? ip_cidr { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? source_ip_cidr { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? process_name { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? rule_set { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<Rule4Sbox>))]
     public List<Rule4Sbox>? rules { get; set; }
 }
 

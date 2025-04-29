@@ -215,6 +215,7 @@ public class MainWindowViewModel : MyReactiveObject
 
         await ConfigHandler.InitBuiltinRouting(_config);
         await ConfigHandler.InitBuiltinDNS(_config);
+        await ConfigHandler.InitBuiltinRawRoute(_config);
         await ProfileExHandler.Instance.Init();
         await CoreHandler.Instance.Init(_config, UpdateHandler);
         TaskHandler.Instance.RegUpdateTask(_config, UpdateTaskHandler);

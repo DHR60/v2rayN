@@ -63,7 +63,10 @@ public class CoreConfigSingboxService
 
             await GenExperimental(singboxConfig);
 
-            await ConvertGeo2Ruleset(singboxConfig);
+            if (singboxConfig.route.rule_set == null || singboxConfig.route.rule_set.Count == 0)
+            {
+                await ConvertGeo2Ruleset(singboxConfig);
+            }
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
@@ -383,7 +386,10 @@ public class CoreConfigSingboxService
             }
 
             await GenDns(null, singboxConfig);
-            await ConvertGeo2Ruleset(singboxConfig);
+            if (singboxConfig.route.rule_set == null || singboxConfig.route.rule_set.Count == 0)
+            {
+                await ConvertGeo2Ruleset(singboxConfig);
+            }
 
             //add urltest outbound
             var outUrltest = new Outbound4Sbox
@@ -978,6 +984,13 @@ public class CoreConfigSingboxService
     {
         try
         {
+            var rawRouteItem = await AppHandler.Instance.GetRawRouteItem(ECoreType.sing_box);
+            if (rawRouteItem.Enabled == true)
+            {
+                singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.Route);
+                return 0;
+            }
+            
             var dnsOutbound = "dns_out";
 
             if (_config.TunModeItem.EnableTun)

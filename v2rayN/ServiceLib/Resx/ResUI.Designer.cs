@@ -214,6 +214,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Please fill in the correct custom Routing 的本地化字符串。
+        /// </summary>
+        public static string FillCorrectRoutingText {
+            get {
+                return ResourceManager.GetString("FillCorrectRoutingText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Please enter the correct port format. 的本地化字符串。
         /// </summary>
         public static string FillCorrectServerPort {
@@ -2680,11 +2689,29 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Enable Custom Routing 的本地化字符串。
+        /// </summary>
+        public static string TbRoutingCustomEnable {
+            get {
+                return ResourceManager.GetString("TbRoutingCustomEnable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 socks: local port, socks2: second local port, socks3: LAN port 的本地化字符串。
         /// </summary>
         public static string TbRoutingInboundTagTips {
             get {
                 return ResourceManager.GetString("TbRoutingInboundTagTips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Xray Custom Rules 的本地化字符串。
+        /// </summary>
+        public static string TbRoutingRayCustom {
+            get {
+                return ResourceManager.GetString("TbRoutingRayCustom", resourceCulture);
             }
         }
         
@@ -2712,6 +2739,15 @@ namespace ServiceLib.Resx {
         public static string TbRoutingRuleProcess {
             get {
                 return ResourceManager.GetString("TbRoutingRuleProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 sing-box Custom Rules 的本地化字符串。
+        /// </summary>
+        public static string TbRoutingSingboxCustom {
+            get {
+                return ResourceManager.GetString("TbRoutingSingboxCustom", resourceCulture);
             }
         }
         

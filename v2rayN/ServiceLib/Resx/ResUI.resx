@@ -1419,4 +1419,16 @@
   <data name="TbSettingsIPAPIUrl" xml:space="preserve">
     <value>Current connection info test URL</value>
   </data>
+  <data name="TbRoutingCustomEnable" xml:space="preserve">
+    <value>Enable Custom Routing</value>
+  </data>
+  <data name="TbRoutingRayCustom" xml:space="preserve">
+    <value>Xray Custom Rules</value>
+  </data>
+  <data name="TbRoutingSingboxCustom" xml:space="preserve">
+    <value>sing-box Custom Rules</value>
+  </data>
+  <data name="FillCorrectRoutingText" xml:space="preserve">
+    <value>Please fill in the correct custom Routing</value>
+  </data>
 </root>
