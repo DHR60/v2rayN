@@ -64,6 +64,7 @@ public sealed class AppHandler
         SQLiteHelper.Instance.CreateTable<RoutingItem>();
         SQLiteHelper.Instance.CreateTable<ProfileExItem>();
         SQLiteHelper.Instance.CreateTable<DNSItem>();
+        SQLiteHelper.Instance.CreateTable<RawRouteItem>();
         return true;
     }
 
@@ -201,6 +202,16 @@ public sealed class AppHandler
     public async Task<DNSItem?> GetDNSItem(ECoreType eCoreType)
     {
         return await SQLiteHelper.Instance.TableAsync<DNSItem>().FirstOrDefaultAsync(it => it.CoreType == eCoreType);
+    }
+
+    public async Task<List<RawRouteItem>?> RawRouteItems()
+    {
+        return await SQLiteHelper.Instance.TableAsync<RawRouteItem>().ToListAsync();
+    }
+
+    public async Task<RawRouteItem?> GetRawRouteItem(ECoreType eCoreType)
+    {
+        return await SQLiteHelper.Instance.TableAsync<RawRouteItem>().FirstOrDefaultAsync(it => it.CoreType == eCoreType);
     }
 
     #endregion SqliteHelper

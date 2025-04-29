@@ -1419,4 +1419,16 @@
   <data name="TbSettingsIPAPIUrl" xml:space="preserve">
     <value>URL для тестирования текущего соединения</value>
   </data>
+  <data name="TbRoutingCustomEnable" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TbRoutingRayCustom" xml:space="preserve">
+    <value />
+  </data>
+  <data name="TbRoutingSingboxCustom" xml:space="preserve">
+    <value />
+  </data>
+  <data name="FillCorrectRoutingText" xml:space="preserve">
+    <value />
+  </data>
 </root>
