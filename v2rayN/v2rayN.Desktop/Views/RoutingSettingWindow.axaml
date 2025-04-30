@@ -70,7 +70,7 @@
         </StackPanel>
 
         <DockPanel>
-            <TabControl x:Name="tabAdvanced">
+            <TabControl x:Name="tabAdvanced" HorizontalAlignment="Left">
                 <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingTabRuleList}">
                     <DataGrid
                         x:Name="lstRoutings"
@@ -119,6 +119,80 @@
                                 Header="{x:Static resx:ResUI.LvCustomIcon}" />
                         </DataGrid.Columns>
                     </DataGrid>
+                </TabItem>
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingRayCustom}">
+                    <Grid Margin="{StaticResource Margin4}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin4}"
+                                VerticalAlignment="Center"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleSwitch
+                                x:Name="rayCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin4}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+
+                        <TextBox
+                            x:Name="rayRawRoute"
+                            Grid.Row="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            BorderThickness="1"
+                            Classes="TextArea"
+                            Margin="{StaticResource Margin4}"
+                            TextWrapping="Wrap"
+                            Watermark="xray json route" />
+                    </Grid>
+                </TabItem>
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingSingboxCustom}">
+                    <Grid Margin="{StaticResource Margin4}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin4}"
+                                VerticalAlignment="Center"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleSwitch
+                                x:Name="sbCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin4}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+
+                        <TextBox
+                            x:Name="sbRawRoute"
+                            Grid.Row="1"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            BorderThickness="1"
+                            Classes="TextArea"
+                            Margin="{StaticResource Margin4}"
+                            TextWrapping="Wrap"
+                            Watermark="sing-box json route" />
+                    </Grid>
                 </TabItem>
             </TabControl>
         </DockPanel>
