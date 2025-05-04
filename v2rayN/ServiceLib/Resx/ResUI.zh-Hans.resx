@@ -1389,6 +1389,18 @@
   <data name="TbSettingsIPAPIUrl" xml:space="preserve">
     <value>当前连接信息测试地址</value>
   </data>
+  <data name="TbRoutingCustomEnable" xml:space="preserve">
+    <value>启用自定义路由</value>
+  </data>
+  <data name="TbRoutingRayCustom" xml:space="preserve">
+    <value>Xray 自定义规则</value>
+  </data>
+  <data name="TbRoutingSingboxCustom" xml:space="preserve">
+    <value>Sing-box 自定义规则</value>
+  </data>
+  <data name="FillCorrectRoutingText" xml:space="preserve">
+    <value>请填写正确的自定义路由</value>
+  </data>
   <data name="menuAddAnytlsServer" xml:space="preserve">
     <value>添加 [Anytls] 配置文件</value>
   </data>

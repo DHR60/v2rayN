@@ -2183,6 +2183,54 @@ public class ConfigHandler
 
     #endregion DNS
 
+    #region Raw Route
+    
+    public static async Task<int> InitBuiltinRawRoute(Config config)
+    {
+        var items = await AppHandler.Instance.RawRouteItems();
+        if (items.Count <= 0)
+        {
+            var item = new RawRouteItem()
+            {
+                Remarks = "V2ray",
+                CoreType = ECoreType.Xray,
+            };
+            await SaveRawRouteItem(config, item);
+
+            var item2 = new RawRouteItem()
+            {
+                Remarks = "sing-box",
+                CoreType = ECoreType.sing_box,
+            };
+            await SaveRawRouteItem(config, item2);
+        }
+
+        return 0;
+    }
+    public static async Task<int> SaveRawRouteItem(Config config, RawRouteItem item)
+    {
+        if (item == null)
+        {
+            return -1;
+        }
+
+        if (item.Id.IsNullOrEmpty())
+        {
+            item.Id = Utils.GetGuid(false);
+        }
+
+        if (await SQLiteHelper.Instance.ReplaceAsync(item) > 0)
+        {
+            return 0;
+        }
+        else
+        {
+            return -1;
+        }
+    }
+
+    #endregion Raw Route
+
     #region Regional Presets
 
     /// <summary>

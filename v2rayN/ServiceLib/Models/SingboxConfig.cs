@@ -39,6 +39,16 @@ public class Route4Sbox
 {
     public bool? auto_detect_interface { get; set; }
     public List<Rule4Sbox> rules { get; set; }
+    [JsonConverter(typeof(DomainResolverConverter))]
+    public Rule4Sbox? default_domain_resolver { get; set; } // or string
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? default_network_type { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? default_fallback_network_type { get; set; }
+    public string? default_network_strategy { get; set; }
+    public string? default_fallback_delay { get; set; }
+    public string? default_interface { get; set; }
+    public string? default_mark { get; set; }
     public List<Ruleset4Sbox>? rule_set { get; set; }
     public string? final { get; set; }
 }
@@ -86,6 +96,7 @@ public class Rule4Sbox
     public List<string>? process_name { get; set; }
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? rule_set { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<Rule4Sbox>))]
     public List<Rule4Sbox>? rules { get; set; }
     public string? action { get; set; }
     public string? strategy { get; set; }
@@ -258,7 +269,6 @@ public class Server4Sbox : BaseServer4Sbox
     public string? inet6_range { get; set; }
     public string? client_subnet { get; set; }
     public string? server { get; set; }
-    public new string? domain_resolver { get; set; }
     [JsonPropertyName("interface")] public string? Interface { get; set; }
     public int? server_port { get; set; }
     public string? path { get; set; }

@@ -74,145 +74,252 @@
                 Style="{StaticResource DefButton}" />
         </StackPanel>
 
-        <Grid Margin="{StaticResource Margin8}" DockPanel.Dock="Top">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="Auto" />
-            </Grid.RowDefinitions>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-            </Grid.ColumnDefinitions>
+        <DockPanel>
+            <Grid Margin="{StaticResource Margin8}" DockPanel.Dock="Top">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-            <TextBlock
-                Grid.Row="0"
-                Grid.Column="0"
-                Margin="{StaticResource Margin4}"
-                VerticalAlignment="Center"
-                Style="{StaticResource ToolbarTextBlock}">
-                <Hyperlink Click="linkdomainStrategy_Click">
-                    <TextBlock Text="{x:Static resx:ResUI.TbdomainStrategy}" />
-                    <materialDesign:PackIcon Kind="Link" />
-                </Hyperlink>
-            </TextBlock>
-            <ComboBox
-                x:Name="cmbdomainStrategy"
-                Grid.Row="0"
-                Grid.Column="1"
-                Width="300"
-                Margin="{StaticResource Margin4}"
-                Style="{StaticResource DefComboBox}" />
+                <TextBlock
+                    Grid.Row="0"
+                    Grid.Column="0"
+                    Margin="{StaticResource Margin4}"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ToolbarTextBlock}">
+                    <Hyperlink Click="linkdomainStrategy_Click">
+                        <TextBlock Text="{x:Static resx:ResUI.TbdomainStrategy}" />
+                        <materialDesign:PackIcon Kind="Link" />
+                    </Hyperlink>
+                </TextBlock>
+                <ComboBox
+                    x:Name="cmbdomainStrategy"
+                    Grid.Row="0"
+                    Grid.Column="1"
+                    Width="300"
+                    Margin="{StaticResource Margin4}"
+                    Style="{StaticResource DefComboBox}" />
 
-            <TextBlock
-                Grid.Row="1"
-                Grid.Column="0"
-                Margin="{StaticResource Margin4}"
-                VerticalAlignment="Center"
-                Style="{StaticResource ToolbarTextBlock}"
-                Text="{x:Static resx:ResUI.TbdomainMatcher}" />
-            <ComboBox
-                x:Name="cmbdomainMatcher"
-                Grid.Row="1"
-                Grid.Column="1"
-                Width="300"
-                Margin="{StaticResource Margin4}"
-                Style="{StaticResource DefComboBox}" />
+                <TextBlock
+                    Grid.Row="1"
+                    Grid.Column="0"
+                    Margin="{StaticResource Margin4}"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ToolbarTextBlock}"
+                    Text="{x:Static resx:ResUI.TbdomainMatcher}" />
+                <ComboBox
+                    x:Name="cmbdomainMatcher"
+                    Grid.Row="1"
+                    Grid.Column="1"
+                    Width="300"
+                    Margin="{StaticResource Margin4}"
+                    Style="{StaticResource DefComboBox}" />
 
-            <TextBlock
-                Grid.Row="2"
-                Grid.Column="0"
-                Margin="{StaticResource Margin4}"
-                VerticalAlignment="Center"
-                Style="{StaticResource ToolbarTextBlock}">
-                <Hyperlink Click="linkdomainStrategy4Singbox_Click">
-                    <TextBlock Text="{x:Static resx:ResUI.TbdomainStrategy4Singbox}" />
-                    <materialDesign:PackIcon Kind="Link" />
-                </Hyperlink>
-            </TextBlock>
-            <ComboBox
-                x:Name="cmbdomainStrategy4Singbox"
-                Grid.Row="2"
-                Grid.Column="1"
-                Width="300"
-                Margin="{StaticResource Margin4}"
-                Style="{StaticResource DefComboBox}" />
-        </Grid>
+                <TextBlock
+                    Grid.Row="2"
+                    Grid.Column="0"
+                    Margin="{StaticResource Margin4}"
+                    VerticalAlignment="Center"
+                    Style="{StaticResource ToolbarTextBlock}">
+                    <Hyperlink Click="linkdomainStrategy4Singbox_Click">
+                        <TextBlock Text="{x:Static resx:ResUI.TbdomainStrategy4Singbox}" />
+                        <materialDesign:PackIcon Kind="Link" />
+                    </Hyperlink>
+                </TextBlock>
+                <ComboBox
+                    x:Name="cmbdomainStrategy4Singbox"
+                    Grid.Row="2"
+                    Grid.Column="1"
+                    Width="300"
+                    Margin="{StaticResource Margin4}"
+                    Style="{StaticResource DefComboBox}" />
+            </Grid>
 
-        <TabControl x:Name="tabAdvanced">
-            <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingTabRuleList}">
-                <DataGrid
-                    x:Name="lstRoutings"
-                    AutoGenerateColumns="False"
-                    BorderThickness="1"
-                    CanUserAddRows="False"
-                    CanUserResizeRows="False"
-                    CanUserSortColumns="False"
-                    EnableRowVirtualization="True"
-                    GridLinesVisibility="All"
-                    HeadersVisibility="Column"
-                    IsReadOnly="True"
-                    Style="{StaticResource DefDataGrid}">
-                    <DataGrid.ContextMenu>
-                        <ContextMenu Style="{StaticResource DefContextMenu}">
-                            <MenuItem
-                                x:Name="menuRoutingAdvancedAdd"
-                                Height="{StaticResource MenuItemHeight}"
-                                Header="{x:Static resx:ResUI.menuRoutingAdvancedAdd}" />
-                            <MenuItem
-                                x:Name="menuRoutingAdvancedRemove"
-                                Height="{StaticResource MenuItemHeight}"
-                                Header="{x:Static resx:ResUI.menuRoutingAdvancedRemove}" />
-                            <MenuItem
-                                x:Name="menuRoutingAdvancedSelectAll"
-                                Height="{StaticResource MenuItemHeight}"
-                                Header="{x:Static resx:ResUI.menuSelectAll}" />
-                            <MenuItem
-                                x:Name="menuRoutingAdvancedSetDefault"
-                                Height="{StaticResource MenuItemHeight}"
-                                Header="{x:Static resx:ResUI.menuRoutingAdvancedSetDefault}" />
-                            <Separator />
-                            <MenuItem
-                                x:Name="menuRoutingAdvancedImportRules"
-                                Height="{StaticResource MenuItemHeight}"
-                                Header="{x:Static resx:ResUI.menuRoutingAdvancedImportRules}" />
-                        </ContextMenu>
-                    </DataGrid.ContextMenu>
-                    <DataGrid.Resources>
-                        <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsActive}" Value="True">
-                                    <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
-                                    <Setter Property="Foreground" Value="Black" />
-                                    <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </DataGrid.Resources>
-                    <DataGrid.Columns>
-                        <DataGridTextColumn
-                            Width="*"
-                            Binding="{Binding Remarks}"
-                            Header="{x:Static resx:ResUI.LvRemarks}" />
-                        <DataGridTextColumn
-                            Width="60"
-                            Binding="{Binding RuleNum}"
-                            Header="{x:Static resx:ResUI.LvCount}" />
-                        <DataGridTextColumn
-                            Width="60"
-                            Binding="{Binding Sort}"
-                            Header="{x:Static resx:ResUI.LvSort}" />
-                        <DataGridTextColumn
-                            Width="*"
-                            Binding="{Binding Url}"
-                            Header="{x:Static resx:ResUI.LvUrl}" />
-                        <DataGridTextColumn
-                            Width="300"
-                            Binding="{Binding CustomIcon}"
-                            Header="{x:Static resx:ResUI.LvCustomIcon}" />
-                    </DataGrid.Columns>
-                </DataGrid>
-            </TabItem>
-        </TabControl>
+            <TabControl x:Name="tabAdvanced" HorizontalContentAlignment="Left">
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingTabRuleList}">
+                    <DataGrid
+                        x:Name="lstRoutings"
+                        AutoGenerateColumns="False"
+                        BorderThickness="1"
+                        CanUserAddRows="False"
+                        CanUserResizeRows="False"
+                        CanUserSortColumns="False"
+                        EnableRowVirtualization="True"
+                        GridLinesVisibility="All"
+                        HeadersVisibility="Column"
+                        IsReadOnly="True"
+                        Style="{StaticResource DefDataGrid}">
+                        <DataGrid.ContextMenu>
+                            <ContextMenu Style="{StaticResource DefContextMenu}">
+                                <MenuItem
+                                    x:Name="menuRoutingAdvancedAdd"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuRoutingAdvancedAdd}" />
+                                <MenuItem
+                                    x:Name="menuRoutingAdvancedRemove"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuRoutingAdvancedRemove}" />
+                                <MenuItem
+                                    x:Name="menuRoutingAdvancedSelectAll"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuSelectAll}" />
+                                <MenuItem
+                                    x:Name="menuRoutingAdvancedSetDefault"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuRoutingAdvancedSetDefault}" />
+                                <Separator />
+                                <MenuItem
+                                    x:Name="menuRoutingAdvancedImportRules"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuRoutingAdvancedImportRules}" />
+                            </ContextMenu>
+                        </DataGrid.ContextMenu>
+                        <DataGrid.Resources>
+                            <Style BasedOn="{StaticResource MaterialDesignDataGridCell}" TargetType="DataGridCell">
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                        <Setter Property="Background" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                                        <Setter Property="Foreground" Value="Black" />
+                                        <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesign.Brush.Primary.Light}" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.Resources>
+                        <DataGrid.Columns>
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Remarks}"
+                                Header="{x:Static resx:ResUI.LvRemarks}" />
+                            <DataGridTextColumn
+                                Width="60"
+                                Binding="{Binding RuleNum}"
+                                Header="{x:Static resx:ResUI.LvCount}" />
+                            <DataGridTextColumn
+                                Width="60"
+                                Binding="{Binding Sort}"
+                                Header="{x:Static resx:ResUI.LvSort}" />
+                            <DataGridTextColumn
+                                Width="*"
+                                Binding="{Binding Url}"
+                                Header="{x:Static resx:ResUI.LvUrl}" />
+                            <DataGridTextColumn
+                                Width="300"
+                                Binding="{Binding CustomIcon}"
+                                Header="{x:Static resx:ResUI.LvCustomIcon}" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </TabItem>
+
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingRayCustom}">
+                    <Grid Margin="{StaticResource Margin8}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin8}"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource ToolbarTextBlock}"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleButton
+                                x:Name="rayCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+                        
+                        <TextBox
+                            x:Name="rayRawRoute"
+                            Grid.Row="1"
+                            Margin="{StaticResource Margin8}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            materialDesign:HintAssist.Hint="xray json route"
+                            AcceptsReturn="True"
+                            BorderThickness="1"
+                            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
+                    </Grid>
+                </TabItem>
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingSingboxCustom}">
+                    <Grid Margin="{StaticResource Margin8}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin8}"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource ToolbarTextBlock}"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleButton
+                                x:Name="sbCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+
+                        <Grid Grid.Row="1" Margin="{StaticResource Margin8}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="10" />
+                                <ColumnDefinition Width="1*" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBox
+                                x:Name="sbRawRoute"
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                materialDesign:HintAssist.Hint="sing-box json route"
+                                AcceptsReturn="True"
+                                BorderThickness="1"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto" />
+
+                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+
+                            <TextBox
+                                x:Name="sbRawTunRoute"
+                                Grid.Column="2"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                materialDesign:HintAssist.Hint="sing-box json tun route"
+                                AcceptsReturn="True"
+                                BorderThickness="1"
+                                Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                TextWrapping="Wrap"
+                                VerticalScrollBarVisibility="Auto" />
+                            
+                        </Grid>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
     </DockPanel>
 </base:WindowBase>

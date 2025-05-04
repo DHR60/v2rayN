@@ -77,7 +77,10 @@ public class CoreConfigSingboxService
 
             await GenExperimental(singboxConfig);
 
-            await ConvertGeo2Ruleset(singboxConfig);
+            if (singboxConfig.route.rule_set == null || singboxConfig.route.rule_set.Count == 0)
+            {
+                await ConvertGeo2Ruleset(singboxConfig);
+            }
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
@@ -418,7 +421,10 @@ public class CoreConfigSingboxService
             await GenOutboundsList(proxyProfiles, singboxConfig);
 
             await GenDns(null, singboxConfig);
-            await ConvertGeo2Ruleset(singboxConfig);
+            if (singboxConfig.route.rule_set == null || singboxConfig.route.rule_set.Count == 0)
+            {
+                await ConvertGeo2Ruleset(singboxConfig);
+            }
 
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(singboxConfig);
@@ -1244,6 +1250,20 @@ public class CoreConfigSingboxService
     {
         try
         {
+            var rawRouteItem = await AppHandler.Instance.GetRawRouteItem(ECoreType.sing_box);
+            if (rawRouteItem.Enabled == true)
+            {
+                if (_config.TunModeItem.EnableTun)
+                {
+                    singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.TunRoute);
+                }
+                else
+                {
+                    singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.Route);
+                }
+                return 0;
+            }
+            
             singboxConfig.route.final = Global.ProxyTag;
 
             if (_config.TunModeItem.EnableTun)
