@@ -182,16 +182,33 @@
                                 HorizontalAlignment="Left" />
                         </Grid>
 
-                        <TextBox
-                            x:Name="sbRawRoute"
-                            Grid.Row="1"
-                            HorizontalAlignment="Stretch"
-                            VerticalAlignment="Stretch"
-                            BorderThickness="1"
-                            Classes="TextArea"
-                            Margin="{StaticResource Margin4}"
-                            TextWrapping="Wrap"
-                            Watermark="sing-box json route" />
+                        <Grid Grid.Row="1" Margin="{StaticResource Margin4}" ColumnDefinitions="*,10,*">
+                            
+                            <TextBox
+                                x:Name="sbRawRoute"
+                                Grid.Column="0"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="1"
+                                Classes="TextArea"
+                                Margin="{StaticResource Margin4}"
+                                TextWrapping="Wrap"
+                                Watermark="sing-box json route" />
+
+                            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+
+                            <TextBox
+                                x:Name="sbRawTunRoute"
+                                Grid.Column="2"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                BorderThickness="1"
+                                Classes="TextArea"
+                                Margin="{StaticResource Margin4}"
+                                TextWrapping="Wrap"
+                                Watermark="sing-box json tun route" />
+
+                        </Grid>
                     </Grid>
                 </TabItem>
             </TabControl>

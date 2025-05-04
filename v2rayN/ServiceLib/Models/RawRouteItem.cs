@@ -12,4 +12,5 @@ public class RawRouteItem
     public bool Enabled { get; set; } = false;
     public ECoreType CoreType { get; set; }
     public string? Route { get; set; }
+    public string? TunRoute { get; set; }
 }

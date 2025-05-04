@@ -987,7 +987,14 @@ public class CoreConfigSingboxService
             var rawRouteItem = await AppHandler.Instance.GetRawRouteItem(ECoreType.sing_box);
             if (rawRouteItem.Enabled == true)
             {
-                singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.Route);
+                if (_config.TunModeItem.EnableTun)
+                {
+                    singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.TunRoute);
+                }
+                else
+                {
+                    singboxConfig.route = JsonUtils.Deserialize<Route4Sbox>(rawRouteItem.Route);
+                }
                 return 0;
             }
             
