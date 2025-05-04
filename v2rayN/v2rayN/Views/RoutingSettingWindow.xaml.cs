@@ -55,6 +55,7 @@ public partial class RoutingSettingWindow
 
             this.Bind(ViewModel, vm => vm.RawRoute4Singbox, v => v.sbRawRoute.Text).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.EnableRawRoute4Singbox, v => v.sbCustomRoutingEnable.IsChecked).DisposeWith(disposables);
+            this.Bind(ViewModel, vm => vm.RawTunRoute4Singbox, v => v.sbRawTunRoute.Text).DisposeWith(disposables);
 
             this.BindCommand(ViewModel, vm => vm.SaveCmd, v => v.btnSave).DisposeWith(disposables);
         });
