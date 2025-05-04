@@ -87,6 +87,7 @@ public class Rule4Sbox
     public List<string>? process_name { get; set; }
     [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? rule_set { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<Rule4Sbox>))]
     public List<Rule4Sbox>? rules { get; set; }
     public string? action { get; set; }
     public string? strategy { get; set; }

@@ -1,4 +1,4 @@
-﻿<reactiveui:ReactiveWindow
+<reactiveui:ReactiveWindow
     x:Class="v2rayN.Views.RoutingSettingWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -99,12 +99,6 @@
             HorizontalAlignment="Right"
             DockPanel.Dock="Bottom"
             Orientation="Horizontal">
-            <StackPanel
-                Width="600"
-                HorizontalAlignment="Left"
-                VerticalAlignment="Center">
-                <TextBlock Style="{StaticResource ToolbarTextBlock}" Text="{x:Static resx:ResUI.TbRoutingTips}" />
-            </StackPanel>
             <Button
                 x:Name="btnSave"
                 Width="100"
@@ -123,7 +117,7 @@
         </StackPanel>
 
         <DockPanel>
-            <TabControl x:Name="tabAdvanced">
+            <TabControl x:Name="tabAdvanced" HorizontalContentAlignment="Left">
                 <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingTabRuleList}">
                     <DataGrid
                         x:Name="lstRoutings"
@@ -196,6 +190,87 @@
                                 Header="{x:Static resx:ResUI.LvCustomIcon}" />
                         </DataGrid.Columns>
                     </DataGrid>
+                </TabItem>
+
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingRayCustom}">
+                    <Grid Margin="{StaticResource Margin8}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin8}"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource ToolbarTextBlock}"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleButton
+                                x:Name="rayCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+                        
+                        <TextBox
+                            x:Name="rayRawRoute"
+                            Grid.Row="1"
+                            Margin="{StaticResource Margin8}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            materialDesign:HintAssist.Hint="xray json route"
+                            AcceptsReturn="True"
+                            BorderThickness="1"
+                            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
+                    </Grid>
+                </TabItem>
+                <TabItem HorizontalAlignment="Left" Header="{x:Static resx:ResUI.TbRoutingSingboxCustom}">
+                    <Grid Margin="{StaticResource Margin8}">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Grid Grid.Row="0">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock
+                                Grid.Column="0"
+                                Margin="{StaticResource Margin8}"
+                                VerticalAlignment="Center"
+                                Style="{StaticResource ToolbarTextBlock}"
+                                Text="{x:Static resx:ResUI.TbRoutingCustomEnable}" />
+                            <ToggleButton
+                                x:Name="sbCustomRoutingEnable"
+                                Grid.Column="1"
+                                Margin="{StaticResource Margin8}"
+                                HorizontalAlignment="Left" />
+                        </Grid>
+
+                        <TextBox
+                            x:Name="sbRawRoute"
+                            Grid.Row="1"
+                            Margin="{StaticResource Margin8}"
+                            HorizontalAlignment="Stretch"
+                            VerticalAlignment="Stretch"
+                            materialDesign:HintAssist.Hint="sing-box json route"
+                            AcceptsReturn="True"
+                            BorderThickness="1"
+                            Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                            TextWrapping="Wrap"
+                            VerticalScrollBarVisibility="Auto" />
+                    </Grid>
                 </TabItem>
             </TabControl>
         </DockPanel>
