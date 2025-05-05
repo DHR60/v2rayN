@@ -118,7 +118,7 @@ public class User4Sbox
     public string password { get; set; }
 }
 
-public class Outbound4Sbox
+public class Outbound4Sbox : DialFields4Sbox
 {
     public string type { get; set; }
     public string tag { get; set; }
@@ -136,7 +136,6 @@ public class Outbound4Sbox
     public int? recv_window_conn { get; set; }
     public int? recv_window { get; set; }
     public bool? disable_mtu_discovery { get; set; }
-    public string? detour { get; set; }
     public string? method { get; set; }
     public string? username { get; set; }
     public string? password { get; set; }
@@ -146,16 +145,11 @@ public class Outbound4Sbox
     public string? packet_encoding { get; set; }
     public string? plugin { get; set; }
     public string? plugin_opts { get; set; }
-    public Tls4Sbox? tls { get; set; }
-    public Multiplex4Sbox? multiplex { get; set; }
-    public Transport4Sbox? transport { get; set; }
-    public HyObfs4Sbox? obfs { get; set; }
     public List<string>? outbounds { get; set; }
     public bool? interrupt_exist_connections { get; set; }
-    public Rule4Sbox? domain_resolver { get; set; }
 }
 
-public class Endpoints4Sbox
+public class Endpoints4Sbox : DialFields4Sbox
 {
     public string type { get; set; }
     public string tag { get; set; }
@@ -168,8 +162,6 @@ public class Endpoints4Sbox
     public string? udp_timeout { get; set; }
     public int? workers { get; set; }
     public List<Peer4Sbox> peers { get; set; }
-    public string? detour { get; set; }
-    public Rule4Sbox? domain_resolver { get; set; }
 }
 
 public class Peer4Sbox
@@ -238,19 +230,16 @@ public class HyObfs4Sbox
     public string? password { get; set; }
 }
 
-public class Server4Sbox
+public class Server4Sbox : DialFields4Sbox
 {
     public string? tag { get; set; }
-    public string? detour { get; set; }
     public string? client_subnet { get; set; }
     public string? type { get; set; }
     public string? server { get; set; }
-    public string? domain_resolver { get; set; }
     [JsonPropertyName("interface")] public string? Interface { get; set; }
     public int? server_port { get; set; }
     public string? path { get; set; }
     public Headers4Sbox? headers { get; set; }
-    public Tls4Sbox? tls { get; set; }
     // Deprecated
     public string? address { get; set; }
     public string? address_resolver { get; set; }
@@ -310,4 +299,28 @@ public class Ruleset4Sbox
     public string? url { get; set; }
     public string? download_detour { get; set; }
     public string? update_interval { get; set; }
+}
+
+public abstract class DialFields4Sbox
+{
+    public string? detour { get; set; }
+    public string? bind_interface { get; set; }
+    public string? inet4_bind_address { get; set; }
+    public string? inet6_bind_address { get; set; }
+    public int? routing_mark { get; set; }
+    public bool? reuse_addr { get; set; }
+    public string? netns { get; set; }
+    public string? connect_timeout { get; set; }
+    public bool? tcp_fast_open { get; set; }
+    public bool? tcp_multi_path { get; set; }
+    public bool? udp_fragment { get; set; }
+    public Rule4Sbox? domain_resolver { get; set; } // or string
+    public string? network_strategy { get; set; }
+    public List<string>? network_type { get; set; }
+    public List<string>? fallback_network_type { get; set; }
+    public string? fallback_delay { get; set; }
+    public Tls4Sbox? tls { get; set; }
+    public Multiplex4Sbox? multiplex { get; set; }
+    public Transport4Sbox? transport { get; set; }
+    public HyObfs4Sbox? obfs { get; set; }
 }
