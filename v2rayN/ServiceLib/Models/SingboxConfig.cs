@@ -1,3 +1,4 @@
+using System;
 using System.Text.Json.Serialization;
 
 namespace ServiceLib.Models;
@@ -38,6 +39,16 @@ public class Route4Sbox
 {
     public bool? auto_detect_interface { get; set; }
     public List<Rule4Sbox> rules { get; set; }
+    [JsonConverter(typeof(DomainResolverConverter))]
+    public Rule4Sbox? default_domain_resolver { get; set; } // or string
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? default_network_type { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? default_fallback_network_type { get; set; }
+    public string? default_network_strategy { get; set; }
+    public string? default_fallback_delay { get; set; }
+    public string? default_interface { get; set; }
+    public string? default_mark { get; set; }
     public List<Ruleset4Sbox>? rule_set { get; set; }
     public string? final { get; set; }
 }
@@ -55,40 +66,65 @@ public class Rule4Sbox
     public int? rewrite_ttl { get; set; }
     public bool? invert { get; set; }
     public string? clash_mode { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? inbound { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? protocol { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? network { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<int>))]
     public List<int>? port { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? port_range { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? geosite { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_suffix { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_keyword { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? domain_regex { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? geoip { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? ip_cidr { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? source_ip_cidr { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? process_name { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? rule_set { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<Rule4Sbox>))]
     public List<Rule4Sbox>? rules { get; set; }
     public string? action { get; set; }
     public string? strategy { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? sniffer { get; set; }
     public string? rcode { get; set; }
-    public List<object>? query_type { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<QueryTypeItem>))]
+    public List<QueryTypeItem>? query_type { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? answer { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? ns { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? extra { get; set; }
     public string? method { get; set; }
     public bool? no_drop { get; set; }
     public bool? source_ip_is_private { get; set; }
     public bool? ip_accept_any { get; set; }
     public int? source_port { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? source_port_range { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? network_type { get; set; }
     public bool? network_is_expensive { get; set; }
     public bool? network_is_constrained { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? wifi_ssid { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? wifi_bssid { get; set; }
     public bool? rule_set_ip_cidr_match_source { get; set; }
     public bool? rule_set_ip_cidr_accept_empty { get; set; }
@@ -102,9 +138,19 @@ public class Inbound4Sbox
     public string listen { get; set; }
     public int? listen_port { get; set; }
     public string interface_name { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? address { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? route_address { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? route_exclude_address { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? include_interface { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? exclude_interface { get; set; }
     public int? mtu { get; set; }
     public bool? auto_route { get; set; }
+    public bool? auto_redirect { get; set; }
     public bool? strict_route { get; set; }
     public bool? endpoint_independent_nat { get; set; }
     public string? stack { get; set; }
@@ -151,6 +197,7 @@ public class Endpoints4Sbox : BaseServer4Sbox
     public bool? system { get; set; }
     public string? name { get; set; }
     public int? mtu { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string> address { get; set; }
     public string private_key { get; set; }
     public int? listen_port { get; set; }
@@ -231,7 +278,6 @@ public class Server4Sbox : BaseServer4Sbox
     public string? inet6_range { get; set; }
     public string? client_subnet { get; set; }
     public string? server { get; set; }
-    public new string? domain_resolver { get; set; }
     [JsonPropertyName("interface")] public string? Interface { get; set; }
     public int? server_port { get; set; }
     public string? path { get; set; }
@@ -262,7 +308,14 @@ public class V2ray_Api4Sbox
 public class Clash_Api4Sbox
 {
     public string? external_controller { get; set; }
-    public bool? store_selected { get; set; }
+    public string? external_ui { get; set; }
+    public string? external_ui_download_url { get; set; }
+    public string? external_ui_download_detour { get; set; }
+    public string? secret { get; set; }
+    public string? default_mode { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
+    public List<string>? access_control_allow_origin { get; set; }
+    public bool? access_control_allow_private_network { get; set; }
 }
 
 public class Stats4Sbox
@@ -279,6 +332,8 @@ public class CacheFile4Sbox
     public string? path { get; set; }
     public string? cache_id { get; set; }
     public bool? store_fakeip { get; set; }
+    public bool? store_rdrc { get; set; }
+    public string? rdrc_timeout { get; set; }
 }
 
 public class Ruleset4Sbox
@@ -305,9 +360,12 @@ public abstract class DialFields4Sbox
     public bool? tcp_fast_open { get; set; }
     public bool? tcp_multi_path { get; set; }
     public bool? udp_fragment { get; set; }
+    [JsonConverter(typeof(DomainResolverConverter))]
     public Rule4Sbox? domain_resolver { get; set; } // or string
     public string? network_strategy { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? network_type { get; set; }
+    [JsonConverter(typeof(SingleOrArrayConverter<string>))]
     public List<string>? fallback_network_type { get; set; }
     public string? fallback_delay { get; set; }
     public Tls4Sbox? tls { get; set; }
