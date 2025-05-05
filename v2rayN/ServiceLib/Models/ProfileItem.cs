@@ -31,7 +31,7 @@ public class ProfileItem
     public string GetSummary()
     {
         var summary = $"[{(ConfigType).ToString()}] ";
-        var arrAddr = Address.Split('.');
+        var arrAddr = Address.Contains(':') ? Address.Split(':') : Address.Split('.');
         var addr = arrAddr.Length switch
         {
             > 2 => $"{arrAddr.First()}***{arrAddr.Last()}",
