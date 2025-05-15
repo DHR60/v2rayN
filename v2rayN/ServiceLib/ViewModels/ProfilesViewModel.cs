@@ -81,6 +81,7 @@ public class ProfilesViewModel : MyReactiveObject
     public ReactiveCommand<Unit, Unit> TcpingServerCmd { get; }
     public ReactiveCommand<Unit, Unit> RealPingServerCmd { get; }
     public ReactiveCommand<Unit, Unit> SpeedServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> UdpTestServerCmd { get; }
     public ReactiveCommand<Unit, Unit> SortServerResultCmd { get; }
     public ReactiveCommand<Unit, Unit> RemoveInvalidServerResultCmd { get; }
 
@@ -208,6 +209,10 @@ public class ProfilesViewModel : MyReactiveObject
         SpeedServerCmd = ReactiveCommand.CreateFromTask(async () =>
         {
             await ServerSpeedtest(ESpeedActionType.Speedtest);
+        }, canEditRemove);
+        UdpTestServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await ServerSpeedtest(ESpeedActionType.Udptest);
         }, canEditRemove);
         SortServerResultCmd = ReactiveCommand.CreateFromTask(async () =>
         {
