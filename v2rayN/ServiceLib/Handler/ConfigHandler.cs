@@ -129,6 +129,20 @@ public class ConfigHandler
             config.SpeedTestItem.MixedConcurrencyCount = 5;
         }
 
+        config.NtpTestItem ??= new();
+        if (config.NtpTestItem.NtpServer.IsNullOrEmpty())
+        {
+            config.NtpTestItem.NtpServer = "time.google.com";
+        }
+        if (config.NtpTestItem.TimeoutSeconds <= 0)
+        {
+            config.NtpTestItem.TimeoutSeconds = 10;
+        }
+        if (config.NtpTestItem.ConcurrencyCount < 1)
+        {
+            config.NtpTestItem.ConcurrencyCount = 5;
+        }
+
         config.Mux4RayItem ??= new()
         {
             Concurrency = 8,

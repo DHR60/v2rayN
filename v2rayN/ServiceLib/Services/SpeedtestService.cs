@@ -1,3 +1,4 @@
+using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Net;
@@ -62,6 +63,10 @@ public class SpeedtestService
             case ESpeedActionType.Mixedtest:
                 await RunMixedTestAsync(lstSelected, _config.SpeedTestItem.MixedConcurrencyCount, true, exitLoopKey);
                 break;
+
+            case ESpeedActionType.Udptest:
+                await RunUdpTestBatchAsync(lstSelected, exitLoopKey);
+                break;
         }
     }
 
@@ -96,6 +101,7 @@ public class SpeedtestService
             switch (actionType)
             {
                 case ESpeedActionType.Tcping:
+                case ESpeedActionType.Udptest:
                 case ESpeedActionType.Realping:
                     UpdateFunc(it.IndexId, ResUI.Speedtesting, "");
                     ProfileExHandler.Instance.SetTestDelay(it.IndexId, 0);
@@ -293,6 +299,78 @@ public class SpeedtestService
         await Task.WhenAll(tasks);
     }
 
+    private async Task RunUdpTestAsync(List<ServerTestItem> selectedProxies, string exitLoopKey)
+    {
+        var concurrencyCount = Math.Max(1, _config.NtpTestItem.ConcurrencyCount);
+        using var concurrencySemaphore = new SemaphoreSlim(concurrencyCount);
+        var tasks = new List<Task>();
+
+        foreach (var item in selectedProxies)
+        {
+            if (!_lstExitLoop.Contains(exitLoopKey))
+            {
+                continue;
+            }
+
+            if (item.ConfigType == EConfigType.Custom)
+            {
+                continue;
+            }
+
+            await concurrencySemaphore.WaitAsync();
+
+            tasks.Add(Task.Run(async () =>
+            {
+                var currentItemId = item.IndexId ?? string.Empty;
+                var pid = -1;
+                try
+                {
+                    if (currentItemId.IsNotEmpty())
+                    {
+                        UpdateFunc(currentItemId, "");
+                    }
+
+                    pid = await CoreHandler.Instance.LoadCoreConfigSpeedtest(item);
+                    if (pid < 0)
+                    {
+                        if (currentItemId.IsNotEmpty())
+                        {
+                            UpdateFunc(currentItemId, "-1");
+                            ProfileExHandler.Instance.SetTestDelay(currentItemId, -1);
+                        }
+                        return; // Exit this Task.Run lambda
+                    }
+
+                    await Task.Delay(500);
+
+                    await PerformNtpTestForItemAsync(item);
+                }
+                catch (Exception ex)
+                {
+                    if (currentItemId.IsNotEmpty())
+                    {
+                        UpdateFunc(currentItemId, "-1");
+                        if (ex is not OperationCanceledException or TimeoutException)
+                        {
+                            Logging.SaveLog(_tag, ex);
+                        }
+
+                        ProfileExHandler.Instance.SetTestDelay(currentItemId, -1);
+                    }
+                }
+                finally
+                {
+                    if (pid > 0)
+                    {
+                        await ProcUtils.ProcessKill(pid);
+                    }
+                    concurrencySemaphore.Release();
+                }
+            }));
+        }
+        await Task.WhenAll(tasks);
+    }
+
     private async Task<int> DoRealPing(DownloadService downloadHandle, ServerTestItem it)
     {
         var webProxy = new WebProxy($"socks5://{Global.Loopback}:{it.Port}");
@@ -370,6 +448,122 @@ public class SpeedtestService
         }
 
         return lstTest;
+    }
+    private async Task RunUdpTestBatchAsync(List<ServerTestItem> lstSelected, string exitLoopKey, int pageSize = 0)
+    {
+        if (pageSize <= 0)
+        {
+            pageSize = lstSelected.Count < Global.SpeedTestPageSize ? lstSelected.Count : Global.SpeedTestPageSize;
+        }
+        var lstTest = GetTestBatchItem(lstSelected, pageSize);
+
+        List<ServerTestItem> lstFailed = new();
+        foreach (var lst in lstTest)
+        {
+            var ret = await RunUdpTestForBatchAsync(lst, exitLoopKey);
+            if (ret == false)
+            {
+                lstFailed.AddRange(lst);
+            }
+            await Task.Delay(100);
+        }
+    }
+
+    private async Task<bool> RunUdpTestForBatchAsync(List<ServerTestItem> selecteds, string exitLoopKey)
+    {
+        var pid = -1;
+        try
+        {
+            pid = await CoreHandler.Instance.LoadCoreConfigSpeedtest(selecteds);
+            if (pid < 0)
+            {
+                return false;
+            }
+
+            await Task.Delay(500);
+
+            List<Task> tasks = new();
+            foreach (var it in selecteds)
+            {
+                if (!_lstExitLoop.Contains(exitLoopKey))
+                {
+                    continue;
+                }
+
+                if (it.ConfigType == EConfigType.Custom)
+                {
+                    continue;
+                }
+
+                var currentItemId = it.IndexId ?? string.Empty;
+                if (currentItemId.IsNotEmpty())
+                {
+                    UpdateFunc(currentItemId, "");
+                }
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    try
+                    {
+                        await PerformNtpTestForItemAsync(it);
+                    }
+                    catch (Exception ex)
+                    {
+                        if (currentItemId.IsNotEmpty())
+                        {
+                            UpdateFunc(currentItemId, "-1");
+                            if (ex is not OperationCanceledException or TimeoutException)
+                            {
+                                Logging.SaveLog(_tag, ex);
+                            }
+
+                            ProfileExHandler.Instance.SetTestDelay(currentItemId, -1);
+                        }
+                    }
+                }));
+            }
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            return false;
+        }
+        finally
+        {
+            if (pid > 0)
+            {
+                await ProcUtils.ProcessKill(pid);
+            }
+        }
+        return true;
+    }
+
+    private async Task PerformNtpTestForItemAsync(ServerTestItem proxyProfileItem)
+    {
+        var socks5Host = Global.Loopback;
+        var socks5Port = proxyProfileItem.Port;
+        var targetNtpServer = _config.NtpTestItem.NtpServer;
+        var currentIndexId = proxyProfileItem.IndexId ?? string.Empty;
+
+        var ntpClient = new NtpOverSocks5(socks5Host, socks5Port);
+
+        var result = await ntpClient.GetNtpTimeAsync(
+            targetNtpServer,
+            TimeSpan.FromSeconds(_config.NtpTestItem.TimeoutSeconds)
+        );
+
+        if (result.Success)
+        {
+            var rttStr = result.RoundTripTime?.TotalMilliseconds.ToString("F0") ?? "-1";
+            ProfileExHandler.Instance.SetTestDelay(currentIndexId, (int)(result.RoundTripTime?.TotalMilliseconds ?? -1));
+            UpdateFunc(currentIndexId, rttStr);
+        }
+        else
+        {
+            ProfileExHandler.Instance.SetTestDelay(currentIndexId, -1);
+            UpdateFunc(currentIndexId, "-1");
+        }
     }
 
     private void UpdateFunc(string indexId, string delay, string speed = "")

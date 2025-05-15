@@ -1419,4 +1419,13 @@
   <data name="TbSettingsIPAPIUrl" xml:space="preserve">
     <value>URL для тестирования текущего соединения</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value />
+  </data>
 </root>

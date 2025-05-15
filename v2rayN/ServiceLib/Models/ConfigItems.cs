@@ -160,6 +160,14 @@ public class SpeedTestItem
 }
 
 [Serializable]
+public class NtpTestItem
+{
+    public string NtpServer { get; set; }
+    public int TimeoutSeconds { get; set; }
+    public int ConcurrencyCount { get; set; }
+}
+
+[Serializable]
 public class RoutingBasicItem
 {
     public string DomainStrategy { get; set; }
