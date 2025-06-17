@@ -251,6 +251,8 @@ public class Server4Sbox
     public string? path { get; set; }
     public Headers4Sbox? headers { get; set; }
     public Tls4Sbox? tls { get; set; }
+    // public List<string>? path { get; set; } // hosts
+    public Dictionary<string, object>? predefined { get; set; }
     // Deprecated
     public string? address { get; set; }
     public string? address_resolver { get; set; }
