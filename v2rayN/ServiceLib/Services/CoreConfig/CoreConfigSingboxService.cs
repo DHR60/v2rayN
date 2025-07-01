@@ -1304,22 +1304,24 @@ public class CoreConfigSingboxService
                 clash_mode = ERuleMode.Global.ToString()
             });
 
-            if (!(_config.Inbound.First().RouteOnly || _config.TunModeItem.EnableTun))
+            var domainStrategy = _config.RoutingBasicItem.DomainStrategy4Singbox.IsNullOrEmpty() ? null : _config.RoutingBasicItem.DomainStrategy4Singbox;
+            var defaultRouting = await ConfigHandler.GetDefaultRouting(_config);
+            if (defaultRouting.DomainStrategy4Singbox.IsNotEmpty())
             {
-                var domainStrategy = _config.RoutingBasicItem.DomainStrategy4Singbox.IsNullOrEmpty() ? null : _config.RoutingBasicItem.DomainStrategy4Singbox;
-                var defaultRouting = await ConfigHandler.GetDefaultRouting(_config);
-                if (defaultRouting.DomainStrategy4Singbox.IsNotEmpty())
-                {
-                    domainStrategy = defaultRouting.DomainStrategy4Singbox;
-                }
-                singboxConfig.route.rules.Add(new()
-                {
-                    action = "resolve",
-                    strategy = domainStrategy
-                });
+                domainStrategy = defaultRouting.DomainStrategy4Singbox;
+            }
+            var resolveRule = new Rule4Sbox
+            {
+                action = "resolve",
+                strategy = domainStrategy
+            };
+            if (_config.RoutingBasicItem.DomainStrategy == "IPOnDemand")
+            {
+                singboxConfig.route.rules.Add(resolveRule);
             }
 
             var routing = await ConfigHandler.GetDefaultRouting(_config);
+            var ipRules = new List<RulesItem>();
             if (routing != null)
             {
                 var rules = JsonUtils.Deserialize<List<RulesItem>>(routing.RuleSet);
@@ -1328,7 +1330,19 @@ public class CoreConfigSingboxService
                     if (item.Enabled)
                     {
                         await GenRoutingUserRule(item, singboxConfig.route.rules);
+                        if (item.Ip != null && item.Ip.Count > 0)
+                        {
+                            ipRules.Add(item);
+                        }
                     }
+                }
+            }
+            if (_config.RoutingBasicItem.DomainStrategy == "IPIfNonMatch")
+            {
+                singboxConfig.route.rules.Add(resolveRule);
+                foreach (var item in ipRules)
+                {
+                    await GenRoutingUserRule(item, singboxConfig.route.rules);
                 }
             }
         }
