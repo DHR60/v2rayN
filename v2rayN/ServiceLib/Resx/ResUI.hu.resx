@@ -1407,4 +1407,13 @@
   <data name="menuAddAnytlsServer" xml:space="preserve">
     <value>Add [Anytls] Configuration</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value />
+  </data>
 </root>

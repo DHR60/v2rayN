@@ -165,6 +165,10 @@
                             x:Name="menuSpeedServer"
                             Height="{StaticResource MenuItemHeight}"
                             Header="{x:Static resx:ResUI.menuSpeedServer}" />
+                        <MenuItem
+                            x:Name="menuUdpTestServer"
+                            Height="{StaticResource MenuItemHeight}"
+                            Header="{x:Static resx:ResUI.menuUdpTestServer}" />
                         <MenuItem Header="{x:Static resx:ResUI.menuTestServerResult}">
                             <MenuItem
                                 x:Name="menuSortServerResult"
