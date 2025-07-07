@@ -130,6 +130,7 @@ public partial class AddServerWindow
             case EConfigType.Anytls:
                 gridAnytls.Visibility = Visibility.Visible;
                 cmbCoreType.IsEnabled = false;
+                cmbStreamSecurity.Items.Add(Global.StreamSecurityReality);
                 break;
         }
 
