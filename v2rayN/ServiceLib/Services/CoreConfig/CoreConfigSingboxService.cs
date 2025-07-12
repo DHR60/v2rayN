@@ -2,6 +2,7 @@ using System.Data;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Reactive;
+using System.Text.Json.Nodes;
 using DynamicData;
 using ServiceLib.Models;
 
@@ -79,20 +80,31 @@ public class CoreConfigSingboxService
 
             await ConvertGeo2Ruleset(singboxConfig);
 
+            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
+            ret.Success = true;
+
             var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
             if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
             {
-                var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
-                if (customConfigObj != null)
+                //var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                //    singboxConfig = customConfigObj;
+                //}
+
+                // skip deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
                 {
-                    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
-                    singboxConfig = customConfigObj;
+                    customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds));
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
                 }
             }
-
-            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
-            ret.Success = true;
-            ret.Data = JsonUtils.Serialize(singboxConfig);
+            else
+            {
+                ret.Data = JsonUtils.Serialize(singboxConfig);
+            }
             return ret;
         }
         catch (Exception ex)
@@ -431,19 +443,29 @@ public class CoreConfigSingboxService
             await GenDns(null, singboxConfig);
             await ConvertGeo2Ruleset(singboxConfig);
 
+            ret.Success = true;
+
             var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
             if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
             {
-                var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
-                if (customConfigObj != null)
+                //var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                //    singboxConfig = customConfigObj;
+                //}
+                // skip deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
                 {
-                    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
-                    singboxConfig = customConfigObj;
+                    customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds));
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
                 }
             }
-
-            ret.Success = true;
-            ret.Data = JsonUtils.Serialize(singboxConfig);
+            else
+            {
+                ret.Data = JsonUtils.Serialize(singboxConfig);
+            }
             return ret;
         }
         catch (Exception ex)

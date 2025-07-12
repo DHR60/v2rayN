@@ -68,10 +68,7 @@ public class CustomConfigViewModel : MyReactiveObject
 
         if (CustomConfig4Ray.IsNotEmpty())
         {
-            if (!TrySerializeConfig<V2rayConfig>(CustomConfig4Ray, out var serializedConfig))
-                return false;
-            
-            item.Config = serializedConfig;
+            item.Config = CustomConfig4Ray;
         }
 
         await ConfigHandler.SaveCustomConfigItem(_config, item);
@@ -89,19 +86,13 @@ public class CustomConfigViewModel : MyReactiveObject
 
         if (CustomConfig4Singbox.IsNotEmpty())
         {
-            if (!TrySerializeConfig<SingboxConfig>(CustomConfig4Singbox, out var serializedConfig))
-                return false;
-            
-            item.Config = serializedConfig;
+            item.Config = CustomConfig4Singbox;
             hasChanges = true;
         }
 
         if (CustomTunConfig4Singbox.IsNotEmpty())
         {
-            if (!TrySerializeConfig<SingboxConfig>(CustomTunConfig4Singbox, out var serializedTunConfig))
-                return false;
-            
-            item.TunConfig = serializedTunConfig;
+            item.TunConfig = CustomTunConfig4Singbox;
             hasChanges = true;
         }
 
@@ -110,21 +101,6 @@ public class CustomConfigViewModel : MyReactiveObject
             await ConfigHandler.SaveCustomConfigItem(_config, item);
         }
 
-        return true;
-    }
-
-    private bool TrySerializeConfig<T>(string configText, out string? serializedConfig)
-    {
-        serializedConfig = null;
-        var obj = JsonUtils.Deserialize<T>(configText);
-        
-        if (obj == null)
-        {
-            NoticeHandler.Instance.Enqueue(ResUI.FillCorrectConfigText);
-            return false;
-        }
-
-        serializedConfig = JsonUtils.Serialize(obj);
         return true;
     }
 }

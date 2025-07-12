@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
+using ServiceLib.Models;
 
 namespace ServiceLib.Services.CoreConfig;
 
@@ -64,20 +65,30 @@ public class CoreConfigV2rayService
 
             await GenStatistic(v2rayConfig);
 
+            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
+            ret.Success = true;
+
             var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.Xray);
             if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
             {
-                var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
-                if (customConfigObj != null)
+                //var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
+                //    v2rayConfig = customConfigObj;
+                //}
+                // spik deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
                 {
-                    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
-                    v2rayConfig = customConfigObj;
+                    customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig.outbounds));
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
                 }
             }
-
-            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
-            ret.Success = true;
-            ret.Data = JsonUtils.Serialize(v2rayConfig);
+            else
+            {
+                ret.Data = JsonUtils.Serialize(v2rayConfig);
+            }
             return ret;
         }
         catch (Exception ex)
@@ -205,29 +216,51 @@ public class CoreConfigV2rayService
                 });
             }
 
+            ret.Success = true;
 
             var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.Xray);
             if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
             {
-                var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
-                if (customConfigObj != null)
+                //var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    foreach (var rule in customConfigObj.routing.rules)
+                //    {
+                //        if (rule.outboundTag == Global.ProxyTag)
+                //        {
+                //            rule.outboundTag = null;
+                //            rule.balancerTag = balancer.tag;
+                //        }
+                //    }
+                //    customConfigObj.routing.balancers = JsonUtils.DeepCopy(v2rayConfig.routing.balancers);
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
+                //    v2rayConfig = customConfigObj;
+                //}
+                // skip deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
                 {
-                    foreach (var rule in customConfigObj.routing.rules)
+                    var rulesNode = customConfigNode["routing"]?["rules"];
+                    if (rulesNode != null)
                     {
-                        if (rule.outboundTag == "proxy")
+                        foreach (var rule in rulesNode.AsArray())
                         {
-                            rule.outboundTag = null;
-                            rule.balancerTag = balancer.tag;
+                            if (rule["outboundTag"]?.GetValue<string>() == Global.ProxyTag)
+                            {
+                                rule["outboundTag"] = null;
+                                rule["balancerTag"] = balancer.tag;
+                            }
                         }
                     }
-                    customConfigObj.routing.balancers = JsonUtils.DeepCopy(v2rayConfig.routing.balancers);
-                    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
-                    v2rayConfig = customConfigObj;
+                    customConfigNode["routing"]["balancers"] = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig.routing.balancers));
+                    customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig.outbounds));
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
                 }
             }
-
-            ret.Success = true;
-            ret.Data = JsonUtils.Serialize(v2rayConfig);
+            else
+            {
+                ret.Data = JsonUtils.Serialize(v2rayConfig);
+            }
             return ret;
         }
         catch (Exception ex)
