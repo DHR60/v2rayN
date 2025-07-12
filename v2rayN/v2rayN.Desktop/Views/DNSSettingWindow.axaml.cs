@@ -31,7 +31,7 @@ public partial class DNSSettingWindow : WindowBase<DNSSettingViewModel>
             cmbDirectDNS.Items.Add(it);
             cmbSBResolverDNS.Items.Add(it);
         });
-        cmbSBResolverDNS.Items.Add("dhcp://auto");
+        cmbSBResolverDNS.Items.Add("dhcp://auto,localhost");
         Global.DomainRemoteDNSAddress.ForEach(it =>
         {
             cmbRemoteDNS.Items.Add(it);
@@ -40,6 +40,7 @@ public partial class DNSSettingWindow : WindowBase<DNSSettingViewModel>
         {
             cmbSBFinalResolverDNS.Items.Add(it);
         });
+        cmbSBFinalResolverDNS.Items.Add("dhcp://auto,localhost");
 
         this.WhenActivated(disposables =>
         {
