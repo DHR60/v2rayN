@@ -41,6 +41,10 @@ public partial class DNSSettingWindow : WindowBase<DNSSettingViewModel>
             cmbSBFinalResolverDNS.Items.Add(it);
         });
         cmbSBFinalResolverDNS.Items.Add("dhcp://auto,localhost");
+        Global.ExpectedIPs.ForEach(it =>
+        {
+            cmbDirectExpectedIPs.Items.Add(it);
+        });
 
         this.WhenActivated(disposables =>
         {
@@ -56,6 +60,7 @@ public partial class DNSSettingWindow : WindowBase<DNSSettingViewModel>
             this.Bind(ViewModel, vm => vm.SingboxStrategy4Direct, v => v.cmbSBDirectDNSStrategy.SelectedItem).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.SingboxStrategy4Proxy, v => v.cmbSBRemoteDNSStrategy.SelectedItem).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.Hosts, v => v.txtHosts.Text).DisposeWith(disposables);
+            this.Bind(ViewModel, vm => vm.DirectExpectedIPs, v => v.cmbDirectExpectedIPs.SelectedItem).DisposeWith(disposables);
 
             this.BindCommand(ViewModel, vm => vm.SaveCmd, v => v.btnSave).DisposeWith(disposables);
         });
