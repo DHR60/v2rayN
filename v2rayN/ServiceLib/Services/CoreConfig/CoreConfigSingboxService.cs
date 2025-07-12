@@ -79,6 +79,17 @@ public class CoreConfigSingboxService
 
             await ConvertGeo2Ruleset(singboxConfig);
 
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                if (customConfigObj != null)
+                {
+                    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                    singboxConfig = customConfigObj;
+                }
+            }
+
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(singboxConfig);
@@ -419,6 +430,17 @@ public class CoreConfigSingboxService
 
             await GenDns(null, singboxConfig);
             await ConvertGeo2Ruleset(singboxConfig);
+
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                if (customConfigObj != null)
+                {
+                    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                    singboxConfig = customConfigObj;
+                }
+            }
 
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(singboxConfig);

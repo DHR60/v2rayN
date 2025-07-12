@@ -64,6 +64,17 @@ public class CoreConfigV2rayService
 
             await GenStatistic(v2rayConfig);
 
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.Xray);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
+                if (customConfigObj != null)
+                {
+                    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
+                    v2rayConfig = customConfigObj;
+                }
+            }
+
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(v2rayConfig);
@@ -192,6 +203,27 @@ public class CoreConfigV2rayService
                     balancerTag = balancer.tag,
                     type = "field"
                 });
+            }
+
+
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.Xray);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                var customConfigObj = JsonUtils.Deserialize<V2rayConfig>(customConfig.Config);
+                if (customConfigObj != null)
+                {
+                    foreach (var rule in customConfigObj.routing.rules)
+                    {
+                        if (rule.outboundTag == "proxy")
+                        {
+                            rule.outboundTag = null;
+                            rule.balancerTag = balancer.tag;
+                        }
+                    }
+                    customConfigObj.routing.balancers = JsonUtils.DeepCopy(v2rayConfig.routing.balancers);
+                    customConfigObj.outbounds = JsonUtils.DeepCopy(v2rayConfig.outbounds);
+                    v2rayConfig = customConfigObj;
+                }
             }
 
             ret.Success = true;
