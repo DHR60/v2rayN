@@ -4,6 +4,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Reactive;
 using System.Text;
+using System.Text.Json.Nodes;
 using DynamicData;
 using ServiceLib.Models;
 
@@ -83,7 +84,51 @@ public class CoreConfigSingboxService
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
-            ret.Data = JsonUtils.Serialize(singboxConfig);
+
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                //var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                //    singboxConfig = customConfigObj;
+                //}
+
+                // skip deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
+                {
+                    // customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds));
+                    // append outbounds instead of override
+                    if (customConfigNode["outbounds"] is JsonArray customOutboundsNode)
+                    {
+                        if (JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds)) is JsonArray newOutbounds)
+                        {
+                            foreach (var outbound in newOutbounds)
+                            {
+                                customOutboundsNode.Add(outbound?.DeepClone());
+                            }
+                        }
+                    }
+                    // endpoints
+                    if (customConfigNode["endpoints"] is JsonArray customEndpointsNode)
+                    {
+                        if (singboxConfig.endpoints != null && JsonNode.Parse(JsonUtils.Serialize(singboxConfig.endpoints)) is JsonArray newEndpoints)
+                        {
+                            foreach (var endpoint in newEndpoints)
+                            {
+                                customEndpointsNode.Add(endpoint?.DeepClone());
+                            }
+                        }
+                    }
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
+                }
+            }
+            else
+            {
+                ret.Data = JsonUtils.Serialize(singboxConfig);
+            }
             return ret;
         }
         catch (Exception ex)
@@ -435,7 +480,50 @@ public class CoreConfigSingboxService
             await ConvertGeo2Ruleset(singboxConfig);
 
             ret.Success = true;
-            ret.Data = JsonUtils.Serialize(singboxConfig);
+
+            var customConfig = await AppHandler.Instance.GetCustomConfigItem(ECoreType.sing_box);
+            if (customConfig.Enabled && (!customConfig.Config.IsNullOrEmpty()))
+            {
+                //var customConfigObj = JsonUtils.Deserialize<SingboxConfig>(customConfig.Config);
+                //if (customConfigObj != null)
+                //{
+                //    customConfigObj.outbounds = JsonUtils.DeepCopy(singboxConfig.outbounds);
+                //    singboxConfig = customConfigObj;
+                //}
+                // skip deserialize
+                var customConfigNode = JsonNode.Parse(customConfig.Config);
+                if (customConfigNode != null)
+                {
+                    // customConfigNode["outbounds"] = JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds));
+                    // append outbounds instead of override
+                    if (customConfigNode["outbounds"] is JsonArray customOutboundsNode)
+                    {
+                        if (JsonNode.Parse(JsonUtils.Serialize(singboxConfig.outbounds)) is JsonArray newOutbounds)
+                        {
+                            foreach (var outbound in newOutbounds)
+                            {
+                                customOutboundsNode.Add(outbound?.DeepClone());
+                            }
+                        }
+                    }
+                    // endpoints
+                    if (customConfigNode["endpoints"] is JsonArray customEndpointsNode)
+                    {
+                        if (singboxConfig.endpoints != null && JsonNode.Parse(JsonUtils.Serialize(singboxConfig.endpoints)) is JsonArray newEndpoints)
+                        {
+                            foreach (var endpoint in newEndpoints)
+                            {
+                                customEndpointsNode.Add(endpoint?.DeepClone());
+                            }
+                        }
+                    }
+                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
+                }
+            }
+            else
+            {
+                ret.Data = JsonUtils.Serialize(singboxConfig);
+            }
             return ret;
         }
         catch (Exception ex)
