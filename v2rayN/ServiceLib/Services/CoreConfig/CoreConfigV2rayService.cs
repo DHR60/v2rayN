@@ -1110,7 +1110,7 @@ public class CoreConfigV2rayService
     {
         try
         {
-            var dNSItem = _config.DNSItem;
+            var dNSItem = _config.SimpleDNSItem;
             var domainStrategy4Freedom = dNSItem?.RayStrategy4Freedom;
 
             //Outbound Freedom domainStrategy
@@ -1137,10 +1137,10 @@ public class CoreConfigV2rayService
         return 0;
     }
 
-    private async Task<int> GenDnsServers(ProfileItem? node, V2rayConfig v2rayConfig, DNSItem dNSItem)
+    private async Task<int> GenDnsServers(ProfileItem? node, V2rayConfig v2rayConfig, SimpleDNSItem simpleDNSItem)
     {
-        var directDNSAddress = dNSItem?.DirectDNS?
-            .Split(dNSItem.DirectDNS?.Contains(',') == true ? ',' : ';')
+        var directDNSAddress = simpleDNSItem?.DirectDNS?
+            .Split(simpleDNSItem.DirectDNS?.Contains(',') == true ? ',' : ';')
             .Select(addr => addr.Trim())
             .Where(addr => !string.IsNullOrEmpty(addr))
             .Select(addr => addr.StartsWith("dhcp", StringComparison.OrdinalIgnoreCase) ? "localhost" : addr)
@@ -1152,8 +1152,8 @@ public class CoreConfigV2rayService
             directDNSAddress = new() { Global.DomainDirectDNSAddress.FirstOrDefault() };
         }
 
-        var remoteDNSAddress = dNSItem?.RemoteDNS?
-            .Split(dNSItem.RemoteDNS?.Contains(',') == true ? ',' : ';')
+        var remoteDNSAddress = simpleDNSItem?.RemoteDNS?
+            .Split(simpleDNSItem.RemoteDNS?.Contains(',') == true ? ',' : ';')
             .Select(addr => addr.Trim())
             .Where(addr => !string.IsNullOrEmpty(addr))
             .Select(addr => addr.StartsWith("dhcp", StringComparison.OrdinalIgnoreCase) ? "localhost" : addr)
@@ -1285,7 +1285,7 @@ public class CoreConfigV2rayService
                     address = dnsDomain,
                     skipFallback = true,
                     domains = directDomainList,
-                    expectedIPs = dNSItem.DirectExpectedIPs.IsNullOrEmpty() ? null : new() { dNSItem.DirectExpectedIPs }
+                    expectedIPs = simpleDNSItem.DirectExpectedIPs.IsNullOrEmpty() ? null : new() { simpleDNSItem.DirectExpectedIPs }
                 };
                 v2rayConfig.dns.servers.Add(JsonUtils.SerializeToNode(dnsServer, options));
             }
@@ -1312,7 +1312,7 @@ public class CoreConfigV2rayService
                     address = dnsDomain,
                     skipFallback = true,
                     domains = directGeositeList,
-                    expectedIPs = dNSItem.DirectExpectedIPs.IsNullOrEmpty() ? null : new() { dNSItem.DirectExpectedIPs }
+                    expectedIPs = simpleDNSItem.DirectExpectedIPs.IsNullOrEmpty() ? null : new() { simpleDNSItem.DirectExpectedIPs }
                 };
                 v2rayConfig.dns.servers.Add(JsonUtils.SerializeToNode(dnsServer, options));
             }
@@ -1327,20 +1327,20 @@ public class CoreConfigV2rayService
         return await Task.FromResult(0);
     }
 
-    private async Task<int> GenDnsHosts(V2rayConfig v2rayConfig, DNSItem dNSItem)
+    private async Task<int> GenDnsHosts(V2rayConfig v2rayConfig, SimpleDNSItem simpleDNSItem)
     {
-        if (dNSItem.AddCommonHosts == false && dNSItem.UseSystemHosts == false && dNSItem.Hosts.IsNullOrEmpty())
+        if (simpleDNSItem.AddCommonHosts == false && simpleDNSItem.UseSystemHosts == false && simpleDNSItem.Hosts.IsNullOrEmpty())
         {
             return await Task.FromResult(0);
         }
         v2rayConfig.dns ??= new Dns4Ray();
         v2rayConfig.dns.hosts ??= new Dictionary<string, List<string>>();
-        if (dNSItem.AddCommonHosts == true)
+        if (simpleDNSItem.AddCommonHosts == true)
         {
             v2rayConfig.dns.hosts = Global.PredefinedHosts;
         }
 
-        if (dNSItem.UseSystemHosts == true)
+        if (simpleDNSItem.UseSystemHosts == true)
         {
             var systemHosts = Utils.GetSystemHosts();
             if (systemHosts.Count > 0)
@@ -1360,7 +1360,7 @@ public class CoreConfigV2rayService
             }
         }
 
-        var userHostsMap = dNSItem.Hosts?
+        var userHostsMap = simpleDNSItem.Hosts?
             .Split(new[] { '\r', '\n' }, StringSplitOptions.RemoveEmptyEntries)
             .Where(line => !string.IsNullOrWhiteSpace(line))
             .Where(line => line.Contains(' '))
