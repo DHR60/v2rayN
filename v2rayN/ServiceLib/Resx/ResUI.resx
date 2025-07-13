@@ -1455,4 +1455,10 @@
   <data name="TbValidateDirectExpectedIPsDesc" xml:space="preserve">
     <value>After configuration, validates returned IPs, returning only expected IPs</value>
   </data>
+  <data name="TbCustomDNSEnable" xml:space="preserve">
+    <value>Enable Custom DNS</value>
+  </data>
+  <data name="TbCustomDNSEnabledPageInvalid" xml:space="preserve">
+    <value>Custom DNS Enabled, This Page's Settings Invalid</value>
+  </data>
 </root>
