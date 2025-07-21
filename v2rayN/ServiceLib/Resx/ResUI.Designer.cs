@@ -1744,6 +1744,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Test Configurations UDP 的本地化字符串。
+        /// </summary>
+        public static string menuUdpTestServer {
+            get {
+                return ResourceManager.GetString("menuUdpTestServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 {0} Website 的本地化字符串。
         /// </summary>
         public static string menuWebsiteItem {
@@ -1965,6 +1974,24 @@ namespace ServiceLib.Resx {
         public static string NoValidQRcodeFound {
             get {
                 return ResourceManager.GetString("NoValidQRcodeFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 NTP Error 的本地化字符串。
+        /// </summary>
+        public static string NtpError {
+            get {
+                return ResourceManager.GetString("NtpError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 NTP Timeout 的本地化字符串。
+        /// </summary>
+        public static string NtpTimeout {
+            get {
+                return ResourceManager.GetString("NtpTimeout", resourceCulture);
             }
         }
         

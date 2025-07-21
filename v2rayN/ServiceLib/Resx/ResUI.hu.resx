@@ -1494,4 +1494,13 @@
   <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
     <value>Routing Core defaults to sing-box when Tun is enabled.</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value />
+  </data>
 </root>

@@ -436,6 +436,11 @@ public class CoreConfigV2rayService
                     listen = Global.Loopback,
                     port = port,
                     protocol = EInboundProtocol.mixed.ToString(),
+                    settings = new Inboundsettings4Ray()
+                    {
+                        udp = true,
+                        auth = "noauth"
+                    },
                 };
                 inbound.tag = inbound.protocol + inbound.port.ToString();
                 v2rayConfig.inbounds.Add(inbound);
@@ -511,6 +516,11 @@ public class CoreConfigV2rayService
                 listen = Global.Loopback,
                 port = port,
                 protocol = EInboundProtocol.mixed.ToString(),
+                settings = new Inboundsettings4Ray()
+                {
+                    udp = true,
+                    auth = "noauth"
+                },
             });
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
