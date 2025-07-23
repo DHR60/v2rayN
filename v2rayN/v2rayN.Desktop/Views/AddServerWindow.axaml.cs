@@ -74,7 +74,7 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
                 gridHysteria2.IsVisible = true;
                 sepa2.IsVisible = false;
                 gridTransport.IsVisible = false;
-                cmbCoreType.IsEnabled = false;
+                cmbCoreType.ItemsSource = Global.Hysteria2CoreTypes.AppendEmpty();
                 cmbFingerprint.IsEnabled = false;
                 cmbFingerprint.SelectedValue = string.Empty;
                 break;
@@ -83,11 +83,11 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
                 gridTuic.IsVisible = true;
                 sepa2.IsVisible = false;
                 gridTransport.IsVisible = false;
-                cmbCoreType.IsEnabled = false;
+                cmbCoreType.ItemsSource = Global.TuicCoreTypes.AppendEmpty();
                 cmbFingerprint.IsEnabled = false;
                 cmbFingerprint.SelectedValue = string.Empty;
 
-                cmbHeaderType8.ItemsSource = Global.TuicCongestionControls;
+                cmbHeaderType8.ItemsSource = Global.CongestionControls;
                 break;
 
             case EConfigType.WireGuard:
@@ -103,6 +103,66 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
                 gridAnytls.IsVisible = true;
                 lstStreamSecurity.Add(Global.StreamSecurityReality);
                 cmbCoreType.IsEnabled = false;
+                break;
+
+            case EConfigType.NaiveProxy:
+                gridNaive.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                cmbAlpn.IsEnabled = false;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.SelectedValue = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType201.ItemsSource = Global.NaiveProxyProtocols;
+                break;
+
+            case EConfigType.Juicity:
+                gridJuicity.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                cmbAlpn.IsEnabled = false;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.SelectedValue = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType202.ItemsSource = Global.CongestionControls;
+                break;
+
+            case EConfigType.Brook:
+                gridBrook.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                gridTls.IsVisible = false;
+                cmbCoreType.IsEnabled = false;
+                break;
+
+            case EConfigType.Shadowquic:
+                gridShadowquic.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.SelectedValue = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType204.ItemsSource = Global.CongestionControls;
+                break;
+
+            case EConfigType.Overtls:
+                gridOvertls.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                cmbCoreType.IsEnabled = false;
+                break;
+
+            case EConfigType.Mieru:
+                gridMieru.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                gridTls.IsVisible = false;
+                cmbCoreType.IsEnabled = false;
+
+                cmbNetwork206.ItemsSource = new List<string> { "tcp", "udp" };
                 break;
         }
         cmbStreamSecurity.ItemsSource = lstStreamSecurity;
@@ -172,6 +232,39 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
 
                 case EConfigType.Anytls:
                     this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId10.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.NaiveProxy:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId201.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType201.SelectedValue).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Juicity:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId202.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity202.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType202.SelectedValue).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Brook:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId203.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Shadowquic:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId204.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity204.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType204.SelectedValue).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Overtls:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId205.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Mieru:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId206.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity206.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Network, v => v.cmbNetwork206.SelectedValue).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Ports, v => v.txtPorts206.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Sni, v => v.txtSNI206.Text).DisposeWith(disposables);
                     break;
             }
             this.Bind(ViewModel, vm => vm.SelectedSource.Network, v => v.cmbNetwork.SelectedValue).DisposeWith(disposables);
