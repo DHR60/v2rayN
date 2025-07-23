@@ -1641,4 +1641,7 @@ Si un certificat auto-signé est utilisé ou si le système contient une CA non 
   <data name="AlpnMustContainHttp11ForWsTls" xml:space="preserve">
     <value>Avec WebSocket et TLS, l’ALPN doit inclure ‘http/1.1’.</value>
   </data>
+  <data name="TbUser" xml:space="preserve">
+    <value>Username</value>
+  </data>
 </root>
