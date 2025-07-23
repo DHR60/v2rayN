@@ -19,6 +19,12 @@ public class FmtHandler
                 EConfigType.TUIC => TuicFmt.ToUri(item),
                 EConfigType.WireGuard => WireguardFmt.ToUri(item),
                 EConfigType.Anytls => AnytlsFmt.ToUri(item),
+                EConfigType.NaiveProxy => NaiveFmt.ToUri(item),
+                EConfigType.Juicity => JuicityFmt.ToUri(item),
+                EConfigType.Brook => BrookFmt.ToUri(item),
+                EConfigType.Shadowquic => ShadowquicFmt.ToUri(item),
+                EConfigType.Overtls => OvertlsFmt.ToUri(item),
+                EConfigType.Mieru => MieruFmt.ToUri(item),
                 _ => null,
             };
 
@@ -79,6 +85,30 @@ public class FmtHandler
             else if (str.StartsWith(Global.ProtocolShares[EConfigType.Anytls]))
             {
                 return AnytlsFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.NaiveProxy]))
+            {
+                return NaiveFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.Juicity]))
+            {
+                return JuicityFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.Brook]))
+            {
+                return BrookFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.Shadowquic]))
+            {
+                return ShadowquicFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.Overtls]))
+            {
+                return OvertlsFmt.Resolve(str, out msg);
+            }
+            else if (str.StartsWith(Global.ProtocolShares[EConfigType.Mieru]))
+            {
+                return MieruFmt.Resolve(str, out msg);
             }
             else
             {
