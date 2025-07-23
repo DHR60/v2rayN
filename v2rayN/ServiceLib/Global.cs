@@ -12,8 +12,8 @@ public class Global
 
     public const string PromotionUrl = @"aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw=";
     public const string ConfigFileName = "guiNConfig.json";
-    public const string CoreConfigFileName = "config.json";
-    public const string CorePreConfigFileName = "configPre.json";
+    public const string CoreConfigFileName = "config";
+    public const string CorePreConfigFileName = "configPre";
     public const string CoreSpeedtestConfigFileName = "configTest{0}.json";
     public const string CoreMultipleLoadConfigFileName = "configMultipleLoad.json";
     public const string ClashMixinConfigFileName = "Mixin.yaml";
@@ -183,7 +183,11 @@ public class Global
             { EConfigType.Hysteria2, "hysteria2://" },
             { EConfigType.TUIC, "tuic://" },
             { EConfigType.WireGuard, "wireguard://" },
-            { EConfigType.Anytls, "anytls://" }
+            { EConfigType.Anytls, "anytls://" },
+            { EConfigType.NaiveProxy, "naive://" },
+            { EConfigType.Juicity, "juicity://" },
+            { EConfigType.Brook, "brook://" },
+            { EConfigType.Shadowquic, "shadowquic://" }
         };
 
     public static readonly Dictionary<EConfigType, string> ProtocolTypes = new()
@@ -197,7 +201,11 @@ public class Global
             { EConfigType.Hysteria2, "hysteria2" },
             { EConfigType.TUIC, "tuic" },
             { EConfigType.WireGuard, "wireguard" },
-            { EConfigType.Anytls, "anytls" }
+            { EConfigType.Anytls, "anytls" },
+            { EConfigType.NaiveProxy, "naiveproxy" },
+            { EConfigType.Juicity, "juicity" },
+            { EConfigType.Brook, "brook" },
+            { EConfigType.Shadowquic, "shadowquic" }
         };
 
     public static readonly List<string> VmessSecurities =
@@ -289,6 +297,50 @@ public class Global
     [
         "Xray",
             "sing_box"
+    ];
+
+    public static readonly List<string> Hysteria2CoreTypes =
+    [
+        "sing_box",
+            "hysteria2"
+    ];
+
+    public static readonly List<string> TuicCoreTypes =
+    [
+        "sing_box",
+            "tuic"
+    ];
+
+    public static readonly List<string> NaiveProxyCoreTypes =
+    [
+        "naiveproxy"
+    ];
+
+    public static readonly List<string> JuicityProxyCoreTypes =
+    [
+        "juicity"
+    ];
+
+    public static readonly List<string> BrookCoreTypes =
+    [
+        "brook"
+    ];
+
+    public static readonly List<string> ShadowquicCoreTypes =
+    [
+        "shadowquic"
+    ];
+
+    public static readonly List<EConfigType> SupportSplitConfigTypes =
+    [
+        EConfigType.VMess,
+            EConfigType.VLESS,
+            EConfigType.Shadowsocks,
+            EConfigType.Trojan,
+            EConfigType.Hysteria2,
+            EConfigType.TUIC,
+            EConfigType.WireGuard,
+            EConfigType.SOCKS,
     ];
 
     public static readonly HashSet<EConfigType> XraySupportConfigType =
@@ -524,11 +576,18 @@ public class Global
             ""
     ];
 
-    public static readonly List<string> TuicCongestionControls =
+    public static readonly List<string> CongestionControls =
     [
         "cubic",
             "new_reno",
             "bbr"
+    ];
+
+    public static readonly List<string> NaiveProxyProtocols =
+    [
+        "https",
+            "http",
+            "quic"
     ];
 
     public static readonly List<string> allowSelectType =
