@@ -6,46 +6,42 @@ public partial class CoreConfigSingboxService
     {
         try
         {
-            var listen = "0.0.0.0";
             singboxConfig.inbounds = [];
 
-            if (!_config.TunModeItem.EnableTun
-                || (_config.TunModeItem.EnableTun && _config.TunModeItem.EnableExInbound && AppManager.Instance.RunningCoreType == ECoreType.sing_box))
+            var inbound = new Inbound4Sbox()
             {
-                var inbound = new Inbound4Sbox()
-                {
-                    type = EInboundProtocol.mixed.ToString(),
-                    tag = EInboundProtocol.socks.ToString(),
-                    listen = Global.Loopback,
-                };
-                singboxConfig.inbounds.Add(inbound);
+                type = EInboundProtocol.mixed.ToString(),
+                tag = EInboundProtocol.socks.ToString(),
+                listen = Global.Loopback,
+            };
+            singboxConfig.inbounds.Add(inbound);
 
-                inbound.listen_port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
+            inbound.listen_port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
 
-                if (_config.Inbound.First().SecondLocalPortEnabled)
+            if (_config.Inbound.First().SecondLocalPortEnabled)
+            {
+                var inbound2 = GetInbound(inbound, EInboundProtocol.socks2, true);
+                singboxConfig.inbounds.Add(inbound2);
+            }
+
+            if (_config.Inbound.First().AllowLANConn)
+            {
+                var listen = "0.0.0.0";
+                if (_config.Inbound.First().NewPort4LAN)
                 {
-                    var inbound2 = GetInbound(inbound, EInboundProtocol.socks2, true);
-                    singboxConfig.inbounds.Add(inbound2);
+                    var inbound3 = GetInbound(inbound, EInboundProtocol.socks3, true);
+                    inbound3.listen = listen;
+                    singboxConfig.inbounds.Add(inbound3);
+
+                    //auth
+                    if (_config.Inbound.First().User.IsNotEmpty() && _config.Inbound.First().Pass.IsNotEmpty())
+                    {
+                        inbound3.users = new() { new() { username = _config.Inbound.First().User, password = _config.Inbound.First().Pass } };
+                    }
                 }
-
-                if (_config.Inbound.First().AllowLANConn)
+                else
                 {
-                    if (_config.Inbound.First().NewPort4LAN)
-                    {
-                        var inbound3 = GetInbound(inbound, EInboundProtocol.socks3, true);
-                        inbound3.listen = listen;
-                        singboxConfig.inbounds.Add(inbound3);
-
-                        //auth
-                        if (_config.Inbound.First().User.IsNotEmpty() && _config.Inbound.First().Pass.IsNotEmpty())
-                        {
-                            inbound3.users = new() { new() { username = _config.Inbound.First().User, password = _config.Inbound.First().Pass } };
-                        }
-                    }
-                    else
-                    {
-                        inbound.listen = listen;
-                    }
+                    inbound.listen = listen;
                 }
             }
 
