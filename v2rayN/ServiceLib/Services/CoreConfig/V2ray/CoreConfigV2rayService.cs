@@ -1,5 +1,6 @@
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.Json.Nodes;
 
 namespace ServiceLib.Services.CoreConfig;
 
@@ -401,6 +402,71 @@ public partial class CoreConfigV2rayService(Config config)
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(v2rayConfig);
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            ret.Msg = ResUI.FailedGenDefaultConfiguration;
+            return ret;
+        }
+    }
+
+    public async Task<RetResult> GeneratePureEndpointConfig(ProfileItem node)
+    {
+        var ret = new RetResult();
+        try
+        {
+            if (node == null
+                || node.Port <= 0)
+            {
+                ret.Msg = ResUI.CheckServerSettings;
+                return ret;
+            }
+
+            if (node.GetNetwork() is nameof(ETransport.quic))
+            {
+                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                return ret;
+            }
+
+            ret.Msg = ResUI.InitialConfiguration;
+
+            var result = EmbedUtils.GetEmbedText(Global.V2raySampleClient);
+            if (result.IsNullOrEmpty())
+            {
+                ret.Msg = ResUI.FailedGetDefaultConfiguration;
+                return ret;
+            }
+
+            var v2rayConfig = JsonUtils.Deserialize<V2rayConfig>(result);
+            if (v2rayConfig == null)
+            {
+                ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                return ret;
+            }
+
+            await GenLog(v2rayConfig);
+
+            var inbound = GetInbound(_config.Inbound.First(), EInboundProtocol.split, true);
+
+            v2rayConfig.inbounds = new() { inbound };
+
+            await GenOutbound(node, v2rayConfig.outbounds.First());
+
+            v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+
+            await GenMoreOutbounds(node, v2rayConfig);
+
+            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
+            ret.Success = true;
+
+            var config = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig)).AsObject();
+
+            config.Remove("routing");
+
+            ret.Data = config.ToJsonString(new() { WriteIndented = true });
+
             return ret;
         }
         catch (Exception ex)
