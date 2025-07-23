@@ -72,6 +72,12 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
             this.BindCommand(ViewModel, vm => vm.AddTuicServerCmd, v => v.menuAddTuicServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.AddWireguardServerCmd, v => v.menuAddWireguardServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.AddAnytlsServerCmd, v => v.menuAddAnytlsServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddBrookServerCmd, v => v.menuAddBrookServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddJuicityServerCmd, v => v.menuAddJuicityServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddNaiveServerCmd, v => v.menuAddNaiveServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddShadowquicServerCmd, v => v.menuAddShadowquicServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddOvertlsServerCmd, v => v.menuAddOvertlsServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.AddMieruServerCmd, v => v.menuAddMieruServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.AddCustomServerCmd, v => v.menuAddCustomServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.AddPolicyGroupServerCmd, v => v.menuAddPolicyGroupServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.AddProxyChainServerCmd, v => v.menuAddProxyChainServer).DisposeWith(disposables);

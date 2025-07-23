@@ -168,6 +168,13 @@ public static class ConfigHandler
             config.SystemProxyItem.SystemProxyExceptions = Utils.IsWindows() ? Global.SystemProxyExceptionsWindows : Global.SystemProxyExceptionsLinux;
         }
 
+        config.SplitCoreItem ??= new()
+        {
+            EnableSplitCore = false,
+            SplitCoreTypes = new List<CoreTypeItem>(),
+            RouteCoreType = ECoreType.Xray
+        };
+
         return config;
     }
 
@@ -267,6 +274,12 @@ public static class ConfigHandler
             EConfigType.TUIC => await AddTuicServer(config, item),
             EConfigType.WireGuard => await AddWireguardServer(config, item),
             EConfigType.Anytls => await AddAnytlsServer(config, item),
+            EConfigType.NaiveProxy => await AddNaiveServer(config, item),
+            EConfigType.Juicity => await AddJuicityServer(config, item),
+            EConfigType.Brook => await AddBrookServer(config, item),
+            EConfigType.Shadowquic => await AddShadowquicServer(config, item),
+            EConfigType.Overtls => await AddOvertlsServer(config, item),
+            EConfigType.Mieru => await AddMieruServer(config, item),
             _ => -1,
         };
         return ret;
@@ -700,7 +713,7 @@ public static class ConfigHandler
     public static async Task<int> AddHysteria2Server(Config config, ProfileItem profileItem, bool toFile = true)
     {
         profileItem.ConfigType = EConfigType.Hysteria2;
-        profileItem.CoreType = ECoreType.sing_box;
+        //profileItem.CoreType = ECoreType.sing_box;
 
         profileItem.Address = profileItem.Address.TrimEx();
         profileItem.Id = profileItem.Id.TrimEx();
@@ -733,16 +746,16 @@ public static class ConfigHandler
     public static async Task<int> AddTuicServer(Config config, ProfileItem profileItem, bool toFile = true)
     {
         profileItem.ConfigType = EConfigType.TUIC;
-        profileItem.CoreType = ECoreType.sing_box;
+        //profileItem.CoreType = ECoreType.sing_box;
 
         profileItem.Address = profileItem.Address.TrimEx();
         profileItem.Id = profileItem.Id.TrimEx();
         profileItem.Security = profileItem.Security.TrimEx();
         profileItem.Network = string.Empty;
 
-        if (!Global.TuicCongestionControls.Contains(profileItem.HeaderType))
+        if (!Global.CongestionControls.Contains(profileItem.HeaderType))
         {
-            profileItem.HeaderType = Global.TuicCongestionControls.FirstOrDefault()!;
+            profileItem.HeaderType = Global.CongestionControls.FirstOrDefault()!;
         }
 
         if (profileItem.StreamSecurity.IsNullOrEmpty())
@@ -820,6 +833,209 @@ public static class ConfigHandler
         if (profileItem.Id.IsNullOrEmpty())
         {
             return -1;
+        }
+        await AddServerCommon(config, profileItem, toFile);
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Naive server
+    /// Validates and processes Naive-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Naive profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddNaiveServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.NaiveProxy;
+        profileItem.CoreType = ECoreType.naiveproxy;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = string.Empty;
+        if (!Global.NaiveProxyProtocols.Contains(profileItem.HeaderType))
+        {
+            profileItem.HeaderType = Global.NaiveProxyProtocols.FirstOrDefault()!;
+        }
+        if (profileItem.StreamSecurity.IsNullOrEmpty())
+        {
+            profileItem.StreamSecurity = Global.StreamSecurity;
+        }
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        await AddServerCommon(config, profileItem, toFile);
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Juicity server
+    /// Validates and processes Juicity-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Juicity profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddJuicityServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Juicity;
+        profileItem.CoreType = ECoreType.juicity;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Security = profileItem.Security.TrimEx();
+        profileItem.Network = string.Empty;
+
+        if (!Global.CongestionControls.Contains(profileItem.HeaderType))
+        {
+            profileItem.HeaderType = Global.CongestionControls.FirstOrDefault()!;
+        }
+
+        if (profileItem.StreamSecurity.IsNullOrEmpty())
+        {
+            profileItem.StreamSecurity = Global.StreamSecurity;
+        }
+        if (profileItem.Alpn.IsNullOrEmpty())
+        {
+            profileItem.Alpn = "h3";
+        }
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+
+        await AddServerCommon(config, profileItem, toFile);
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Brook server
+    /// Validates and processes Brook-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Brook profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddBrookServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Brook;
+        profileItem.CoreType = ECoreType.brook;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = string.Empty;
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        await AddServerCommon(config, profileItem, toFile);
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Shadowquic server
+    /// Validates and processes Shadowquic-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Shadowquic profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddShadowquicServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Shadowquic;
+        profileItem.CoreType = ECoreType.shadowquic;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Security = profileItem.Security.TrimEx();
+        profileItem.Network = string.Empty;
+
+        if (!Global.CongestionControls.Contains(profileItem.HeaderType))
+        {
+            profileItem.HeaderType = Global.CongestionControls.FirstOrDefault()!;
+        }
+
+        if (profileItem.StreamSecurity.IsNullOrEmpty())
+        {
+            profileItem.StreamSecurity = Global.StreamSecurity;
+        }
+        if (profileItem.Alpn.IsNullOrEmpty())
+        {
+            profileItem.Alpn = "h3";
+        }
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+
+        await AddServerCommon(config, profileItem, toFile);
+
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Overtls server
+    /// Validates and processes Overtls-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Overtls profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddOvertlsServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Overtls;
+        profileItem.CoreType = ECoreType.overtls;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = string.Empty;
+
+        if (profileItem.StreamSecurity.IsNullOrEmpty())
+        {
+            profileItem.StreamSecurity = Global.StreamSecurity;
+        }
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        await AddServerCommon(config, profileItem, toFile);
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Mieru server
+    /// Validates and processes Mieru-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Mieru profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddMieruServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Mieru;
+        profileItem.CoreType = ECoreType.mieru;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = profileItem.Network.TrimEx();
+        profileItem.Security = profileItem.Security.TrimEx();
+        profileItem.Ports = profileItem.Ports.TrimEx();
+        profileItem.Sni = profileItem.Sni.TrimEx();
+
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        if (profileItem.Security.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        if (profileItem.Network.IsNullOrEmpty())
+        {
+            profileItem.Network = "tcp";
         }
         await AddServerCommon(config, profileItem, toFile);
         return 0;
@@ -1385,6 +1601,10 @@ public static class ConfigHandler
                 EConfigType.TUIC => await AddTuicServer(config, profileItem, false),
                 EConfigType.WireGuard => await AddWireguardServer(config, profileItem, false),
                 EConfigType.Anytls => await AddAnytlsServer(config, profileItem, false),
+                EConfigType.NaiveProxy => await AddNaiveServer(config, profileItem, false),
+                EConfigType.Juicity => await AddJuicityServer(config, profileItem, false),
+                EConfigType.Brook => await AddBrookServer(config, profileItem, false),
+                EConfigType.Shadowquic => await AddShadowquicServer(config, profileItem, false),
                 _ => -1,
             };
 
