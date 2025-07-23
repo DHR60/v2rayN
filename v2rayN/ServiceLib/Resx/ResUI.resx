@@ -1611,4 +1611,28 @@
   <data name="TbSettingsUdpTestUrl" xml:space="preserve">
     <value>UDP Test Url</value>
   </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>Enable separation of outbound and routing cores</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated.</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>Routing Core defaults to sing-box when Tun is enabled.</value>
+  </data>
+  <data name="menuAddBrookServer" xml:space="preserve">
+    <value>Add [Brook] Configuration</value>
+  </data>
+  <data name="menuAddJuicityServer" xml:space="preserve">
+    <value>Add [Juicity] Configuration</value>
+  </data>
+  <data name="menuAddNaiveServer" xml:space="preserve">
+    <value>Add [Naive] Configuration</value>
+  </data>
+  <data name="menuAddShadowquicServer" xml:space="preserve">
+    <value>Add [Shadowquic] Configuration</value>
+  </data>
+  <data name="TbHeaderType100" xml:space="preserve">
+    <value>Proxy Protocol</value>
+  </data>
 </root>
