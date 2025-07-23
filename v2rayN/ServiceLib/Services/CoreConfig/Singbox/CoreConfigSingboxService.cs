@@ -1,16 +1,14 @@
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.Json.Nodes;
 
 namespace ServiceLib.Services.CoreConfig;
 
-public partial class CoreConfigSingboxService(Config config)
+public partial class CoreConfigSingboxService(Config config) : CoreConfigServiceBase(config)
 {
-    private readonly Config _config = config;
-    private static readonly string _tag = "CoreConfigSingboxService";
-
     #region public gen function
 
-    public async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
+    public override async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
     {
         var ret = new RetResult();
         try
@@ -111,7 +109,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
     {
         var ret = new RetResult();
         try
@@ -288,7 +286,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
     {
         var ret = new RetResult();
         try
@@ -371,7 +369,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientMultipleLoadConfig(List<ProfileItem> selecteds, EMultipleLoad multipleLoad)
+    public override async Task<RetResult> GenerateClientMultipleLoadConfig(List<ProfileItem> selecteds, EMultipleLoad multipleLoad)
     {
         var ret = new RetResult();
         try
@@ -562,7 +560,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientCustomConfig(ProfileItem node, string? fileName)
+    public override async Task<RetResult> GenerateClientCustomConfig(ProfileItem node, string? fileName)
     {
         var ret = new RetResult();
         if (node == null || fileName is null)
@@ -633,6 +631,92 @@ public partial class CoreConfigSingboxService(Config config)
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            ret.Msg = ResUI.FailedGenDefaultConfiguration;
+            return ret;
+        }
+    }
+
+    protected override async Task<RetResult> GeneratePassthroughConfig(ProfileItem node, int port)
+    {
+        var ret = new RetResult();
+        try
+        {
+            if (node == null
+                || node.Port <= 0)
+            {
+                ret.Msg = ResUI.CheckServerSettings;
+                return ret;
+            }
+            if (node.GetNetwork() is nameof(ETransport.kcp) or nameof(ETransport.xhttp))
+            {
+                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                return ret;
+            }
+
+            ret.Msg = ResUI.InitialConfiguration;
+
+            var result = EmbedUtils.GetEmbedText(Global.SingboxSampleClient);
+            if (result.IsNullOrEmpty())
+            {
+                ret.Msg = ResUI.FailedGetDefaultConfiguration;
+                return ret;
+            }
+
+            var singboxConfig = JsonUtils.Deserialize<SingboxConfig>(result);
+            if (singboxConfig == null)
+            {
+                ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                return ret;
+            }
+
+            await GenLog(singboxConfig);
+
+            var inbound = new Inbound4Sbox()
+            {
+                type = EInboundProtocol.mixed.ToString(),
+                tag = EInboundProtocol.socks.ToString(),
+                listen = Global.Loopback,
+                listen_port = AppManager.Instance.GetLocalPort(EInboundProtocol.split)
+            };
+            singboxConfig.inbounds = new() { inbound };
+
+            if (node.ConfigType == EConfigType.WireGuard)
+            {
+                singboxConfig.outbounds.RemoveAt(0);
+                var endpoints = new Endpoints4Sbox();
+                await GenEndpoint(node, endpoints);
+                endpoints.tag = Global.ProxyTag;
+                singboxConfig.endpoints = new() { endpoints };
+            }
+            else
+            {
+                await GenOutbound(node, singboxConfig.outbounds.First());
+            }
+
+            if (singboxConfig.endpoints == null)
+            {
+                singboxConfig.outbounds = new() { JsonUtils.DeepCopy(singboxConfig.outbounds.First()) };
+            }
+            else
+            {
+                singboxConfig.outbounds.Clear();
+            }
+
+            await GenMoreOutbounds(node, singboxConfig);
+
+            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
+            ret.Success = true;
+            var config = JsonNode.Parse(JsonUtils.Serialize(singboxConfig)).AsObject();
+
+            config.Remove("route");
+
+            ret.Data = JsonUtils.Serialize(config, true);
+
             return ret;
         }
         catch (Exception ex)
