@@ -73,7 +73,7 @@ public partial class AddServerWindow
                 gridHysteria2.Visibility = Visibility.Visible;
                 sepa2.Visibility = Visibility.Collapsed;
                 gridTransport.Visibility = Visibility.Collapsed;
-                cmbCoreType.IsEnabled = false;
+                cmbCoreType.ItemsSource = Global.Hysteria2CoreTypes.AppendEmpty();
                 cmbFingerprint.IsEnabled = false;
                 cmbFingerprint.Text = string.Empty;
                 break;
@@ -82,11 +82,11 @@ public partial class AddServerWindow
                 gridTuic.Visibility = Visibility.Visible;
                 sepa2.Visibility = Visibility.Collapsed;
                 gridTransport.Visibility = Visibility.Collapsed;
-                cmbCoreType.IsEnabled = false;
+                cmbCoreType.ItemsSource = Global.TuicCoreTypes.AppendEmpty();
                 cmbFingerprint.IsEnabled = false;
                 cmbFingerprint.Text = string.Empty;
 
-                cmbHeaderType8.ItemsSource = Global.TuicCongestionControls;
+                cmbHeaderType8.ItemsSource = Global.CongestionControls;
                 break;
 
             case EConfigType.WireGuard:
@@ -102,6 +102,49 @@ public partial class AddServerWindow
                 gridAnytls.Visibility = Visibility.Visible;
                 cmbCoreType.IsEnabled = false;
                 lstStreamSecurity.Add(Global.StreamSecurityReality);
+                break;
+
+            case EConfigType.NaiveProxy:
+                gridNaive.Visibility = Visibility.Visible;
+                sepa2.Visibility = Visibility.Collapsed;
+                gridTransport.Visibility = Visibility.Collapsed;
+                cmbAlpn.IsEnabled = false;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.Text = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType100.ItemsSource = Global.NaiveProxyProtocols;
+                break;
+
+            case EConfigType.Juicity:
+                gridJuicity.Visibility = Visibility.Visible;
+                sepa2.Visibility = Visibility.Collapsed;
+                gridTransport.Visibility = Visibility.Collapsed;
+                cmbAlpn.IsEnabled = false;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.Text = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType101.ItemsSource = Global.CongestionControls;
+                break;
+
+            case EConfigType.Brook:
+                gridBrook.Visibility = Visibility.Visible;
+                sepa2.Visibility = Visibility.Collapsed;
+                gridTransport.Visibility = Visibility.Collapsed;
+                gridTls.Visibility = Visibility.Collapsed;
+                cmbCoreType.IsEnabled = false;
+                break;
+
+            case EConfigType.Shadowquic:
+                gridShadowquic.Visibility = Visibility.Visible;
+                sepa2.Visibility = Visibility.Collapsed;
+                gridTransport.Visibility = Visibility.Collapsed;
+                cmbFingerprint.IsEnabled = false;
+                cmbFingerprint.Text = string.Empty;
+                cmbCoreType.IsEnabled = false;
+
+                cmbHeaderType103.ItemsSource = Global.CongestionControls;
                 break;
         }
         cmbStreamSecurity.ItemsSource = lstStreamSecurity;
@@ -171,6 +214,27 @@ public partial class AddServerWindow
 
                 case EConfigType.Anytls:
                     this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId10.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.NaiveProxy:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId100.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType100.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Juicity:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId101.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity101.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType101.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Brook:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId102.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Shadowquic:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId103.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity103.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType103.Text).DisposeWith(disposables);
                     break;
             }
             this.Bind(ViewModel, vm => vm.SelectedSource.Network, v => v.cmbNetwork.Text).DisposeWith(disposables);
