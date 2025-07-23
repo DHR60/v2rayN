@@ -24,6 +24,12 @@ public class MainWindowViewModel : MyReactiveObject
     public ReactiveCommand<Unit, Unit> AddServerViaClipboardCmd { get; }
     public ReactiveCommand<Unit, Unit> AddServerViaScanCmd { get; }
     public ReactiveCommand<Unit, Unit> AddServerViaImageCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddBrookServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddJuicityServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddNaiveServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddShadowquicServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddOvertlsServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddMieruServerCmd { get; }
 
     //Subscription
     public ReactiveCommand<Unit, Unit> SubSettingCmd { get; }
@@ -115,6 +121,30 @@ public class MainWindowViewModel : MyReactiveObject
         AddAnytlsServerCmd = ReactiveCommand.CreateFromTask(async () =>
         {
             await AddServerAsync(EConfigType.Anytls);
+        });
+        AddBrookServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.Brook);
+        });
+        AddJuicityServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.Juicity);
+        });
+        AddNaiveServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.NaiveProxy);
+        });
+        AddShadowquicServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.Shadowquic);
+        });
+        AddOvertlsServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.Overtls);
+        });
+        AddMieruServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(EConfigType.Mieru);
         });
         AddCustomServerCmd = ReactiveCommand.CreateFromTask(async () =>
         {
