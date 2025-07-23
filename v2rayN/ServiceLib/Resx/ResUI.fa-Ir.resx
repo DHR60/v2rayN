@@ -1684,4 +1684,43 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbTestResultDivisor" xml:space="preserve">
     <value>Test Result Divisor</value>
   </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>Enable separation of outbound and routing cores</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated.</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>Routing Core defaults to sing-box when Tun is enabled.</value>
+  </data>
+  <data name="menuAddBrookServer" xml:space="preserve">
+    <value>افزودن سرور [Brook]</value>
+  </data>
+  <data name="menuAddJuicityServer" xml:space="preserve">
+    <value>افزودن سرور [Juicity]</value>
+  </data>
+  <data name="menuAddNaiveServer" xml:space="preserve">
+    <value>افزودن سرور [Naive]</value>
+  </data>
+  <data name="menuAddShadowquicServer" xml:space="preserve">
+    <value>افزودن سرور [Shadowquic]</value>
+  </data>
+  <data name="TbHeaderType201" xml:space="preserve">
+    <value>Proxy Protocol</value>
+  </data>
+  <data name="menuAddOvertlsServer" xml:space="preserve">
+    <value>افزودن سرور [overtls]</value>
+  </data>
+  <data name="menuAddMieruServer" xml:space="preserve">
+    <value>افزودن سرور [Mieru]</value>
+  </data>
+  <data name="TbUser" xml:space="preserve">
+    <value>Username</value>
+  </data>
+  <data name="TbSettingsEnableExDirectPorts" xml:space="preserve">
+    <value>Enable Additional Direct Ports</value>
+  </data>
+  <data name="TbSettingsEnableExDirectPortsTip" xml:space="preserve">
+    <value>Enable additional direct ports to prevent loopback issues in dual‑core TUN setups.</value>
+  </data>
 </root>

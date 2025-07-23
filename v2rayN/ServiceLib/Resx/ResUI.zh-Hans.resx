@@ -1681,4 +1681,43 @@
   <data name="TbTestResultDivisor" xml:space="preserve">
     <value>测试结果除数</value>
   </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>启用出站核心与路由核心分离</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>出站与路由分离，出站与分流 Core 类型不同时，将启用两个核心</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>启用 Tun 时，路由 Core 为 sing-box</value>
+  </data>
+  <data name="menuAddBrookServer" xml:space="preserve">
+    <value>添加 [Brook]</value>
+  </data>
+  <data name="menuAddJuicityServer" xml:space="preserve">
+    <value>添加 [Juicity]</value>
+  </data>
+  <data name="menuAddNaiveServer" xml:space="preserve">
+    <value>添加 [Naive]</value>
+  </data>
+  <data name="menuAddShadowquicServer" xml:space="preserve">
+    <value>添加 [Shadowquic]</value>
+  </data>
+  <data name="TbHeaderType201" xml:space="preserve">
+    <value>代理协议</value>
+  </data>
+  <data name="menuAddOvertlsServer" xml:space="preserve">
+    <value>添加 [overtls]</value>
+  </data>
+  <data name="menuAddMieruServer" xml:space="preserve">
+    <value>添加 [Mieru]</value>
+  </data>
+  <data name="TbUser" xml:space="preserve">
+    <value>用户名</value>
+  </data>
+  <data name="TbSettingsEnableExDirectPorts" xml:space="preserve">
+    <value>启用额外直连端口</value>
+  </data>
+  <data name="TbSettingsEnableExDirectPortsTip" xml:space="preserve">
+    <value>避免双核心 TUN 回环问题</value>
+  </data>
 </root>
