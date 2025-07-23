@@ -137,6 +137,14 @@ public class CoreTypeItem
 }
 
 [Serializable]
+public class SplitCoreItem
+{
+    public bool EnableSplitCore { get; set; }
+    public List<CoreTypeItem> SplitCoreTypes { get; set; }
+    public ECoreType RouteCoreType { get; set; }
+}
+
+[Serializable]
 public class TunModeItem
 {
     public bool EnableTun { get; set; }
@@ -146,6 +154,7 @@ public class TunModeItem
     public int Mtu { get; set; }
     public bool EnableExInbound { get; set; }
     public bool EnableIPv6Address { get; set; }
+    public bool EnableExDirectPorts { get; set; } = true;
 }
 
 [Serializable]
