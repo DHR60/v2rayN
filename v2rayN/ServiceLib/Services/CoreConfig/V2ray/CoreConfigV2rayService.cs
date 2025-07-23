@@ -1,16 +1,14 @@
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text.Json.Nodes;
 
 namespace ServiceLib.Services.CoreConfig;
 
-public partial class CoreConfigV2rayService(Config config)
+public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBase(config)
 {
-    private readonly Config _config = config;
-    private static readonly string _tag = "CoreConfigV2rayService";
-
     #region public gen function
 
-    public async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
+    public override async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
     {
         var ret = new RetResult();
         try
@@ -82,7 +80,7 @@ public partial class CoreConfigV2rayService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientMultipleLoadConfig(ProfileItem parentNode)
+    public override async Task<RetResult> GenerateClientMultipleLoadConfig(ProfileItem parentNode)
     {
         var ret = new RetResult();
 
@@ -188,7 +186,7 @@ public partial class CoreConfigV2rayService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientChainConfig(ProfileItem parentNode)
+    public override async Task<RetResult> GenerateClientChainConfig(ProfileItem parentNode)
     {
         var ret = new RetResult();
 
@@ -245,7 +243,7 @@ public partial class CoreConfigV2rayService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
     {
         var ret = new RetResult();
         try
@@ -373,7 +371,7 @@ public partial class CoreConfigV2rayService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
     {
         var ret = new RetResult();
         try
@@ -422,6 +420,80 @@ public partial class CoreConfigV2rayService(Config config)
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
             ret.Data = JsonUtils.Serialize(v2rayConfig);
+            return ret;
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+            ret.Msg = ResUI.FailedGenDefaultConfiguration;
+            return ret;
+        }
+    }
+
+    protected override async Task<RetResult> GeneratePassthroughConfig(ProfileItem node, int port)
+    {
+        var ret = new RetResult();
+        try
+        {
+            if (node == null
+                || node.Port <= 0)
+            {
+                ret.Msg = ResUI.CheckServerSettings;
+                return ret;
+            }
+
+            if (node.GetNetwork() is nameof(ETransport.quic))
+            {
+                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                return ret;
+            }
+
+            ret.Msg = ResUI.InitialConfiguration;
+
+            var result = EmbedUtils.GetEmbedText(Global.V2raySampleClient);
+            if (result.IsNullOrEmpty())
+            {
+                ret.Msg = ResUI.FailedGetDefaultConfiguration;
+                return ret;
+            }
+
+            var v2rayConfig = JsonUtils.Deserialize<V2rayConfig>(result);
+            if (v2rayConfig == null)
+            {
+                ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                return ret;
+            }
+
+            await GenLog(v2rayConfig);
+
+            v2rayConfig.inbounds = new() { new()
+            {
+                tag = EInboundProtocol.socks.ToString(),
+                listen = Global.Loopback,
+                port = port,
+                protocol = EInboundProtocol.mixed.ToString(),
+                settings = new Inboundsettings4Ray()
+                {
+                    udp = true,
+                    auth = "noauth"
+                },
+            } };
+
+            await GenOutbound(node, v2rayConfig.outbounds.First());
+
+            v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+
+            await GenMoreOutbounds(node, v2rayConfig);
+
+            ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
+            ret.Success = true;
+
+            var config = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig)).AsObject();
+
+            config.Remove("routing");
+
+            ret.Data = JsonUtils.Serialize(config, true);
+
             return ret;
         }
         catch (Exception ex)
