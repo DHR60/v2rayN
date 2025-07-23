@@ -292,8 +292,90 @@ public sealed class AppManager
             return (ECoreType)profileItem.CoreType;
         }
 
+        return GetCoreType(eConfigType);
+    }
+
+    public ECoreType GetCoreType(EConfigType eConfigType)
+    {
         var item = _config.CoreTypeItem?.FirstOrDefault(it => it.ConfigType == eConfigType);
         return item?.CoreType ?? ECoreType.Xray;
+    }
+
+    public ECoreType GetSplitCoreType(ProfileItem profileItem, EConfigType eConfigType)
+    {
+        if (profileItem?.CoreType != null)
+        {
+            return (ECoreType)profileItem.CoreType;
+        }
+
+        return GetSplitCoreType(eConfigType);
+    }
+
+    public ECoreType GetSplitCoreType(EConfigType eConfigType)
+    {
+        var item = _config.SplitCoreItem.SplitCoreTypes?.FirstOrDefault(it => it.ConfigType == eConfigType);
+        return item?.CoreType ?? ECoreType.Xray;
+    }
+
+    public (ECoreType, ECoreType?) GetCoreAndPreType(ProfileItem profileItem)
+    {
+        // TODO: Simplify this logic
+        var coreType = GetCoreType(profileItem, profileItem.ConfigType);
+        ECoreType? preCoreType = null;
+
+        var pureEndpointCore = profileItem.CoreType ?? GetSplitCoreType(profileItem.ConfigType);
+        var splitRouteCore = _config.SplitCoreItem.RouteCoreType;
+        var enableTun = _config.TunModeItem.EnableTun;
+
+        // profileItem.CoreType is null, then coreType is default core, but may not support the protocol of profileItem.ConfigType
+        if ((coreType == ECoreType.Xray && !Global.XraySupportConfigType.Contains(profileItem.ConfigType))
+            || (coreType == ECoreType.sing_box && !Global.SingboxSupportConfigType.Contains(profileItem.ConfigType)))
+        {
+            coreType = pureEndpointCore;
+        }
+
+        if (profileItem.ConfigType == EConfigType.Custom)
+        {
+            coreType = profileItem.CoreType ?? ECoreType.Xray;
+            if (profileItem.PreSocksPort > 0)
+            {
+                preCoreType = enableTun ? ECoreType.sing_box : GetCoreType(profileItem.ConfigType);
+            }
+            else
+            {
+                preCoreType = null;
+            }
+        }
+        else if (coreType is not (ECoreType.Xray or ECoreType.sing_box))
+        {
+            // Force SplitCore for cores that don't support direct routing (like Hysteria2, TUIC, etc.)
+            preCoreType = enableTun ? ECoreType.sing_box : splitRouteCore;
+        }
+        else if (_config.SplitCoreItem.EnableSplitCore)
+        {
+            // User explicitly enabled SplitCore
+            preCoreType = enableTun ? ECoreType.sing_box : splitRouteCore;
+            coreType = pureEndpointCore;
+
+            if (preCoreType == coreType)
+            {
+                preCoreType = null;
+            }
+        }
+        else if (enableTun) // EnableTun is true but SplitCore is false
+        {
+            // TUN mode handling for Xray/sing_box cores
+            if (preCoreType == coreType) // CoreType is sing_box
+            {
+                preCoreType = null;
+            }
+            else // CoreType is xray, etc.
+            {
+                // Force SplitCore for non-split cores
+                preCoreType = ECoreType.sing_box;
+            }
+        }
+        return (coreType, preCoreType);
     }
 
     #endregion Core Type
