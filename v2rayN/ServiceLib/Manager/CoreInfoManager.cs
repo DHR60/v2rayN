@@ -143,7 +143,7 @@ public sealed class CoreInfoManager
                 {
                     CoreType = ECoreType.hysteria,
                     CoreExes = ["hysteria"],
-                    Arguments = "",
+                    Arguments = "-c {0}",
                     Url = GetCoreUrl(ECoreType.hysteria),
                 },
 
@@ -193,7 +193,7 @@ public sealed class CoreInfoManager
                 {
                     CoreType = ECoreType.hysteria2,
                     CoreExes = ["hysteria-windows-amd64", "hysteria-linux-amd64", "hysteria"],
-                    Arguments = "",
+                    Arguments = "-c {0}",
                     Url = GetCoreUrl(ECoreType.hysteria2),
                 },
 
