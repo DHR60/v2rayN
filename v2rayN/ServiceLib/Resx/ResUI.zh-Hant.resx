@@ -1593,4 +1593,28 @@
   <data name="TbSettingsHide2TrayWhenCloseTip" xml:space="preserve">
     <value>如果系統沒有托盤功能，請不要開啟</value>
   </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>Enable separation of outbound and routing cores</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated.</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>Routing Core defaults to sing-box when Tun is enabled.</value>
+  </data>
+  <data name="menuAddBrookServer" xml:space="preserve">
+    <value>新增 [Brook] 設定檔</value>
+  </data>
+  <data name="menuAddJuicityServer" xml:space="preserve">
+    <value>新增 [Juicity] 設定檔</value>
+  </data>
+  <data name="menuAddNaiveServer" xml:space="preserve">
+    <value>新增 [Naive] 設定檔</value>
+  </data>
+  <data name="menuAddShadowquicServer" xml:space="preserve">
+    <value>新增 [Shadowquic] 設定檔</value>
+  </data>
+  <data name="TbHeaderType100" xml:space="preserve">
+    <value>Proxy Protocol</value>
+  </data>
 </root>

@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -64,7 +65,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var lstSelected = new List<ServerTestItem>();
         foreach (var it in selecteds)
         {
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
@@ -116,7 +117,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         List<Task> tasks = [];
         foreach (var it in selecteds)
         {
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
@@ -199,7 +200,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 {
                     continue;
                 }
-                if (it.ConfigType == EConfigType.Custom)
+                if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
                 {
                     continue;
                 }
@@ -233,7 +234,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 await UpdateFunc(it.IndexId, "", ResUI.SpeedtestingSkip);
                 continue;
             }
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
