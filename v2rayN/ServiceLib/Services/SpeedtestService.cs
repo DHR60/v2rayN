@@ -65,7 +65,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var lstSelected = new List<ServerTestItem>();
         foreach (var it in selecteds)
         {
-            if (it.ConfigType.IsComplexType())
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
@@ -118,6 +118,10 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         List<Task> tasks = [];
         foreach (var it in selecteds)
         {
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
+            {
+                continue;
+            }
             tasks.Add(Task.Run(async () =>
             {
                 try
@@ -194,6 +198,10 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             foreach (var it in selecteds)
             {
                 if (!it.AllowTest)
+                {
+                    continue;
+                }
+                if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
                 {
                     continue;
                 }
@@ -302,6 +310,10 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             if (_lstExitLoop.Any(p => p == exitLoopKey) == false)
             {
                 await UpdateFunc(it.IndexId, "", ResUI.SpeedtestingSkip);
+                continue;
+            }
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
+            {
                 continue;
             }
             await concurrencySemaphore.WaitAsync();

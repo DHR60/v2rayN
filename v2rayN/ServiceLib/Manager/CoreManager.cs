@@ -65,13 +65,9 @@ public class CoreManager
             return;
         }
 
-        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName);
-        var result = await CoreConfigHandler.GenerateClientConfig(node, fileName);
-        if (result.Success != true)
-        {
-            await UpdateFunc(true, result.Msg);
-            return;
-        }
+        // Create launch context and configure parameters
+        var context = new CoreLaunchContext(node, _config);
+        context.AdjustForConfigType();
 
         await UpdateFunc(false, $"{node.GetSummary()}");
         await UpdateFunc(false, $"{Utils.GetRuntimeInfo()}");
@@ -85,8 +81,19 @@ public class CoreManager
             await WindowsUtils.RemoveTunDevice();
         }
 
-        await CoreStart(node);
-        await CoreStartPreService(node);
+        // Start main core
+        if (!await CoreStart(context))
+        {
+            return;
+        }
+
+        // Start pre-core if needed
+        if (!await CoreStartPreService(context))
+        {
+            await CoreStop(); // Clean up main core if pre-core fails
+            return;
+        }
+        
         if (_processService != null)
         {
             await UpdateFunc(true, $"{node.GetSummary()}");
@@ -97,7 +104,7 @@ public class CoreManager
     {
         var coreType = selecteds.Any(t => Global.SingboxOnlyConfigType.Contains(t.ConfigType)) ? ECoreType.sing_box : ECoreType.Xray;
         var fileName = string.Format(Global.CoreSpeedtestConfigFileName, Utils.GetGuid(false));
-        var configPath = Utils.GetBinConfigPath(fileName);
+        var configPath = Utils.GetBinConfigPath(fileName, coreType);
         var result = await CoreConfigHandler.GenerateClientSpeedtestConfig(_config, configPath, selecteds, coreType);
         await UpdateFunc(false, result.Msg);
         if (result.Success != true)
@@ -120,15 +127,17 @@ public class CoreManager
             return null;
         }
 
+        var context = new CoreLaunchContext(node, _config);
+        context.AdjustForConfigType();
+        var coreType = context.GetOutboundCoreType();
         var fileName = string.Format(Global.CoreSpeedtestConfigFileName, Utils.GetGuid(false));
-        var configPath = Utils.GetBinConfigPath(fileName);
-        var result = await CoreConfigHandler.GenerateClientSpeedtestConfig(_config, node, testItem, configPath);
+        var configPath = Utils.GetBinConfigPath(fileName, coreType);
+        var result = await CoreConfigHandler.GenerateClientSpeedtestConfig(_config, context, testItem, configPath);
         if (result.Success != true)
         {
             return null;
         }
 
-        var coreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
         return await RunProcess(coreInfo, fileName, true, false);
     }
@@ -165,43 +174,87 @@ public class CoreManager
 
     #region Private
 
-    private async Task CoreStart(ProfileItem node)
+    private async Task<bool> CoreStart(CoreLaunchContext context)
     {
-        var coreType = _config.RunningCoreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
-        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
+        var coreType = context.GetOutboundCoreType();
+        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName, coreType);
+        var result = context.OutboundCorePassThroughOnly
+            ? await CoreConfigHandler.GeneratePassthroughConfig(context, fileName)
+            : await CoreConfigHandler.GenerateClientConfig(context, fileName);
 
-        var displayLog = node.ConfigType != EConfigType.Custom || node.DisplayLog;
-        var proc = await RunProcess(coreInfo, Global.CoreConfigFileName, displayLog, true);
+        if (result.Success != true)
+        {
+            await UpdateFunc(true, result.Msg);
+            return false;
+        }
+
+        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(context.GetOutboundCoreType());
+        var displayLog = context.Node.ConfigType != EConfigType.Custom || context.Node.DisplayLog;
+        var proc = await RunProcess(coreInfo, Utils.GetBinConfigFileName(Global.CoreConfigFileName, coreType), displayLog, true);
+        
         if (proc is null)
         {
-            return;
+            await UpdateFunc(true, ResUI.FailedToRunCore);
+            return false;
         }
+        
         _processService = proc;
+        _config.RunningCoreType = context.GetInRouteCoreType();
+        return true;
     }
 
-    private async Task CoreStartPreService(ProfileItem node)
+    private async Task<bool> CoreStartPreService(CoreLaunchContext context)
     {
-        if (_processService != null && !_processService.HasExited)
+        if (_processService == null || _processService.HasExited)
         {
-            var coreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
-            var itemSocks = await ConfigHandler.GetPreSocksItem(_config, node, coreType);
-            if (itemSocks != null)
+            return true;
+        }
+        if (!context.SplitCore)
+        {
+            return true; // No pre-core needed, consider successful
+        }
+
+        var coreType = context.GetInRouteCoreType();
+        var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName, coreType);
+
+        var tun2SocksAddress = context.Node.Address;
+        if (context.Node.ConfigType.IsGroupType())
+        {
+            var lstAddresses = (await ProfileGroupItemManager.GetAllChildDomainAddresses(context.Node.IndexId)).ToList();
+            if (lstAddresses.Count > 0)
             {
-                var preCoreType = itemSocks.CoreType ?? ECoreType.sing_box;
-                var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName);
-                var result = await CoreConfigHandler.GenerateClientConfig(itemSocks, fileName);
-                if (result.Success)
-                {
-                    var coreInfo = CoreInfoManager.Instance.GetCoreInfo(preCoreType);
-                    var proc = await RunProcess(coreInfo, Global.CorePreConfigFileName, true, true);
-                    if (proc is null)
-                    {
-                        return;
-                    }
-                    _processPreService = proc;
-                }
+                tun2SocksAddress = Utils.List2String(lstAddresses);
             }
         }
+
+        var itemSocks = new ProfileItem()
+        {
+            CoreType = coreType,
+            ConfigType = EConfigType.SOCKS,
+            Address = Global.Loopback,
+            SpiderX = tun2SocksAddress, // Tun2SocksAddress
+            Port = context.PreSocksPort
+        };
+        var itemSocksLaunch = new CoreLaunchContext(itemSocks, _config);
+
+        var result = await CoreConfigHandler.GenerateClientConfig(itemSocksLaunch, fileName);
+        if (!result.Success)
+        {
+            await UpdateFunc(true, result.Msg);
+            return false;
+        }
+
+        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
+        var proc = await RunProcess(coreInfo, Utils.GetBinConfigFileName(Global.CorePreConfigFileName, coreType), true, true);
+
+        if (proc is null || _processService.HasExited)
+        {
+            await UpdateFunc(true, ResUI.FailedToRunCore);
+            return false;
+        }
+        
+        _processPreService = proc;
+        return true;
     }
 
     private async Task UpdateFunc(bool notify, string msg)
@@ -254,7 +307,7 @@ public class CoreManager
 
         var procService = new ProcessService(
             fileName: fileName,
-            arguments: string.Format(coreInfo.Arguments, coreInfo.AbsolutePath ? Utils.GetBinConfigPath(configPath).AppendQuotes() : configPath),
+            arguments: string.Format(coreInfo.Arguments, coreInfo.AbsolutePath ? Utils.GetBinConfigPath(configPath, coreInfo.CoreType).AppendQuotes() : configPath),
             workingDirectory: Utils.GetBinConfigPath(),
             displayLog: displayLog,
             redirectInput: false,
