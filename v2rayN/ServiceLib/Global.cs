@@ -12,8 +12,8 @@ public class Global
 
     public const string PromotionUrl = @"aHR0cHM6Ly85LjIzNDQ1Ni54eXovYWJjLmh0bWw=";
     public const string ConfigFileName = "guiNConfig.json";
-    public const string CoreConfigFileName = "config.json";
-    public const string CorePreConfigFileName = "configPre.json";
+    public const string CoreConfigFileName = "config";
+    public const string CorePreConfigFileName = "configPre";
     public const string CoreSpeedtestConfigFileName = "configTest{0}.json";
     public const string CoreMultipleLoadConfigFileName = "configMultipleLoad.json";
     public const string ClashMixinConfigFileName = "Mixin.yaml";
@@ -182,7 +182,13 @@ public class Global
             { EConfigType.Hysteria2, "hysteria2://" },
             { EConfigType.TUIC, "tuic://" },
             { EConfigType.WireGuard, "wireguard://" },
-            { EConfigType.Anytls, "anytls://" }
+            { EConfigType.Anytls, "anytls://" },
+            { EConfigType.NaiveProxy, "naive://" },
+            { EConfigType.Juicity, "juicity://" },
+            { EConfigType.Brook, "brook://" },
+            { EConfigType.Shadowquic, "shadowquic://" },
+            { EConfigType.Overtls, "overtls://" },
+            { EConfigType.Mieru, "mieru://" },
         };
 
     public static readonly Dictionary<EConfigType, string> ProtocolTypes = new()
@@ -196,7 +202,13 @@ public class Global
             { EConfigType.Hysteria2, "hysteria2" },
             { EConfigType.TUIC, "tuic" },
             { EConfigType.WireGuard, "wireguard" },
-            { EConfigType.Anytls, "anytls" }
+            { EConfigType.Anytls, "anytls" },
+            { EConfigType.NaiveProxy, "naiveproxy" },
+            { EConfigType.Juicity, "juicity" },
+            { EConfigType.Brook, "brook" },
+            { EConfigType.Shadowquic, "shadowquic" },
+            { EConfigType.Overtls, "overtls" },
+            { EConfigType.Mieru, "mieru" },
         };
 
     public static readonly List<string> VmessSecurities =
@@ -290,6 +302,60 @@ public class Global
             "sing_box"
     ];
 
+    public static readonly List<string> Hysteria2CoreTypes =
+    [
+        "sing_box",
+            "hysteria2"
+    ];
+
+    public static readonly List<string> TuicCoreTypes =
+    [
+        "sing_box",
+            "tuic"
+    ];
+
+    public static readonly List<string> NaiveProxyCoreTypes =
+    [
+        "naiveproxy"
+    ];
+
+    public static readonly List<string> JuicityProxyCoreTypes =
+    [
+        "juicity"
+    ];
+
+    public static readonly List<string> BrookCoreTypes =
+    [
+        "brook"
+    ];
+
+    public static readonly List<string> ShadowquicCoreTypes =
+    [
+        "shadowquic"
+    ];
+
+    public static readonly List<string> overtlsCoreTypes =
+    [
+        "overtls"
+    ];
+
+    public static readonly List<string> MieruCoreTypes =
+    [
+        "mieru"
+    ];
+
+    public static readonly List<EConfigType> SupportSplitConfigTypes =
+    [
+        EConfigType.VMess,
+            EConfigType.VLESS,
+            EConfigType.Shadowsocks,
+            EConfigType.Trojan,
+            EConfigType.Hysteria2,
+            EConfigType.TUIC,
+            EConfigType.WireGuard,
+            EConfigType.SOCKS,
+    ];
+
     public static readonly HashSet<EConfigType> XraySupportConfigType =
     [
         EConfigType.VMess,
@@ -316,6 +382,26 @@ public class Global
     ];
 
     public static readonly HashSet<EConfigType> SingboxOnlyConfigType = SingboxSupportConfigType.Except(XraySupportConfigType).ToHashSet();
+    
+    public static readonly Dictionary<EConfigType, List<ECoreType>> ConfigTypeCores = new()
+        {
+            { EConfigType.VMess, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.VLESS, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Shadowsocks, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Trojan, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Hysteria2, new List<ECoreType>{ ECoreType.sing_box, ECoreType.hysteria2 } },
+            { EConfigType.TUIC, new List<ECoreType>{ ECoreType.sing_box, ECoreType.tuic } },
+            { EConfigType.WireGuard, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Anytls, new List<ECoreType>{ ECoreType.sing_box } },
+            { EConfigType.NaiveProxy, new List<ECoreType>{ ECoreType.naiveproxy } },
+            { EConfigType.Juicity, new List<ECoreType>{ ECoreType.juicity } },
+            { EConfigType.Brook, new List<ECoreType>{ ECoreType.brook } },
+            { EConfigType.Shadowquic, new List<ECoreType>{ ECoreType.shadowquic } },
+            { EConfigType.Overtls, new List<ECoreType>{ ECoreType.overtls } },
+            { EConfigType.Mieru, new List<ECoreType>{ ECoreType.mieru } },
+            { EConfigType.SOCKS, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.HTTP, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+        };
 
     public static readonly List<string> DomainStrategies =
     [
@@ -523,11 +609,18 @@ public class Global
             ""
     ];
 
-    public static readonly List<string> TuicCongestionControls =
+    public static readonly List<string> CongestionControls =
     [
         "cubic",
             "new_reno",
             "bbr"
+    ];
+
+    public static readonly List<string> NaiveProxyProtocols =
+    [
+        "https",
+            "http",
+            "quic"
     ];
 
     public static readonly List<string> allowSelectType =

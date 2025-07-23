@@ -727,6 +727,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Add [Brook] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddBrookServer {
+            get {
+                return ResourceManager.GetString("menuAddBrookServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add Child Configuration 的本地化字符串。
         /// </summary>
         public static string menuAddChildServer {
@@ -759,6 +768,42 @@ namespace ServiceLib.Resx {
         public static string menuAddHysteria2Server {
             get {
                 return ResourceManager.GetString("menuAddHysteria2Server", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Juicity] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddJuicityServer {
+            get {
+                return ResourceManager.GetString("menuAddJuicityServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Mieru] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddMieruServer {
+            get {
+                return ResourceManager.GetString("menuAddMieruServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Naive] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddNaiveServer {
+            get {
+                return ResourceManager.GetString("menuAddNaiveServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [overtls] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddOvertlsServer {
+            get {
+                return ResourceManager.GetString("menuAddOvertlsServer", resourceCulture);
             }
         }
         
@@ -804,6 +849,15 @@ namespace ServiceLib.Resx {
         public static string menuAddServerViaScan {
             get {
                 return ResourceManager.GetString("menuAddServerViaScan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Shadowquic] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddShadowquicServer {
+            get {
+                return ResourceManager.GetString("menuAddShadowquicServer", resourceCulture);
             }
         }
         
@@ -2851,6 +2905,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Proxy Protocol 的本地化字符串。
+        /// </summary>
+        public static string TbHeaderType201 {
+            get {
+                return ResourceManager.GetString("TbHeaderType201", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Congestion control 的本地化字符串。
         /// </summary>
         public static string TbHeaderType8 {
@@ -3936,6 +3999,33 @@ namespace ServiceLib.Resx {
         public static string TbSettingsSpeedTestUrl {
             get {
                 return ResourceManager.GetString("TbSettingsSpeedTestUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated. 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreDoc1 {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreDoc1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Routing Core defaults to sing-box when Tun is enabled. 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreDoc2 {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreDoc2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable separation of outbound and routing cores 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreEnable {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreEnable", resourceCulture);
             }
         }
         
