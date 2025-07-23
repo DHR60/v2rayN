@@ -1645,4 +1645,7 @@ Si un certificat auto-signé est utilisé ou si le système contient une CA non 
   <data name="TbTestResultDivisor" xml:space="preserve">
     <value>Test Result Divisor</value>
   </data>
+  <data name="TbUser" xml:space="preserve">
+    <value>Username</value>
+  </data>
 </root>
