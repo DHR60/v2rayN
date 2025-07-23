@@ -15,4 +15,11 @@ public enum EConfigType
     Anytls = 11,
     PolicyGroup = 101,
     ProxyChain = 102,
+    
+    NaiveProxy = 201,
+    Juicity = 202,
+    Brook = 203,
+    Shadowquic = 204,
+    Overtls = 205,
+    Mieru = 206,
 }
