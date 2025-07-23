@@ -13,6 +13,10 @@ public enum EConfigType
     WireGuard = 9,
     HTTP = 10,
     Anytls = 11,
+    NaiveProxy = 100,
+    Juicity = 101,
+    Brook = 102,
+    Shadowquic = 103,
 
     Group = 1000,
     PolicyGroup = 1001,
