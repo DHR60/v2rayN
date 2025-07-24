@@ -599,7 +599,7 @@ public class CoreConfigSingboxService
 
             config.Remove("route");
 
-            ret.Data = config.ToJsonString(new() { WriteIndented = true });
+            ret.Data = JsonUtils.Serialize(config, true);
 
             return ret;
         }
