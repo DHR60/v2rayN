@@ -1479,12 +1479,6 @@
   <data name="TbRayFullConfigTemplateDesc" xml:space="preserve">
     <value>仅添加出站配置，routing.balancers 和 routing.rules.outboundTag，点击查看文档</value>
   </data>
-  <data name="TbAddProxyProtocolOutboundOnly" xml:space="preserve">
-    <value>不添加非代理协议出站</value>
-  </data>
-  <data name="TbSetUpstreamProxyDetour" xml:space="preserve">
-    <value>设置上游代理 tag</value>
-  </data>
   <data name="TbSBFullConfigTemplate" xml:space="preserve">
     <value>sing-box 完整配置模板</value>
   </data>
@@ -1493,5 +1487,20 @@
   </data>
   <data name="TbFullConfigTemplateDesc" xml:space="preserve">
     <value>此功能供高级用户和有特殊需求的用户使用。 启用此功能后，将忽略 Core 的基础设置，DNS 设置 ，路由设置。你需要保证系统代理的端口和流量统计等功能的配置正确，一切都由你来设置。</value>
+  </data>
+  <data name="TbAddProxyProtocolOutboundOnly" xml:space="preserve">
+    <value>不添加非代理协议出站</value>
+  </data>
+  <data name="TbSetUpstreamProxyDetour" xml:space="preserve">
+    <value>设置上游代理 tag</value>
+  </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>启用出站核心与路由核心分离</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>出站与路由分离，出站与分流 Core 类型不同时，将启用两个核心</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>启用 Tun 时，路由 Core 为 sing-box</value>
   </data>
 </root>
