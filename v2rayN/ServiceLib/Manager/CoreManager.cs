@@ -1,5 +1,7 @@
 using System.Diagnostics;
 using System.Text;
+using ServiceLib.Enums;
+using ServiceLib.Models;
 
 namespace ServiceLib.Manager;
 
@@ -67,13 +69,10 @@ public class CoreManager
             return;
         }
 
-        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName);
-        var result = await CoreConfigHandler.GenerateClientConfig(node, fileName);
-        if (result.Success != true)
-        {
-            await UpdateFunc(true, result.Msg);
-            return;
-        }
+        // Create launch context and configure parameters
+        var context = new CoreLaunchContext(node, _config);
+        context.AdjustForConfigType();
+        context.AdjustForSplitCore();
 
         await UpdateFunc(false, $"{node.GetSummary()}");
         await UpdateFunc(false, $"{Utils.GetRuntimeInfo()}");
@@ -87,8 +86,19 @@ public class CoreManager
             await WindowsUtils.RemoveTunDevice();
         }
 
-        await CoreStart(node);
-        await CoreStartPreService(node);
+        // Start main core
+        if (!await CoreStart(context))
+        {
+            return;
+        }
+
+        // Start pre-core if needed
+        if (!await CoreStartPreService(context))
+        {
+            await CoreStop(); // Clean up main core if pre-core fails
+            return;
+        }
+
         if (_process != null)
         {
             await UpdateFunc(true, $"{node.GetSummary()}");
@@ -177,43 +187,140 @@ public class CoreManager
 
     #region Private
 
-    private async Task CoreStart(ProfileItem node)
+    /// <summary>
+    /// Core launch context that encapsulates all parameters required for launching
+    /// </summary>
+    private class CoreLaunchContext
     {
-        var coreType = _config.RunningCoreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
-        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
+        public ProfileItem Node { get; set; }
+        public bool SplitCore { get; set; }
+        public ECoreType CoreType { get; set; }
+        public ECoreType? PreCoreType { get; set; }
+        public ECoreType PureEndpointCore { get; set; }
+        public ECoreType SplitRouteCore { get; set; }
+        public bool EnableTun { get; set; }
+        public int PreSocksPort { get; set; }
 
-        var displayLog = node.ConfigType != EConfigType.Custom || node.DisplayLog;
-        var proc = await RunProcess(coreInfo, Global.CoreConfigFileName, displayLog, true);
-        if (proc is null)
+        public CoreLaunchContext(ProfileItem node, Config config)
         {
-            return;
+            Node = node;
+            SplitCore = config.SplitCoreItem.EnableSplitCore;
+            CoreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
+            PureEndpointCore = AppManager.Instance.GetSplitCoreType(node, node.ConfigType);
+            SplitRouteCore = config.SplitCoreItem.RouteCoreType;
+            EnableTun = config.TunModeItem.EnableTun;
+            PreSocksPort = 0;
+            PreCoreType = null;
         }
-        _process = proc;
-    }
 
-    private async Task CoreStartPreService(ProfileItem node)
-    {
-        if (_process != null && !_process.HasExited)
+        /// <summary>
+        /// Adjust context parameters based on configuration type
+        /// </summary>
+        public void AdjustForConfigType()
         {
-            var coreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
-            var itemSocks = await ConfigHandler.GetPreSocksItem(_config, node, coreType);
-            if (itemSocks != null)
+            if (Node.ConfigType == EConfigType.Custom)
             {
-                var preCoreType = itemSocks.CoreType ?? ECoreType.sing_box;
-                var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName);
-                var result = await CoreConfigHandler.GenerateClientConfig(itemSocks, fileName);
-                if (result.Success)
+                SplitCore = false;
+                CoreType = Node.CoreType ?? ECoreType.Xray;
+                if (Node.PreSocksPort > 0)
                 {
-                    var coreInfo = CoreInfoManager.Instance.GetCoreInfo(preCoreType);
-                    var proc = await RunProcess(coreInfo, Global.CorePreConfigFileName, true, true);
-                    if (proc is null)
-                    {
-                        return;
-                    }
-                    _processPre = proc;
+                    PreCoreType = EnableTun ? ECoreType.sing_box : AppManager.Instance.GetCoreType(Node, Node.ConfigType);
+                    PreSocksPort = Node.PreSocksPort.Value;
+                }
+                else
+                {
+                    EnableTun = false;
+                    PreCoreType = null;
                 }
             }
         }
+
+        /// <summary>
+        /// Adjust split core configuration
+        /// </summary>
+        public void AdjustForSplitCore()
+        {
+            if (SplitCore)
+            {
+                PreCoreType = EnableTun ? ECoreType.sing_box : SplitRouteCore;
+                CoreType = PureEndpointCore;
+
+                if (PreCoreType == CoreType)
+                {
+                    PreCoreType = null;
+                    SplitCore = false;
+                }
+                else
+                {
+                    PreSocksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.split);
+                }
+            }
+        }
+    }
+
+    private async Task<bool> CoreStart(CoreLaunchContext context)
+    {
+        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName);
+        var result = context.SplitCore 
+            ? await CoreConfigHandler.GeneratePureEndpointConfig(context.Node, fileName) 
+            : await CoreConfigHandler.GenerateClientConfig(context.Node, fileName);
+        
+        if (result.Success != true)
+        {
+            await UpdateFunc(true, result.Msg);
+            return false;
+        }
+
+        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(context.CoreType);
+        var displayLog = context.Node.ConfigType != EConfigType.Custom || context.Node.DisplayLog;
+        var proc = await RunProcess(coreInfo, Global.CoreConfigFileName, displayLog, true);
+        
+        if (proc is null)
+        {
+            await UpdateFunc(true, ResUI.FailedToRunCore);
+            return false;
+        }
+        
+        _process = proc;
+        _config.RunningCoreType = AppManager.Instance.GetCoreType(context.Node, context.Node.ConfigType);
+        return true;
+    }
+
+    private async Task<bool> CoreStartPreService(CoreLaunchContext context)
+    {
+        if (context.PreCoreType == null)
+        {
+            return true; // No pre-core needed, consider successful
+        }
+
+        var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName);
+        var itemSocks = new ProfileItem()
+        {
+            CoreType = context.PreCoreType,
+            ConfigType = EConfigType.SOCKS,
+            Address = Global.Loopback,
+            Sni = context.EnableTun && Utils.IsDomain(context.Node.Address) ? context.Node.Address : string.Empty, //Tun2SocksAddress
+            Port = context.PreSocksPort
+        };
+        
+        var result = await CoreConfigHandler.GenerateClientConfig(itemSocks, fileName);
+        if (!result.Success)
+        {
+            await UpdateFunc(true, result.Msg);
+            return false;
+        }
+
+        var coreInfo = CoreInfoManager.Instance.GetCoreInfo((ECoreType)context.PreCoreType);
+        var proc = await RunProcess(coreInfo, Global.CorePreConfigFileName, true, true);
+        
+        if (proc is null || (_process?.HasExited == true))
+        {
+            await UpdateFunc(true, ResUI.FailedToRunCore);
+            return false;
+        }
+        
+        _processPre = proc;
+        return true;
     }
 
     private async Task UpdateFunc(bool notify, string msg)
