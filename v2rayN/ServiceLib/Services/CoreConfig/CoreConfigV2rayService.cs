@@ -460,6 +460,10 @@ public class CoreConfigV2rayService
             await GenLog(v2rayConfig);
 
             var inbound = GetInbound(_config.Inbound.First(), EInboundProtocol.split, true);
+            inbound.sniffing = new Sniffing4Ray
+            {
+                enabled = false
+            };
 
             v2rayConfig.inbounds = new() { inbound };
 
@@ -476,7 +480,7 @@ public class CoreConfigV2rayService
 
             config.Remove("routing");
 
-            ret.Data = config.ToJsonString(new() { WriteIndented = true });
+            ret.Data = JsonUtils.Serialize(config, true);
 
             return ret;
         }
