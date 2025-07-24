@@ -718,7 +718,7 @@ public partial class CoreConfigSingboxService(Config config)
 
             config.Remove("route");
 
-            ret.Data = config.ToJsonString(new() { WriteIndented = true });
+            ret.Data = JsonUtils.Serialize(config, true);
 
             return ret;
         }
