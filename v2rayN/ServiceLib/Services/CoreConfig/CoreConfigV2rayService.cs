@@ -460,6 +460,7 @@ public class CoreConfigV2rayService
             {
                 enabled = false
             };
+            inbound.tag = EInboundProtocol.socks.ToString();
 
             v2rayConfig.inbounds = new() { inbound };
 
