@@ -1,3 +1,5 @@
+using ServiceLib.Services.CoreConfig.Minimal;
+
 namespace ServiceLib.Handler;
 
 /// <summary>
@@ -38,6 +40,36 @@ public static class CoreConfigHandler
             await File.WriteAllTextAsync(fileName, result.Data.ToString());
         }
 
+        return result;
+    }
+
+    public static async Task<RetResult> GeneratePureEndpointConfig(ProfileItem node, string? fileName)
+    {
+        var config = AppManager.Instance.Config;
+
+        var coreType = AppManager.Instance.GetSplitCoreType(node, node.ConfigType);
+
+        var result = coreType switch
+        {
+            ECoreType.sing_box => await new CoreConfigSingboxService(config).GeneratePureEndpointConfig(node),
+            ECoreType.Xray => await new CoreConfigV2rayService(config).GeneratePureEndpointConfig(node),
+            ECoreType.hysteria2 => await new CoreConfigHy2Service(config).GeneratePureEndpointConfig(node),
+            ECoreType.naiveproxy => await new CoreConfigNaiveService(config).GeneratePureEndpointConfig(node),
+            ECoreType.tuic => await new CoreConfigTuicService(config).GeneratePureEndpointConfig(node),
+            ECoreType.juicity => await new CoreConfigJuicityService(config).GeneratePureEndpointConfig(node),
+            ECoreType.brook => await new CoreConfigBrookService(config).GeneratePureEndpointConfig(node),
+            ECoreType.shadowquic => await new CoreConfigShadowquicService(config).GeneratePureEndpointConfig(node),
+            _ => throw new NotImplementedException(),
+        };
+
+        if (result.Success != true)
+        {
+            return result;
+        }
+        if (fileName.IsNotEmpty() && result.Data != null)
+        {
+            await File.WriteAllTextAsync(fileName, result.Data.ToString());
+        }
         return result;
     }
 
