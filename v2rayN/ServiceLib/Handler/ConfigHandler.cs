@@ -700,7 +700,7 @@ public static class ConfigHandler
     public static async Task<int> AddHysteria2Server(Config config, ProfileItem profileItem, bool toFile = true)
     {
         profileItem.ConfigType = EConfigType.Hysteria2;
-        profileItem.CoreType = ECoreType.sing_box;
+        //profileItem.CoreType = ECoreType.sing_box;
 
         profileItem.Address = profileItem.Address.TrimEx();
         profileItem.Id = profileItem.Id.TrimEx();
@@ -733,7 +733,7 @@ public static class ConfigHandler
     public static async Task<int> AddTuicServer(Config config, ProfileItem profileItem, bool toFile = true)
     {
         profileItem.ConfigType = EConfigType.TUIC;
-        profileItem.CoreType = ECoreType.sing_box;
+        //profileItem.CoreType = ECoreType.sing_box;
 
         profileItem.Address = profileItem.Address.TrimEx();
         profileItem.Id = profileItem.Id.TrimEx();
