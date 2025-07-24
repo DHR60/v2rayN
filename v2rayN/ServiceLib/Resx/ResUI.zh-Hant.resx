@@ -1509,4 +1509,13 @@
   <data name="MsgStartParsingSubscription" xml:space="preserve">
     <value>開始解析和處理訂閱內容</value>
   </data>
+  <data name="TbSettingsSplitCoreEnable" xml:space="preserve">
+    <value>Enable separation of outbound and routing cores</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc1" xml:space="preserve">
+    <value>Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated.</value>
+  </data>
+  <data name="TbSettingsSplitCoreDoc2" xml:space="preserve">
+    <value>Routing Core defaults to sing-box when Tun is enabled.</value>
+  </data>
 </root>
