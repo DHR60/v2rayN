@@ -72,7 +72,6 @@ public class CoreManager
         // Create launch context and configure parameters
         var context = new CoreLaunchContext(node, _config);
         context.AdjustForConfigType();
-        context.AdjustForSplitCore();
 
         await UpdateFunc(false, $"{node.GetSummary()}");
         await UpdateFunc(false, $"{Utils.GetRuntimeInfo()}");
@@ -218,74 +217,21 @@ public class CoreManager
         /// </summary>
         public void AdjustForConfigType()
         {
+            (SplitCore, CoreType, PreCoreType) = AppManager.Instance.GetCoreAndPreType(Node);
             if (Node.ConfigType == EConfigType.Custom)
             {
-                SplitCore = false;
-                CoreType = Node.CoreType ?? ECoreType.Xray;
                 if (Node.PreSocksPort > 0)
                 {
-                    PreCoreType = EnableTun ? ECoreType.sing_box : AppManager.Instance.GetCoreType(Node, Node.ConfigType);
                     PreSocksPort = Node.PreSocksPort.Value;
                 }
                 else
                 {
                     EnableTun = false;
-                    PreCoreType = null;
                 }
             }
-            else if (!SplitCore && !EnableTun)
+            else if (PreCoreType != null)
             {
-                switch (Node.CoreType)
-                {
-                    case ECoreType.hysteria2:
-                    case ECoreType.tuic:
-                        Node.CoreType = ECoreType.sing_box;
-                        CoreType = ECoreType.sing_box;
-                        break;
-                    case ECoreType.v2fly:
-                    case ECoreType.v2fly_v5:
-                        Node.CoreType = ECoreType.Xray;
-                        CoreType = ECoreType.Xray;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-
-        /// <summary>
-        /// Adjust split core configuration
-        /// </summary>
-        public void AdjustForSplitCore()
-        {
-            if (SplitCore)
-            {
-                PreCoreType = EnableTun ? ECoreType.sing_box : SplitRouteCore;
-                CoreType = PureEndpointCore;
-
-                if (PreCoreType == CoreType)
-                {
-                    PreCoreType = null;
-                    SplitCore = false;
-                }
-                else
-                {
-                    PreSocksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.split);
-                }
-            }
-            else if (EnableTun)
-            {
-                PreCoreType = ECoreType.sing_box;
-
-                if (PreCoreType == CoreType) // CoreType is sing_box
-                {
-                    PreCoreType = null;
-                }
-                else // CoreType is xray, hysteria2, tuic, etc.
-                {
-                    SplitCore = true;
-                    PreSocksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.split);
-                }
+                PreSocksPort = AppManager.Instance.GetLocalPort(EInboundProtocol.split);
             }
         }
     }
