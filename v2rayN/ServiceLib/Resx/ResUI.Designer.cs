@@ -2374,24 +2374,6 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
-        ///   查找类似 Enable Custom DNS 的本地化字符串。
-        /// </summary>
-        public static string TbCustomDNSEnable {
-            get {
-                return ResourceManager.GetString("TbCustomDNSEnable", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Custom DNS Enabled, This Page&apos;s Settings Invalid 的本地化字符串。
-        /// </summary>
-        public static string TbCustomDNSEnabledPageInvalid {
-            get {
-                return ResourceManager.GetString("TbCustomDNSEnabledPageInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 Enable Custom Config 的本地化字符串。
         /// </summary>
         public static string TbCustomConfigEnable {
@@ -2406,6 +2388,24 @@ namespace ServiceLib.Resx {
         public static string TbCustomConfigSingbox {
             get {
                 return ResourceManager.GetString("TbCustomConfigSingbox", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable Custom DNS 的本地化字符串。
+        /// </summary>
+        public static string TbCustomDNSEnable {
+            get {
+                return ResourceManager.GetString("TbCustomDNSEnable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Custom DNS Enabled, This Page&apos;s Settings Invalid 的本地化字符串。
+        /// </summary>
+        public static string TbCustomDNSEnabledPageInvalid {
+            get {
+                return ResourceManager.GetString("TbCustomDNSEnabledPageInvalid", resourceCulture);
             }
         }
         
@@ -2887,6 +2887,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Override Outbound And Endpoint Config Only 的本地化字符串。
+        /// </summary>
+        public static string TbSBCustomConfigDesc {
+            get {
+                return ResourceManager.GetString("TbSBCustomConfigDesc", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 sing-box Direct Resolution Strategy 的本地化字符串。
         /// </summary>
         public static string TbSBDirectResolveStrategy {
@@ -2946,15 +2955,6 @@ namespace ServiceLib.Resx {
         public static string TbSBRemoteResolveStrategy {
             get {
                 return ResourceManager.GetString("TbSBRemoteResolveStrategy", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 Override Outbound And Endpoint Config Only 的本地化字符串。
-        /// </summary>
-        public static string TbSBCustomConfigDesc {
-            get {
-                return ResourceManager.GetString("TbSBCustomConfigDesc", resourceCulture);
             }
         }
         
@@ -3621,6 +3621,33 @@ namespace ServiceLib.Resx {
         public static string TbSettingsSpeedTestUrl {
             get {
                 return ResourceManager.GetString("TbSettingsSpeedTestUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Outbound and routing are decoupled. If their Core types differ, two separate cores will be activated. 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreDoc1 {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreDoc1", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Routing Core defaults to sing-box when Tun is enabled. 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreDoc2 {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreDoc2", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Enable separation of outbound and routing cores 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsSplitCoreEnable {
+            get {
+                return ResourceManager.GetString("TbSettingsSplitCoreEnable", resourceCulture);
             }
         }
         
