@@ -122,7 +122,7 @@ public class CoreConfigSingboxService
                             }
                         }
                     }
-                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
+                    ret.Data = JsonUtils.Serialize(customConfigNode);
                 }
             }
             else
@@ -517,7 +517,7 @@ public class CoreConfigSingboxService
                             }
                         }
                     }
-                    ret.Data = customConfigNode.ToJsonString(new() { WriteIndented = true });
+                    ret.Data = JsonUtils.Serialize(customConfigNode);
                 }
             }
             else
