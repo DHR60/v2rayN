@@ -1,5 +1,6 @@
 using System.Collections.Concurrent;
 using System.Diagnostics;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -70,7 +71,7 @@ public class SpeedtestService
         var lstSelected = new List<ServerTestItem>();
         foreach (var it in selecteds)
         {
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
@@ -122,7 +123,7 @@ public class SpeedtestService
         List<Task> tasks = [];
         foreach (var it in selecteds)
         {
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
@@ -205,7 +206,7 @@ public class SpeedtestService
                 {
                     continue;
                 }
-                if (it.ConfigType == EConfigType.Custom)
+                if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
                 {
                     continue;
                 }
@@ -242,7 +243,7 @@ public class SpeedtestService
                 UpdateFunc(it.IndexId, "", ResUI.SpeedtestingSkip);
                 continue;
             }
-            if (it.ConfigType == EConfigType.Custom)
+            if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || Global.SingboxSupportConfigType.Contains(it.ConfigType)))
             {
                 continue;
             }
