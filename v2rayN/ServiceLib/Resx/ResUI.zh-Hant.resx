@@ -1539,4 +1539,13 @@
   <data name="menuAddMieruServer" xml:space="preserve">
     <value>新增 [Mieru] 設定檔</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value />
+  </data>
 </root>
