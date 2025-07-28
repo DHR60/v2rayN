@@ -1399,6 +1399,6 @@
     <value>Incorrect password, please try again.</value>
   </data>
   <data name="menuAddAnytlsServer" xml:space="preserve">
-    <value>Add [Anytls] Configuration</value>
+    <value>Добавить сервер [Anytls]</value>
   </data>
 </root>
