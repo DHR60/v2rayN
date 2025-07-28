@@ -1515,4 +1515,13 @@
   <data name="TbHeaderType100" xml:space="preserve">
     <value>Proxy Protocol</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value />
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value />
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value />
+  </data>
 </root>

@@ -1515,4 +1515,13 @@
   <data name="TbHeaderType100" xml:space="preserve">
     <value>代理协议</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value>NTP 错误</value>
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value>NTP 超时</value>
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>测试配置文件 UDP</value>
+  </data>
 </root>
