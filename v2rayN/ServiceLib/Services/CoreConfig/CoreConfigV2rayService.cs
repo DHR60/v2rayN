@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
@@ -116,11 +117,7 @@ public class CoreConfigV2rayService
             var proxyProfiles = new List<ProfileItem>();
             foreach (var it in selecteds)
             {
-                if (it.ConfigType == EConfigType.Custom)
-                {
-                    continue;
-                }
-                if (it.ConfigType is EConfigType.Hysteria2 or EConfigType.TUIC or EConfigType.Anytls)
+                if (!Global.XraySupportConfigType.Contains(it.ConfigType))
                 {
                     continue;
                 }
@@ -255,7 +252,7 @@ public class CoreConfigV2rayService
 
             foreach (var it in selecteds)
             {
-                if (it.ConfigType == EConfigType.Custom)
+                if (!Global.SingboxSupportConfigType.Contains(it.ConfigType))
                 {
                     continue;
                 }
@@ -707,10 +704,7 @@ public class CoreConfigV2rayService
 
         var node = await AppHandler.Instance.GetProfileItemViaRemarks(outboundTag);
         if (node == null
-            || node.ConfigType == EConfigType.Custom
-            || node.ConfigType == EConfigType.Hysteria2
-            || node.ConfigType == EConfigType.TUIC
-            || node.ConfigType == EConfigType.Anytls)
+            || !Global.SingboxSupportConfigType.Contains(node.ConfigType))
         {
             return Global.ProxyTag;
         }
@@ -1288,10 +1282,7 @@ public class CoreConfigV2rayService
                 // Previous proxy
                 var prevNode = await AppHandler.Instance.GetProfileItemViaRemarks(subItem.PrevProfile);
                 if (prevNode is not null
-                    && prevNode.ConfigType != EConfigType.Custom
-                    && prevNode.ConfigType != EConfigType.Hysteria2
-                    && prevNode.ConfigType != EConfigType.TUIC
-                    && prevNode.ConfigType != EConfigType.Anytls
+                    && Global.SingboxSupportConfigType.Contains(prevNode.ConfigType)
                     && Utils.IsDomain(prevNode.Address))
                 {
                     domainList.Add(prevNode.Address);
@@ -1300,10 +1291,7 @@ public class CoreConfigV2rayService
                 // Next proxy
                 var nextNode = await AppHandler.Instance.GetProfileItemViaRemarks(subItem.NextProfile);
                 if (nextNode is not null
-                    && nextNode.ConfigType != EConfigType.Custom
-                    && nextNode.ConfigType != EConfigType.Hysteria2
-                    && nextNode.ConfigType != EConfigType.TUIC
-                    && nextNode.ConfigType != EConfigType.Anytls
+                    && Global.SingboxSupportConfigType.Contains(nextNode.ConfigType)
                     && Utils.IsDomain(nextNode.Address))
                 {
                     domainList.Add(nextNode.Address);
@@ -1419,10 +1407,7 @@ public class CoreConfigV2rayService
             var prevNode = await AppHandler.Instance.GetProfileItemViaRemarks(subItem.PrevProfile);
             string? prevOutboundTag = null;
             if (prevNode is not null
-                && prevNode.ConfigType != EConfigType.Custom
-                && prevNode.ConfigType != EConfigType.Hysteria2
-                && prevNode.ConfigType != EConfigType.TUIC
-                && prevNode.ConfigType != EConfigType.Anytls)
+                && Global.XraySupportConfigType.Contains(prevNode.ConfigType))
             {
                 var prevOutbound = JsonUtils.Deserialize<Outbounds4Ray>(txtOutbound);
                 await GenOutbound(prevNode, prevOutbound);
@@ -1495,10 +1480,7 @@ public class CoreConfigV2rayService
                     {
                         var prevNode = await AppHandler.Instance.GetProfileItemViaRemarks(subItem.PrevProfile);
                         if (prevNode is not null
-                            && prevNode.ConfigType != EConfigType.Custom
-                            && prevNode.ConfigType != EConfigType.Hysteria2
-                            && prevNode.ConfigType != EConfigType.TUIC
-                            && prevNode.ConfigType != EConfigType.Anytls)
+                            && !Global.XraySupportConfigType.Contains(prevNode.ConfigType))
                         {
                             var prevOutbound = JsonUtils.Deserialize<Outbounds4Ray>(txtOutbound);
                             await GenOutbound(prevNode, prevOutbound);
@@ -1565,10 +1547,7 @@ public class CoreConfigV2rayService
             // Next proxy
             var nextNode = await AppHandler.Instance.GetProfileItemViaRemarks(subItem.NextProfile);
             if (nextNode is not null
-                && nextNode.ConfigType != EConfigType.Custom
-                && nextNode.ConfigType != EConfigType.Hysteria2
-                && nextNode.ConfigType != EConfigType.TUIC
-                && nextNode.ConfigType != EConfigType.Anytls)
+                && !Global.XraySupportConfigType.Contains(nextNode.ConfigType))
             {
                 if (nextOutbound == null)
                 {
