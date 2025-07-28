@@ -27,9 +27,15 @@ public static class CoreConfigHandler
         {
             result = await new CoreConfigSingboxService(config).GenerateClientConfigContent(node);
         }
-        else
+        else if (AppManager.Instance.GetCoreType(node, node.ConfigType) == ECoreType.Xray)
         {
             result = await new CoreConfigV2rayService(config).GenerateClientConfigContent(node);
+        }
+        else
+        {
+            result.Msg = ResUI.OperationFailed;
+            result.Success = false;
+            return result;
         }
         if (result.Success != true)
         {
