@@ -1617,4 +1617,13 @@
   <data name="menuAddMieruServer" xml:space="preserve">
     <value>افزودن سرور [Mieru]</value>
   </data>
+  <data name="NtpError" xml:space="preserve">
+    <value>NTP Error</value>
+  </data>
+  <data name="NtpTimeout" xml:space="preserve">
+    <value>NTP Timeout</value>
+  </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>Test Configurations UDP</value>
+  </data>
 </root>
