@@ -673,6 +673,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Add [Brook] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddBrookServer {
+            get {
+                return ResourceManager.GetString("menuAddBrookServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add Child Configuration 的本地化字符串。
         /// </summary>
         public static string menuAddChildServer {
@@ -705,6 +714,24 @@ namespace ServiceLib.Resx {
         public static string menuAddHysteria2Server {
             get {
                 return ResourceManager.GetString("menuAddHysteria2Server", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Juicity] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddJuicityServer {
+            get {
+                return ResourceManager.GetString("menuAddJuicityServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Naive] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddNaiveServer {
+            get {
+                return ResourceManager.GetString("menuAddNaiveServer", resourceCulture);
             }
         }
         
@@ -750,6 +777,15 @@ namespace ServiceLib.Resx {
         public static string menuAddServerViaScan {
             get {
                 return ResourceManager.GetString("menuAddServerViaScan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [Shadowquic] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddShadowquicServer {
+            get {
+                return ResourceManager.GetString("menuAddShadowquicServer", resourceCulture);
             }
         }
         
@@ -2694,6 +2730,15 @@ namespace ServiceLib.Resx {
         public static string TbHeaderType {
             get {
                 return ResourceManager.GetString("TbHeaderType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Proxy Protocol 的本地化字符串。
+        /// </summary>
+        public static string TbHeaderType100 {
+            get {
+                return ResourceManager.GetString("TbHeaderType100", resourceCulture);
             }
         }
         
