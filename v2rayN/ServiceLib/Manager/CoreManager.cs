@@ -109,7 +109,7 @@ public class CoreManager
     {
         var coreType = selecteds.Exists(t => t.ConfigType is EConfigType.Hysteria2 or EConfigType.TUIC or EConfigType.Anytls) ? ECoreType.sing_box : ECoreType.Xray;
         var fileName = string.Format(Global.CoreSpeedtestConfigFileName, Utils.GetGuid(false));
-        var configPath = Utils.GetBinConfigPath(fileName);
+        var configPath = Utils.GetBinConfigPath(fileName, coreType);
         var result = await CoreConfigHandler.GenerateClientSpeedtestConfig(_config, configPath, selecteds, coreType);
         await UpdateFunc(false, result.Msg);
         if (result.Success != true)
@@ -138,15 +138,15 @@ public class CoreManager
             return -1;
         }
 
+        var coreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
         var fileName = string.Format(Global.CoreSpeedtestConfigFileName, Utils.GetGuid(false));
-        var configPath = Utils.GetBinConfigPath(fileName);
+        var configPath = Utils.GetBinConfigPath(fileName, coreType);
         var result = await CoreConfigHandler.GenerateClientSpeedtestConfig(_config, node, testItem, configPath);
         if (result.Success != true)
         {
             return -1;
         }
 
-        var coreType = AppManager.Instance.GetCoreType(node, node.ConfigType);
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
         var proc = await RunProcess(coreInfo, fileName, true, false);
         if (proc is null)
@@ -239,7 +239,8 @@ public class CoreManager
 
     private async Task<bool> CoreStart(CoreLaunchContext context)
     {
-        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName);
+        var coreType = context.SplitCore ? context.PureEndpointCore : context.CoreType;
+        var fileName = Utils.GetBinConfigPath(Global.CoreConfigFileName, coreType);
         var result = context.SplitCore
             ? await CoreConfigHandler.GeneratePureEndpointConfig(context.Node, fileName)
             : await CoreConfigHandler.GenerateClientConfig(context.Node, fileName);
@@ -252,7 +253,7 @@ public class CoreManager
 
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo(context.CoreType);
         var displayLog = context.Node.ConfigType != EConfigType.Custom || context.Node.DisplayLog;
-        var proc = await RunProcess(coreInfo, Global.CoreConfigFileName, displayLog, true);
+        var proc = await RunProcess(coreInfo, Utils.GetBinConfigFileName(Global.CoreConfigFileName, coreType), displayLog, true);
         
         if (proc is null)
         {
@@ -261,8 +262,7 @@ public class CoreManager
         }
         
         _process = proc;
-        var (_, coreType, preCoreType) = AppManager.Instance.GetCoreAndPreType(context.Node);
-        _config.RunningCoreType = (ECoreType)(preCoreType != null ? preCoreType : coreType);
+        _config.RunningCoreType = (ECoreType)(context.PreCoreType != null ? context.PreCoreType : coreType);
         return true;
     }
 
@@ -273,7 +273,7 @@ public class CoreManager
             return true; // No pre-core needed, consider successful
         }
 
-        var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName);
+        var fileName = Utils.GetBinConfigPath(Global.CorePreConfigFileName, (ECoreType)context.PreCoreType);
         var itemSocks = new ProfileItem()
         {
             CoreType = context.PreCoreType,
@@ -291,8 +291,8 @@ public class CoreManager
         }
 
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo((ECoreType)context.PreCoreType);
-        var proc = await RunProcess(coreInfo, Global.CorePreConfigFileName, true, true);
-        
+        var proc = await RunProcess(coreInfo, Utils.GetBinConfigFileName(Global.CorePreConfigFileName, (ECoreType)context.PreCoreType), true, true);
+
         if (proc is null || (_process?.HasExited == true))
         {
             await UpdateFunc(true, ResUI.FailedToRunCore);
@@ -350,7 +350,7 @@ public class CoreManager
             StartInfo = new()
             {
                 FileName = fileName,
-                Arguments = string.Format(coreInfo.Arguments, coreInfo.AbsolutePath ? Utils.GetBinConfigPath(configPath).AppendQuotes() : configPath),
+                Arguments = string.Format(coreInfo.Arguments, coreInfo.AbsolutePath ? Utils.GetBinConfigPath(configPath, coreInfo.CoreType).AppendQuotes() : configPath),
                 WorkingDirectory = Utils.GetBinConfigPath(),
                 UseShellExecute = false,
                 RedirectStandardOutput = displayLog,
