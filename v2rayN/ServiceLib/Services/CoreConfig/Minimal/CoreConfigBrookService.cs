@@ -1,17 +1,9 @@
 using ServiceLib.Manager;
 
 namespace ServiceLib.Services.CoreConfig.Minimal;
-public class CoreConfigBrookService
+public class CoreConfigBrookService(Config config) : CoreConfigServiceMinimalBase(config)
 {
-    private Config _config;
-    private static readonly string _tag = "CoreConfigBrookService";
-
-    public CoreConfigBrookService(Config config)
-    {
-        _config = config;
-    }
-
-    public async Task<RetResult> GeneratePureEndpointConfig(ProfileItem node)
+    protected override async Task<RetResult> GeneratePassthroughConfig(ProfileItem node, int port)
     {
         var ret = new RetResult();
         try
@@ -32,7 +24,7 @@ public class CoreConfigBrookService
             var processArgs = "client";
 
             // inbound
-            processArgs += " --socks5 " + Global.Loopback + ":" + AppManager.Instance.GetLocalPort(EInboundProtocol.split).ToString();
+            processArgs += " --socks5 " + Global.Loopback + ":" + port.ToString();
 
             // outbound
             processArgs += " --server " + node.Address + ":" + node.Port;
