@@ -63,7 +63,8 @@ public class ActionPrecheckService
 
     private IEnumerable<string> ValidateCurrentNodeAndCoreSupport(ProfileItem item)
     {
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var context = new CoreLaunchContext(item, _config);
+        var coreType = context.SplitCore ? context.SplitRouteCore : context.CoreType;
         return ValidateNodeAndCoreSupport(item, coreType);
     }
 
@@ -77,7 +78,11 @@ public class ActionPrecheckService
     {
         // sing-box does not support xhttp / kcp
         // sing-box does not support transports like ws/http/httpupgrade/etc. when the node is not vmess/trojan/vless
-        coreType ??= AppManager.Instance.GetCoreType(item, item.ConfigType);
+        if (coreType == null)
+        {
+            var context = new CoreLaunchContext(item, _config);
+            coreType = context.SplitCore ? context.SplitRouteCore : context.CoreType;
+        }
         var net = item.GetNetwork() ?? item.Network;
 
         if (coreType == ECoreType.sing_box)
@@ -138,7 +143,8 @@ public class ActionPrecheckService
 
         var prevNode = await AppManager.Instance.GetProfileItemViaRemarks(subItem.PrevProfile);
         var nextNode = await AppManager.Instance.GetProfileItemViaRemarks(subItem.NextProfile);
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var context = new CoreLaunchContext(item, _config);
+        var coreType = context.SplitCore ? context.SplitRouteCore : context.CoreType;
 
         CollectProxyChainedNodeValidation(prevNode, subItem.PrevProfile, coreType, msgs);
         CollectProxyChainedNodeValidation(nextNode, subItem.NextProfile, coreType, msgs);
@@ -171,7 +177,8 @@ public class ActionPrecheckService
             return msgs;
         }
 
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var context = new CoreLaunchContext(item, _config);
+        var coreType = context.SplitCore ? context.SplitRouteCore : context.CoreType;
         var routing = await ConfigHandler.GetDefaultRouting(_config);
         if (routing == null)
         {
