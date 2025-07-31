@@ -53,7 +53,7 @@ public class ActionPrecheckService(Config config)
         {
             return [];
         }
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var coreType = new CoreLaunchContext(item, AppManager.Instance.Config).GetOutboundCoreType();
         return await ValidateNodeAndCoreSupport(item, coreType);
     }
 
@@ -63,7 +63,7 @@ public class ActionPrecheckService(Config config)
         
         // sing-box does not support xhttp / kcp
         // sing-box does not support transports like ws/http/httpupgrade/etc. when the node is not vmess/trojan/vless
-        coreType ??= AppManager.Instance.GetCoreType(item, item.ConfigType);
+        coreType ??= new CoreLaunchContext(item, AppManager.Instance.Config).GetOutboundCoreType();
 
         if (item.ConfigType is EConfigType.Custom)
         {
@@ -157,7 +157,7 @@ public class ActionPrecheckService(Config config)
 
         var prevNode = await AppManager.Instance.GetProfileItemViaRemarks(subItem.PrevProfile);
         var nextNode = await AppManager.Instance.GetProfileItemViaRemarks(subItem.NextProfile);
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var coreType = new CoreLaunchContext(item, AppManager.Instance.Config).GetInRouteCoreType();
 
         await CollectProxyChainedNodeValidation(prevNode, subItem.PrevProfile, coreType, errors);
         await CollectProxyChainedNodeValidation(nextNode, subItem.NextProfile, coreType, errors);
@@ -187,7 +187,7 @@ public class ActionPrecheckService(Config config)
             return errors;
         }
 
-        var coreType = AppManager.Instance.GetCoreType(item, item.ConfigType);
+        var coreType = new CoreLaunchContext(item, AppManager.Instance.Config).GetInRouteCoreType();
         var routing = await ConfigHandler.GetDefaultRouting(_config);
         if (routing == null)
         {

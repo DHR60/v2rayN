@@ -303,9 +303,8 @@ public sealed class AppManager
         return item?.CoreType ?? ECoreType.Xray;
     }
 
-    public (bool, ECoreType, ECoreType?) GetCoreAndPreType(ProfileItem profileItem)
+    public (ECoreType, ECoreType?) GetCoreAndPreType(ProfileItem profileItem)
     {
-        var splitCore = _config.SplitCoreItem.EnableSplitCore;
         var coreType = GetCoreType(profileItem, profileItem.ConfigType);
         ECoreType? preCoreType = null;
 
@@ -315,7 +314,6 @@ public sealed class AppManager
 
         if (profileItem.ConfigType == EConfigType.Custom)
         {
-            splitCore = false;
             coreType = profileItem.CoreType ?? ECoreType.Xray;
             if (profileItem.PreSocksPort > 0)
             {
@@ -326,13 +324,12 @@ public sealed class AppManager
                 preCoreType = null;
             }
         }
-        else if (!splitCore && profileItem.CoreType is not (ECoreType.Xray or ECoreType.sing_box))
+        else if (profileItem.CoreType is not (ECoreType.Xray or ECoreType.sing_box))
         {
             // Force SplitCore for cores that don't support direct routing (like Hysteria2, TUIC, etc.)
-            splitCore = true;
             preCoreType = enableTun ? ECoreType.sing_box : splitRouteCore;
         }
-        else if (splitCore)
+        else if (_config.SplitCoreItem.EnableSplitCore)
         {
             // User explicitly enabled SplitCore
             preCoreType = enableTun ? ECoreType.sing_box : splitRouteCore;
@@ -341,14 +338,11 @@ public sealed class AppManager
             if (preCoreType == coreType)
             {
                 preCoreType = null;
-                splitCore = false;
             }
         }
         else if (enableTun) // EnableTun is true but SplitCore is false
         {
             // TUN mode handling for Xray/sing_box cores
-            preCoreType = ECoreType.sing_box;
-
             if (preCoreType == coreType) // CoreType is sing_box
             {
                 preCoreType = null;
@@ -356,10 +350,10 @@ public sealed class AppManager
             else // CoreType is xray, etc.
             {
                 // Force SplitCore for non-split cores
-                splitCore = true;
+                preCoreType = ECoreType.sing_box;
             }
         }
-        return (splitCore, coreType, preCoreType);
+        return (coreType, preCoreType);
     }
 
     #endregion Core Type

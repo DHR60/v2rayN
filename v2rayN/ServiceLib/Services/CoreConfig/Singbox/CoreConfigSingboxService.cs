@@ -4,14 +4,11 @@ using System.Text.Json.Nodes;
 
 namespace ServiceLib.Services.CoreConfig;
 
-public partial class CoreConfigSingboxService(Config config)
+public partial class CoreConfigSingboxService(Config config) : CoreConfigServiceBase(config)
 {
-    private readonly Config _config = config;
-    private static readonly string _tag = "CoreConfigSingboxService";
-
     #region public gen function
 
-    public async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
+    public override async Task<RetResult> GenerateClientConfigContent(ProfileItem node)
     {
         var ret = new RetResult();
         try
@@ -112,7 +109,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(List<ServerTestItem> selecteds)
     {
         var ret = new RetResult();
         try
@@ -289,7 +286,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
+    public override async Task<RetResult> GenerateClientSpeedtestConfig(ProfileItem node, int port)
     {
         var ret = new RetResult();
         try
@@ -372,7 +369,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientMultipleLoadConfig(List<ProfileItem> selecteds, EMultipleLoad multipleLoad)
+    public override async Task<RetResult> GenerateClientMultipleLoadConfig(List<ProfileItem> selecteds, EMultipleLoad multipleLoad)
     {
         var ret = new RetResult();
         try
@@ -563,7 +560,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GenerateClientCustomConfig(ProfileItem node, string? fileName)
+    public override async Task<RetResult> GenerateClientCustomConfig(ProfileItem node, string? fileName)
     {
         var ret = new RetResult();
         if (node == null || fileName is null)
@@ -644,7 +641,7 @@ public partial class CoreConfigSingboxService(Config config)
         }
     }
 
-    public async Task<RetResult> GeneratePureEndpointConfig(ProfileItem node)
+    protected override async Task<RetResult> GeneratePassthroughConfig(ProfileItem node, int port)
     {
         var ret = new RetResult();
         try
