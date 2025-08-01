@@ -246,6 +246,11 @@ public sealed class AppHandler
             return (ECoreType)profileItem.CoreType;
         }
 
+        return GetCoreType(eConfigType);
+    }
+
+    public ECoreType GetCoreType(EConfigType eConfigType)
+    {
         var item = _config.CoreTypeItem?.FirstOrDefault(it => it.ConfigType == eConfigType);
         return item?.CoreType ?? ECoreType.Xray;
     }
@@ -257,6 +262,11 @@ public sealed class AppHandler
             return (ECoreType)profileItem.CoreType;
         }
 
+        return GetSplitCoreType(eConfigType);
+    }
+
+    public ECoreType GetSplitCoreType(EConfigType eConfigType)
+    {
         var item = _config.SplitCoreItem.SplitCoreTypes?.FirstOrDefault(it => it.ConfigType == eConfigType);
         return item?.CoreType ?? ECoreType.Xray;
     }
@@ -277,7 +287,7 @@ public sealed class AppHandler
             coreType = profileItem.CoreType ?? ECoreType.Xray;
             if (profileItem.PreSocksPort > 0)
             {
-                preCoreType = enableTun ? ECoreType.sing_box : GetCoreType(profileItem, profileItem.ConfigType);
+                preCoreType = enableTun ? ECoreType.sing_box : GetCoreType(profileItem.ConfigType);
             }
             else
             {
