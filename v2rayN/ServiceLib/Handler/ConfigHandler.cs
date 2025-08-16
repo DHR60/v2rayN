@@ -954,6 +954,7 @@ public class ConfigHandler
         profileItem.RequestHost = profileItem.RequestHost.TrimEx();
         profileItem.Path = profileItem.Path.TrimEx();
         profileItem.StreamSecurity = profileItem.StreamSecurity.TrimEx();
+        profileItem.Security = profileItem.Security.TrimEx();
 
         if (!Global.Flows.Contains(profileItem.Flow))
         {
@@ -963,7 +964,7 @@ public class ConfigHandler
         {
             return -1;
         }
-        if (profileItem.Security.IsNotEmpty() && profileItem.Security != Global.None)
+        if (profileItem.Security.IsNullOrEmpty())
         {
             profileItem.Security = Global.None;
         }
