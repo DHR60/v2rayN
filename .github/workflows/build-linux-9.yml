@@ -1,4 +1,4 @@
-name: release Linux
+name: release Linux dotnet 9
 
 on:
   workflow_dispatch:
@@ -19,9 +19,9 @@ jobs:
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"linux-x64",  "package_arch":"linux-64",   "self_contained":true},
-          {"runtime":"linux-arm64","package_arch":"linux-arm64","self_contained":true},
-          {"runtime":"linux-arm",  "package_arch":"linux-arm",  "self_contained":true}
+          {"runtime":"linux-x64",  "package_arch":"linux-64-dotnet9",   "self_contained":true},
+          {"runtime":"linux-arm64","package_arch":"linux-arm64-dotnet9","self_contained":true},
+          {"runtime":"linux-arm",  "package_arch":"linux-arm-dotnet9",  "self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
 
@@ -37,7 +37,13 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v4.3.1
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '9.0.x'
+
+    - name: Replace net8.0 with net9.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net9\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net9\.0/g'
 
     - name: Ensure jq
       run: |
