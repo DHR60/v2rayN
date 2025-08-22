@@ -30,6 +30,8 @@ public partial class ProfilesView
         {
             lstProfiles.AllowDrop = true;
             lstProfiles.PreviewMouseLeftButtonDown += LstProfiles_PreviewMouseLeftButtonDown;
+            lstProfiles.MouseLeftButtonUp += LstProfiles_MouseLeftButtonUp;
+            lstProfiles.ContextMenuOpening += LstProfiles_ContextMenuOpening;
             lstProfiles.MouseMove += LstProfiles_MouseMove;
             lstProfiles.DragEnter += LstProfiles_DragEnter;
             lstProfiles.Drop += LstProfiles_Drop;
@@ -420,6 +422,8 @@ public partial class ProfilesView
     private Point startPoint = new();
     private int startIndex = -1;
     private readonly string formatData = "ProfileItemModel";
+    // ensure drag only starts after a valid left-button down on a row
+    private bool _readyToDrag = false;
 
     /// <summary>
     /// Helper to search up the VisualTree
@@ -443,12 +447,34 @@ public partial class ProfilesView
 
     private void LstProfiles_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
     {
-        // Get current mouse position
+        // Don't start drag if context menu is currently open
+        if (lstProfiles.ContextMenu != null && lstProfiles.ContextMenu.IsOpen)
+        {
+            _readyToDrag = false;
+            return;
+        }
+
+        // Only prepare for drag if mouse down happened on a DataGridRow
+        var row = FindAncestor<DataGridRow>((DependencyObject)e.OriginalSource);
+        if (row == null)
+        {
+            _readyToDrag = false;
+            return;
+        }
+
+        // Get current mouse position and arm drag
         startPoint = e.GetPosition(null);
+        _readyToDrag = true;
     }
 
     private void LstProfiles_MouseMove(object sender, MouseEventArgs e)
     {
+        // Guard: drag must be armed by a prior left-button down and no context menu is open
+        if (!_readyToDrag)
+            return;
+        if (lstProfiles.ContextMenu != null && lstProfiles.ContextMenu.IsOpen)
+            return;
+
         // Get the current mouse position
         var mousePos = e.GetPosition(null);
         var diff = startPoint - mousePos;
@@ -476,9 +502,29 @@ public partial class ProfilesView
             }
             // Initialize the drag & drop operation
             startIndex = lstProfiles.SelectedIndex;
+            if (startIndex < 0)
+            {
+                // invalid start, disarm drag
+                _readyToDrag = false;
+                return;
+            }
             DataObject dragData = new(formatData, item);
             DragDrop.DoDragDrop(listViewItem, dragData, DragDropEffects.Copy | DragDropEffects.Move);
+            // After a drag-drop attempt, disarm to avoid spurious drags
+            _readyToDrag = false;
         }
+    }
+
+    private void LstProfiles_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+    {
+        // Mouse released: disarm drag
+        _readyToDrag = false;
+    }
+
+    private void LstProfiles_ContextMenuOpening(object? sender, ContextMenuEventArgs e)
+    {
+        // Context menu opening: disarm drag to prevent mis-trigger
+        _readyToDrag = false;
     }
 
     private void LstProfiles_DragEnter(object sender, DragEventArgs e)
@@ -519,6 +565,7 @@ public partial class ProfilesView
             ViewModel?.MoveServerTo(startIndex, item);
 
             startIndex = -1;
+            _readyToDrag = false;
         }
     }
 
