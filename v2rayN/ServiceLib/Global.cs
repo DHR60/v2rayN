@@ -187,7 +187,9 @@ public class Global
             { EConfigType.NaiveProxy, "naive://" },
             { EConfigType.Juicity, "juicity://" },
             { EConfigType.Brook, "brook://" },
-            { EConfigType.Shadowquic, "shadowquic://" }
+            { EConfigType.Shadowquic, "shadowquic://" },
+            { EConfigType.Overtls, "overtls://" },
+            { EConfigType.Mieru, "mieru://" },
         };
 
     public static readonly Dictionary<EConfigType, string> ProtocolTypes = new()
@@ -205,7 +207,9 @@ public class Global
             { EConfigType.NaiveProxy, "naiveproxy" },
             { EConfigType.Juicity, "juicity" },
             { EConfigType.Brook, "brook" },
-            { EConfigType.Shadowquic, "shadowquic" }
+            { EConfigType.Shadowquic, "shadowquic" },
+            { EConfigType.Overtls, "overtls" },
+            { EConfigType.Mieru, "mieru" },
         };
 
     public static readonly List<string> VmessSecurities =
@@ -329,6 +333,16 @@ public class Global
     public static readonly List<string> ShadowquicCoreTypes =
     [
         "shadowquic"
+    ];
+
+    public static readonly List<string> overtlsCoreTypes =
+    [
+        "overtls"
+    ];
+
+    public static readonly List<string> MieruCoreTypes =
+    [
+        "mieru"
     ];
 
     public static readonly List<EConfigType> SupportSplitConfigTypes =
