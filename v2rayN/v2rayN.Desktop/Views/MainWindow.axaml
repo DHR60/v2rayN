@@ -52,6 +52,8 @@
                         <MenuItem x:Name="menuAddJuicityServer" Header="{x:Static resx:ResUI.menuAddJuicityServer}" />
                         <MenuItem x:Name="menuAddNaiveServer" Header="{x:Static resx:ResUI.menuAddNaiveServer}" />
                         <MenuItem x:Name="menuAddShadowquicServer" Header="{x:Static resx:ResUI.menuAddShadowquicServer}" />
+                        <MenuItem x:Name="menuAddOvertlsServer" Header="{x:Static resx:ResUI.menuAddOvertlsServer}" />
+                        <MenuItem x:Name="menuAddMieruServer" Header="{x:Static resx:ResUI.menuAddMieruServer}" />
                     </MenuItem>
 
                     <MenuItem Padding="8,0">
