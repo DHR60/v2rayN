@@ -334,7 +334,7 @@ public sealed class AppManager
                 preCoreType = null;
             }
         }
-        else if (profileItem.CoreType is not (ECoreType.Xray or ECoreType.sing_box))
+        else if (coreType is not (ECoreType.Xray or ECoreType.sing_box))
         {
             // Force SplitCore for cores that don't support direct routing (like Hysteria2, TUIC, etc.)
             preCoreType = enableTun ? ECoreType.sing_box : splitRouteCore;
