@@ -204,7 +204,8 @@ public class CoreManager
             await WindowsUtils.RemoveTunDevice();
         }
 
-        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(context.CoreType);
+        // IMPORTANT: use the same coreType used to generate the config
+        var coreInfo = CoreInfoManager.Instance.GetCoreInfo(coreType);
         var displayLog = context.Node.ConfigType != EConfigType.Custom || context.Node.DisplayLog;
         var proc = await RunProcess(coreInfo, Utils.GetBinConfigFileName(Global.CoreConfigFileName, coreType), displayLog, true);
         
