@@ -156,6 +156,10 @@ public static class CoreConfigHandler
                 return new CoreConfigBrookService(AppManager.Instance.Config);
             case ECoreType.shadowquic:
                 return new CoreConfigShadowquicService(AppManager.Instance.Config);
+            case ECoreType.overtls:
+                return new CoreConfigOvertlsService(AppManager.Instance.Config);
+            case ECoreType.mieru:
+                return new CoreConfigMieruService(AppManager.Instance.Config);
             default:
                 throw new NotImplementedException($"Core type {coreType} is not implemented for passthrough configuration.");
         }
@@ -181,6 +185,10 @@ public static class CoreConfigHandler
                 return new CoreConfigBrookService(AppManager.Instance.Config);
             case ECoreType.shadowquic:
                 return new CoreConfigShadowquicService(AppManager.Instance.Config);
+            case ECoreType.overtls:
+                return new CoreConfigOvertlsService(AppManager.Instance.Config);
+            case ECoreType.mieru:
+                return new CoreConfigMieruService(AppManager.Instance.Config);
             default:
                 throw new NotImplementedException($"Core type {coreType} is not implemented for passthrough configuration.");
         }
