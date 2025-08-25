@@ -305,6 +305,7 @@ public sealed class AppManager
     public (bool, ECoreType, ECoreType?) GetCoreAndPreType(ProfileItem profileItem)
     {
         var splitCore = _config.SplitCoreItem.EnableSplitCore;
+        // Resolve effective core type for this profile (use global mapping if profileItem.CoreType is null)
         var coreType = GetCoreType(profileItem, profileItem.ConfigType);
         ECoreType? preCoreType = null;
 
@@ -325,7 +326,7 @@ public sealed class AppManager
                 preCoreType = null;
             }
         }
-        else if (!splitCore && profileItem.CoreType is not (ECoreType.Xray or ECoreType.sing_box))
+        else if (!splitCore && coreType is not (ECoreType.Xray or ECoreType.sing_box))
         {
             // Force SplitCore for cores that don't support direct routing (like Hysteria2, TUIC, etc.)
             splitCore = true;
