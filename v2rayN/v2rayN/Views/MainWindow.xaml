@@ -130,6 +130,14 @@
                                     x:Name="menuAddShadowquicServer"
                                     Height="{StaticResource MenuItemHeight}"
                                     Header="{x:Static resx:ResUI.menuAddShadowquicServer}" />
+                                <MenuItem
+                                    x:Name="menuAddOvertlsServer"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuAddOvertlsServer}" />
+                                <MenuItem
+                                    x:Name="menuAddMieruServer"
+                                    Height="{StaticResource MenuItemHeight}"
+                                    Header="{x:Static resx:ResUI.menuAddMieruServer}" />
                             </MenuItem>
                         </Menu>
                         <Separator />
