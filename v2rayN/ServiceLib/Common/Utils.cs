@@ -842,6 +842,8 @@ public class Utils
             ECoreType.tuic => ".json",
             ECoreType.juicity => ".json",
             ECoreType.brook => ".cac",
+            ECoreType.overtls => ".json",
+            ECoreType.mieru => ".json",
             ECoreType.shadowquic => ".yaml",
             _ => string.Empty
         };
