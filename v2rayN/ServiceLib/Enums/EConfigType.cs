@@ -17,6 +17,8 @@ public enum EConfigType
     Juicity = 101,
     Brook = 102,
     Shadowquic = 103,
+    Overtls = 104,
+    Mieru = 105,
 
     Group = 1000,
     PolicyGroup = 1001,
