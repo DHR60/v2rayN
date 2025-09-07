@@ -115,6 +115,33 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Core &apos;{0}&apos; does not support network type &apos;{1}&apos;. 的本地化字符串。
+        /// </summary>
+        public static string CoreNotSupportNetwork {
+            get {
+                return ResourceManager.GetString("CoreNotSupportNetwork", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core &apos;{0}&apos; does not support protocol &apos;{1}&apos;. 的本地化字符串。
+        /// </summary>
+        public static string CoreNotSupportProtocol {
+            get {
+                return ResourceManager.GetString("CoreNotSupportProtocol", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Core &apos;{0}&apos; does not support protocol &apos;{1}&apos; when using transport &apos;{2}&apos;. 的本地化字符串。
+        /// </summary>
+        public static string CoreNotSupportProtocolTransport {
+            get {
+                return ResourceManager.GetString("CoreNotSupportProtocolTransport", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Note that custom configuration relies entirely on your own configuration and does not work with all settings. If you want to use the system proxy, please modify the listening port manually. 的本地化字符串。
         /// </summary>
         public static string CustomServerTips {
@@ -2041,6 +2068,24 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Proxy chained node alias &apos;{0}&apos; does not exist. 的本地化字符串。
+        /// </summary>
+        public static string ProxyChainedNodeTagNotExist {
+            get {
+                return ResourceManager.GetString("ProxyChainedNodeTagNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Proxy chained node remark &apos;{0}&apos; refers to an outbound that does not support config type &apos;{1}&apos;. 的本地化字符串。
+        /// </summary>
+        public static string ProxyChainedNodeTagNotSupportConfigType {
+            get {
+                return ResourceManager.GetString("ProxyChainedNodeTagNotSupportConfigType", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Global hotkey {0} registration failed, reason: {1} 的本地化字符串。
         /// </summary>
         public static string RegisterGlobalHotkeyFailed {
@@ -2100,6 +2145,24 @@ namespace ServiceLib.Resx {
         public static string RoutingRuleDetailRequiredTips {
             get {
                 return ResourceManager.GetString("RoutingRuleDetailRequiredTips", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Routing rule references outbound remark &apos;{0}&apos;, but no outbound with this remark exists. 的本地化字符串。
+        /// </summary>
+        public static string RoutingRuleOutboundTagNotExist {
+            get {
+                return ResourceManager.GetString("RoutingRuleOutboundTagNotExist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Routing rule outbound remark &apos;{0}&apos; refers to an outbound that does not support config type &apos;{1}&apos;. 的本地化字符串。
+        /// </summary>
+        public static string RoutingRuleOutboundTagNotSupportConfigType {
+            get {
+                return ResourceManager.GetString("RoutingRuleOutboundTagNotSupportConfigType", resourceCulture);
             }
         }
         
