@@ -594,6 +594,16 @@ public class ProfilesViewModel : MyReactiveObject
             return;
         }
 
+        var (ok, msgs) = await ActionPrecheckService.Instance.CheckBeforeSetActive(indexId);
+        if (msgs.Count > 0)
+        {
+            NoticeManager.Instance.Enqueue(msgs.First());
+        }
+        if (!ok)
+        {
+            return;
+        }
+
         if (await ConfigHandler.SetDefaultServerIndex(_config, indexId) == 0)
         {
             await RefreshServers();
@@ -755,6 +765,16 @@ public class ProfilesViewModel : MyReactiveObject
         if (item is null)
         {
             NoticeManager.Instance.Enqueue(ResUI.PleaseSelectServer);
+            return;
+        }
+
+        var (ok, msgs) = await ActionPrecheckService.Instance.CheckBeforeGenerateConfig(item);
+        if (msgs.Count > 0)
+        {
+            NoticeManager.Instance.Enqueue(msgs.First());
+        }
+        if (!ok)
+        {
             return;
         }
         if (blClipboard)
