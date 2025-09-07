@@ -1512,4 +1512,25 @@
   <data name="TbSelectProfile" xml:space="preserve">
     <value>选择配置文件</value>
   </data>
+  <data name="CoreNotSupportNetwork" xml:space="preserve">
+    <value>核心 '{0}' 不支持网络类型 '{1}'。</value>
+  </data>
+  <data name="CoreNotSupportProtocolTransport" xml:space="preserve">
+    <value>核心 '{0}' 在使用传输方式 '{2}' 时不支持协议 '{1}'。</value>
+  </data>
+  <data name="CoreNotSupportProtocol" xml:space="preserve">
+    <value>核心 '{0}' 不支持协议 '{1}'。</value>
+  </data>
+  <data name="RoutingRuleOutboundTagNotExist" xml:space="preserve">
+    <value>路由规则引用了出站别名 '{0}'，但不存在具有该别名的出站。</value>
+  </data>
+  <data name="ProxyChainedNodeTagNotSupportConfigType" xml:space="preserve">
+    <value>代理链节点别名 '{0}' 引用的出站不支持配置类型 '{1}'。</value>
+  </data>
+  <data name="ProxyChainedNodeTagNotExist" xml:space="preserve">
+    <value>代理链节点别名 '{0}' 不存在。</value>
+  </data>
+  <data name="RoutingRuleOutboundTagNotSupportConfigType" xml:space="preserve">
+    <value>路由规则出站别名 '{0}' 引用的出站不支持配置类型 '{1}'。</value>
+  </data>
 </root>

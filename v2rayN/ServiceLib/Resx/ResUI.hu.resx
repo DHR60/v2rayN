@@ -1515,4 +1515,25 @@
   <data name="TbSelectProfile" xml:space="preserve">
     <value>Select Profile</value>
   </data>
+  <data name="CoreNotSupportNetwork" xml:space="preserve">
+    <value>Core '{0}' does not support network type '{1}'.</value>
+  </data>
+  <data name="CoreNotSupportProtocolTransport" xml:space="preserve">
+    <value>Core '{0}' does not support protocol '{1}' when using transport '{2}'.</value>
+  </data>
+  <data name="CoreNotSupportProtocol" xml:space="preserve">
+    <value>Core '{0}' does not support protocol '{1}'.</value>
+  </data>
+  <data name="RoutingRuleOutboundTagNotExist" xml:space="preserve">
+    <value>Routing rule references outbound remark '{0}', but no outbound with this remark exists.</value>
+  </data>
+  <data name="ProxyChainedNodeTagNotSupportConfigType" xml:space="preserve">
+    <value>Proxy chained node remark '{0}' refers to an outbound that does not support config type '{1}'.</value>
+  </data>
+  <data name="ProxyChainedNodeTagNotExist" xml:space="preserve">
+    <value>Proxy chained node alias '{0}' does not exist.</value>
+  </data>
+  <data name="RoutingRuleOutboundTagNotSupportConfigType" xml:space="preserve">
+    <value>Routing rule outbound remark '{0}' refers to an outbound that does not support config type '{1}'.</value>
+  </data>
 </root>
