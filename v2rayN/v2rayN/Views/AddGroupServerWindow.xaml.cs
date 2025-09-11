@@ -15,6 +15,7 @@ public partial class AddGroupServerWindow
         this.Owner = Application.Current.MainWindow;
         this.Loaded += Window_Loaded;
         this.PreviewKeyDown += AddGroupServerWindow_PreviewKeyDown;
+        lstChild.SelectionChanged += LstChild_SelectionChanged;
 
         ViewModel = new AddGroupServerViewModel(profileItem, UpdateViewHandler);
 
@@ -46,6 +47,7 @@ public partial class AddGroupServerWindow
             this.Bind(ViewModel, vm => vm.PolicyGroupType, v => v.cmbPolicyGroupType.Text).DisposeWith(disposables);
 
             this.OneWayBind(ViewModel, vm => vm.ChildItemsObs, v => v.lstChild.ItemsSource).DisposeWith(disposables);
+            this.Bind(ViewModel, vm => vm.SelectedChild, v => v.lstChild.SelectedItem).DisposeWith(disposables);
 
             this.BindCommand(ViewModel, vm => vm.RemoveCmd, v => v.menuRemoveChildServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.MoveTopCmd, v => v.menuMoveTop).DisposeWith(disposables);
@@ -118,6 +120,14 @@ public partial class AddGroupServerWindow
         {
             var profiles = await selectWindow.ProfileItems;
             ViewModel?.ChildItemsObs.AddRange(profiles);
+        }
+    }
+
+    private void LstChild_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+    {
+        if (ViewModel != null)
+        {
+            ViewModel.SelectedChildren = lstChild.SelectedItems.Cast<ProfileItem>().ToList();
         }
     }
 }
