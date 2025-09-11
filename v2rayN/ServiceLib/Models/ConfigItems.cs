@@ -174,6 +174,7 @@ public class NtpTestItem
     public string NtpServer { get; set; }
     public int TimeoutSeconds { get; set; }
     public int ConcurrencyCount { get; set; }
+    public bool EnableHijackDetect { get; set; }
 }
 
 [Serializable]
