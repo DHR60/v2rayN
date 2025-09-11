@@ -9,12 +9,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ServiceLib.Common;
-public class NtpOverSocks5 : IDisposable
+public class NtpOverSocks5(string socks5Host, int socks5TcpPort) : IDisposable
 {
-    private static readonly string _tag = "NtpOverSocks5";
-
-    private readonly string _socks5Host;
-    private readonly int _socks5TcpPort;
+    private readonly string _socks5Host = socks5Host;
+    private readonly int _socks5TcpPort = socks5TcpPort;
 
     private TcpClient? _tcpControlClient;
     private NetworkStream? _tcpControlStream;
@@ -51,7 +49,6 @@ public class NtpOverSocks5 : IDisposable
                     else
                     {
                         ms.Write(new byte[] { 0, 0, 0, 0 });
-                        Logging.SaveLog(_tag + $": S5AddrData Warning: Could not parse '{Host}' as IPv4, using 0.0.0.0.");
                     }
                     break;
                 case AddrTypeDomain:
@@ -74,11 +71,9 @@ public class NtpOverSocks5 : IDisposable
                     else
                     {
                         ms.Write(new byte[16]);
-                        Logging.SaveLog(_tag + $": S5AddrData Warning: Could not parse '{Host}' as IPv6, using ::.");
                     }
                     break;
                 default:
-                    Logging.SaveLog(_tag + $": S5AddrData Error: Address type {AddressType} not supported for ToBytes().");
                     throw new NotSupportedException($"SOCKS5 address type {AddressType} not supported.");
             }
             var portBytes = new byte[2];
@@ -94,7 +89,9 @@ public class NtpOverSocks5 : IDisposable
             try
             {
                 if (await stream.ReadAsync(typeByte.AsMemory(0, 1), ct).ConfigureAwait(false) < 1)
+                {
                     return null;
+                }
                 addr.AddressType = typeByte[0];
                 switch (addr.AddressType)
                 {
@@ -127,24 +124,26 @@ public class NtpOverSocks5 : IDisposable
                         }
                         break;
                     case AddrTypeIPv6:
-                        byte[] ipv6Bytes = new byte[16];
+                        var ipv6Bytes = new byte[16];
                         if (await stream.ReadAsync(ipv6Bytes.AsMemory(0, 16), ct).ConfigureAwait(false) < 16)
+                        {
                             return null;
+                        }
                         addr.Host = new IPAddress(ipv6Bytes).ToString();
                         break;
                     default:
-                        Logging.SaveLog(_tag + $": S5AddrData Unsupported ATYP: {addr.AddressType}");
                         return null;
                 }
                 var portBytes = new byte[2];
                 if (await stream.ReadAsync(portBytes.AsMemory(0, 2), ct).ConfigureAwait(false) < 2)
+                {
                     return null;
+                }
                 addr.Port = BinaryPrimitives.ReadUInt16BigEndian(portBytes);
                 return addr;
             }
             catch (Exception ex) when (ex is IOException or ObjectDisposedException)
             {
-                Logging.SaveLog(_tag + ": S5AddrData Stream error during ParseAsync", ex);
                 return null;
             }
         }
@@ -154,7 +153,7 @@ public class NtpOverSocks5 : IDisposable
     #region NTP Packet Handling
     private static byte[] BuildNtpClientRequestPacket()
     {
-        byte[] ntpReq = new byte[48];
+        var ntpReq = new byte[48];
         ntpReq[0] = 0x23; // LI=0, VN=4, Mode=3
         return ntpReq;
     }
@@ -190,11 +189,6 @@ public class NtpOverSocks5 : IDisposable
     #endregion
 
     #region Constructors and Public Interface
-    public NtpOverSocks5(string socks5Host, int socks5TcpPort)
-    {
-        _socks5Host = socks5Host;
-        _socks5TcpPort = socks5TcpPort;
-    }
 
     public async Task<NtpViaProxyResult> GetNtpTimeAsync(string targetNtpServerHost, TimeSpan operationTimeout, bool useDomainDirectly = true, int retryCount = 2)
     {
@@ -310,7 +304,7 @@ public class NtpOverSocks5 : IDisposable
             using var responseStream = new MemoryStream(receivedData);
             responseStream.Seek(3, SeekOrigin.Begin);
 
-            var originalSrcSocksAddr = await Socks5AddressData.ParseAsync(responseStream, cancellationToken).ConfigureAwait(false);
+            _ = await Socks5AddressData.ParseAsync(responseStream, cancellationToken).ConfigureAwait(false);
 
             var actualNtpPayload = new byte[responseStream.Length - responseStream.Position];
             await responseStream.ReadAsync(actualNtpPayload, 0, actualNtpPayload.Length, cancellationToken).ConfigureAwait(false);
@@ -345,7 +339,6 @@ public class NtpOverSocks5 : IDisposable
             result.Success = false;
             result.StatusMessage = "NTP Test General Error";
             result.ErrorDetail = $"{ex.GetType().Name}: {ex.Message}";
-            Logging.SaveLog(_tag + ": GetNtpTimeInternalAsync error", ex);
         }
         finally
         {
