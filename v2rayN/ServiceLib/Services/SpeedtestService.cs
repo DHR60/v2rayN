@@ -540,8 +540,24 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var targetNtpServer = _config.NtpTestItem.NtpServer;
         var currentIndexId = proxyProfileItem.IndexId ?? string.Empty;
 
-        var ntpClient = new NtpOverSocks5(socks5Host, socks5Port);
+        // hijack detection
+        if (_config.NtpTestItem.EnableHijackDetect)
+        {
+            var hijackProbeClient = new NtpOverSocks5(socks5Host, socks5Port);
+            var hijackProbe = await hijackProbeClient.GetNtpTimeAsync(
+                "www.exam.com",
+                TimeSpan.FromSeconds(_config.NtpTestItem.TimeoutSeconds)
+            );
 
+            if (hijackProbe.Success)
+            {
+                ProfileExManager.Instance.SetTestDelay(currentIndexId, -1);
+                await UpdateFunc(currentIndexId, "-1");
+                return;
+            }
+        }
+
+        var ntpClient = new NtpOverSocks5(socks5Host, socks5Port);
         var result = await ntpClient.GetNtpTimeAsync(
             targetNtpServer,
             TimeSpan.FromSeconds(_config.NtpTestItem.TimeoutSeconds)
