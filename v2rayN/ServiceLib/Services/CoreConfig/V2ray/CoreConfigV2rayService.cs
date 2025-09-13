@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
+using ServiceLib.Models;
 
 namespace ServiceLib.Services.CoreConfig;
 
@@ -435,17 +436,20 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
         var ret = new RetResult();
         try
         {
-            if (node == null
-                || node.Port <= 0)
+            if (node.ConfigType < EConfigType.Group)
             {
-                ret.Msg = ResUI.CheckServerSettings;
-                return ret;
-            }
+                if (node == null
+                    || !node.IsValid())
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
 
-            if (node.GetNetwork() is nameof(ETransport.quic))
-            {
-                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
-                return ret;
+                if (node.GetNetwork() is nameof(ETransport.quic))
+                {
+                    ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                    return ret;
+                }
             }
 
             ret.Msg = ResUI.InitialConfiguration;
@@ -479,18 +483,56 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
                 },
             } };
 
-            await GenOutbound(node, v2rayConfig.outbounds.First());
+            if (node.ConfigType > EConfigType.Group)
+            {
+                v2rayConfig.outbounds.RemoveAt(0);
 
-            v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+                await GenGroupOutbound(node, v2rayConfig);
 
-            await GenMoreOutbounds(node, v2rayConfig);
+                // remove unused outbounds
+                v2rayConfig.outbounds = v2rayConfig.outbounds
+                    .Where(o => o.tag.Contains(Global.ProxyTag))
+                    .ToList();
+
+                if (v2rayConfig.outbounds.Count == 0)
+                {
+                    ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                    return ret;
+                }
+
+                // final rule
+                var defaultBalancerTag = $"{Global.ProxyTag}{Global.BalancerTagSuffix}";
+                v2rayConfig.routing.rules = new()
+                {
+                    new()
+                    {
+                        network = "tcp,udp",
+                        balancerTag = defaultBalancerTag,
+                    }
+                };
+            }
+            else
+            {
+                await GenOutbound(node, v2rayConfig.outbounds.First());
+
+                v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+
+                await GenMoreOutbounds(node, v2rayConfig);
+            }
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
 
             var config = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig)).AsObject();
 
-            config.Remove("routing");
+            if (node.ConfigType < EConfigType.Group)
+            {
+                config.Remove("routing");
+            }
+            else
+            {
+                config["routing"].AsObject().Remove("domainStrategy");
+            }
 
             ret.Data = JsonUtils.Serialize(config, true);
 
