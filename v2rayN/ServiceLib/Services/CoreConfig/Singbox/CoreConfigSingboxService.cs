@@ -646,16 +646,19 @@ public partial class CoreConfigSingboxService(Config config) : CoreConfigService
         var ret = new RetResult();
         try
         {
-            if (node == null
-                || node.Port <= 0)
+            if (node.ConfigType < EConfigType.Group)
             {
-                ret.Msg = ResUI.CheckServerSettings;
-                return ret;
-            }
-            if (node.GetNetwork() is nameof(ETransport.kcp) or nameof(ETransport.xhttp))
-            {
-                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
-                return ret;
+                if (node == null
+                    || node.Port <= 0)
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
+                if (node.GetNetwork() is nameof(ETransport.kcp) or nameof(ETransport.xhttp))
+                {
+                    ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                    return ret;
+                }
             }
 
             ret.Msg = ResUI.InitialConfiguration;
@@ -685,29 +688,72 @@ public partial class CoreConfigSingboxService(Config config) : CoreConfigService
             };
             singboxConfig.inbounds = new() { inbound };
 
-            if (node.ConfigType == EConfigType.WireGuard)
+            if (node.ConfigType > EConfigType.Group)
             {
+                ProfileGroupItemManager.Instance.TryGet(node.IndexId, out var profileGroupItem);
+                if (profileGroupItem == null || profileGroupItem.ChildItems.IsNullOrEmpty())
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
+                var childProfiles = (await Task.WhenAll(
+                        Utils.String2List(profileGroupItem.ChildItems)
+                        .Where(p => !p.IsNullOrEmpty())
+                        .Select(AppManager.Instance.GetProfileItem)
+                    )).Where(p => p != null).ToList();
+                if (childProfiles.Count <= 0)
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
                 singboxConfig.outbounds.RemoveAt(0);
-                var endpoints = new Endpoints4Sbox();
-                await GenEndpoint(node, endpoints);
-                endpoints.tag = Global.ProxyTag;
-                singboxConfig.endpoints = new() { endpoints };
+                switch (node.ConfigType)
+                {
+                    case EConfigType.PolicyGroup:
+                        await GenOutboundsListWithChain(childProfiles, singboxConfig, profileGroupItem.MultipleLoad);
+                        break;
+                    case EConfigType.ProxyChain:
+                        await GenChainOutboundsList(childProfiles, singboxConfig);
+                        break;
+                }
+
+                // remove unused outbounds
+                singboxConfig.outbounds = singboxConfig.outbounds
+                    .Where(o => o.tag.Contains(Global.ProxyTag))
+                    .ToList();
+
+                if (singboxConfig.outbounds.Count == 0)
+                {
+                    ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                    return ret;
+                }
             }
             else
             {
-                await GenOutbound(node, singboxConfig.outbounds.First());
-            }
+                if (node.ConfigType == EConfigType.WireGuard)
+                {
+                    singboxConfig.outbounds.RemoveAt(0);
+                    var endpoints = new Endpoints4Sbox();
+                    await GenEndpoint(node, endpoints);
+                    endpoints.tag = Global.ProxyTag;
+                    singboxConfig.endpoints = new() { endpoints };
+                }
+                else
+                {
+                    await GenOutbound(node, singboxConfig.outbounds.First());
+                }
 
-            if (singboxConfig.endpoints == null)
-            {
-                singboxConfig.outbounds = new() { JsonUtils.DeepCopy(singboxConfig.outbounds.First()) };
-            }
-            else
-            {
-                singboxConfig.outbounds.Clear();
-            }
+                if (singboxConfig.endpoints == null)
+                {
+                    singboxConfig.outbounds = new() { JsonUtils.DeepCopy(singboxConfig.outbounds.First()) };
+                }
+                else
+                {
+                    singboxConfig.outbounds.Clear();
+                }
 
-            await GenMoreOutbounds(node, singboxConfig);
+                await GenMoreOutbounds(node, singboxConfig);
+            }
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
