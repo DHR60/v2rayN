@@ -1,6 +1,7 @@
 using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.Json.Nodes;
+using ServiceLib.Models;
 
 namespace ServiceLib.Services.CoreConfig;
 
@@ -553,17 +554,20 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
         var ret = new RetResult();
         try
         {
-            if (node == null
-                || node.Port <= 0)
+            if (node.ConfigType < EConfigType.Group)
             {
-                ret.Msg = ResUI.CheckServerSettings;
-                return ret;
-            }
+                if (node == null
+                    || node.Port <= 0)
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
 
-            if (node.GetNetwork() is nameof(ETransport.quic))
-            {
-                ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
-                return ret;
+                if (node.GetNetwork() is nameof(ETransport.quic))
+                {
+                    ret.Msg = ResUI.Incorrectconfiguration + $" - {node.GetNetwork()}";
+                    return ret;
+                }
             }
 
             ret.Msg = ResUI.InitialConfiguration;
@@ -597,18 +601,82 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
                 },
             } };
 
-            await GenOutbound(node, v2rayConfig.outbounds.First());
+            if (node.ConfigType > EConfigType.Group)
+            {
+                ProfileGroupItemManager.Instance.TryGet(node.IndexId, out var profileGroupItem);
+                if (profileGroupItem == null || profileGroupItem.ChildItems.IsNullOrEmpty())
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
+                var childProfiles = (await Task.WhenAll(
+                        Utils.String2List(profileGroupItem.ChildItems)
+                        .Where(p => !p.IsNullOrEmpty())
+                        .Select(AppManager.Instance.GetProfileItem)
+                    )).Where(p => p != null).ToList();
+                if (childProfiles.Count <= 0)
+                {
+                    ret.Msg = ResUI.CheckServerSettings;
+                    return ret;
+                }
+                v2rayConfig.outbounds.RemoveAt(0);
+                switch (node.ConfigType)
+                {
+                    case EConfigType.PolicyGroup:
+                        await GenOutboundsListWithChain(childProfiles, v2rayConfig);
+                        break;
+                    case EConfigType.ProxyChain:
+                        await GenChainOutboundsList(childProfiles, v2rayConfig);
+                        break;
+                }
 
-            v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+                // remove unused outbounds
+                v2rayConfig.outbounds = v2rayConfig.outbounds
+                    .Where(o => o.tag.Contains(Global.ProxyTag))
+                    .ToList();
 
-            await GenMoreOutbounds(node, v2rayConfig);
+                if (v2rayConfig.outbounds.Count == 0)
+                {
+                    ret.Msg = ResUI.FailedGenDefaultConfiguration;
+                    return ret;
+                }
+
+                // blancer
+                await GenObservatory(v2rayConfig, profileGroupItem.MultipleLoad);
+                var defaultBalancerTag = await GenBalancer(v2rayConfig, profileGroupItem.MultipleLoad);
+
+                // final rule
+                v2rayConfig.routing.rules = new()
+                {
+                    new()
+                    {
+                        network = "tcp,udp",
+                        balancerTag = defaultBalancerTag,
+                    }
+                };
+            }
+            else
+            {
+                await GenOutbound(node, v2rayConfig.outbounds.First());
+
+                v2rayConfig.outbounds = new() { JsonUtils.DeepCopy(v2rayConfig.outbounds.First()) };
+
+                await GenMoreOutbounds(node, v2rayConfig);
+            }
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
 
             var config = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig)).AsObject();
 
-            config.Remove("routing");
+            if (node.ConfigType < EConfigType.Group)
+            {
+                config.Remove("routing");
+            }
+            else
+            {
+                config["routing"].AsObject().Remove("domainStrategy");
+            }
 
             ret.Data = JsonUtils.Serialize(config, true);
 
