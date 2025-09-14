@@ -316,6 +316,12 @@ public sealed class AppManager
         {
             coreType = pureEndpointCore;
         }
+        if (((coreType == ECoreType.Xray && !Global.XraySupportConfigType.Contains(profileItem.ConfigType))
+            || (coreType == ECoreType.sing_box && !Global.SingboxSupportConfigType.Contains(profileItem.ConfigType)))
+            && Global.ConfigTypeCores.TryGetValue(profileItem.ConfigType, out var supportCoreTypes))
+        {
+            coreType = supportCoreTypes.First();
+        }
 
         if (profileItem.ConfigType == EConfigType.Custom)
         {
