@@ -243,6 +243,16 @@ public class OptionSettingViewModel : MyReactiveObject
                 continue;
             }
 
+            if (Global.ConfigTypeCores.TryGetValue(it, out var supportCoreTypes))
+            {
+                _config.SplitCoreItem.SplitCoreTypes.Add(new CoreTypeItem()
+                {
+                    ConfigType = it,
+                    CoreType = supportCoreTypes.First(),
+                });
+                continue;
+            }
+
             _config.CoreTypeItem.Add(new CoreTypeItem()
             {
                 ConfigType = it,
@@ -303,16 +313,16 @@ public class OptionSettingViewModel : MyReactiveObject
                 continue;
             }
 
-            if (it is EConfigType.Hysteria2 or EConfigType.TUIC)
+            if (Global.ConfigTypeCores.TryGetValue(it, out var supportCoreTypes))
             {
                 _config.SplitCoreItem.SplitCoreTypes.Add(new CoreTypeItem()
                 {
                     ConfigType = it,
-                    CoreType = ECoreType.sing_box
+                    CoreType = supportCoreTypes.First(),
                 });
                 continue;
             }
-            if (it is EConfigType.Custom)
+            if (it.IsComplexType())
             {
                 continue;
             }
