@@ -384,6 +384,26 @@ public class Global
             EConfigType.HTTP,
     ];
 
+    public static readonly Dictionary<EConfigType, List<ECoreType>> ConfigTypeCores = new()
+        {
+            { EConfigType.VMess, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.VLESS, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Shadowsocks, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Trojan, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Hysteria2, new List<ECoreType>{ ECoreType.sing_box, ECoreType.hysteria2 } },
+            { EConfigType.TUIC, new List<ECoreType>{ ECoreType.sing_box, ECoreType.tuic } },
+            { EConfigType.WireGuard, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.Anytls, new List<ECoreType>{ ECoreType.sing_box } },
+            { EConfigType.NaiveProxy, new List<ECoreType>{ ECoreType.naiveproxy } },
+            { EConfigType.Juicity, new List<ECoreType>{ ECoreType.juicity } },
+            { EConfigType.Brook, new List<ECoreType>{ ECoreType.brook } },
+            { EConfigType.Shadowquic, new List<ECoreType>{ ECoreType.shadowquic } },
+            { EConfigType.Overtls, new List<ECoreType>{ ECoreType.overtls } },
+            { EConfigType.Mieru, new List<ECoreType>{ ECoreType.mieru } },
+            { EConfigType.SOCKS, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+            { EConfigType.HTTP, new List<ECoreType>{ ECoreType.Xray, ECoreType.sing_box } },
+        };
+
     public static readonly List<string> DomainStrategies =
     [
         AsIs,
