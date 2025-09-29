@@ -1,5 +1,6 @@
 using System.Reactive.Disposables;
 using System.Windows;
+using System.Windows.Interop;
 using System.Windows.Threading;
 using ReactiveUI;
 
@@ -47,6 +48,13 @@ public partial class MsgView
 
     private void ShowMsg(object msg)
     {
+        // try avoid non ui thread call
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(new Action(() => ShowMsg(msg)));
+            return;
+        }
+
         if (txtMsg.LineCount > ViewModel?.NumMaxMsg)
         {
             ClearMsg();
@@ -61,6 +69,13 @@ public partial class MsgView
 
     public void ClearMsg()
     {
+        // try avoid non ui thread call
+        if (!Dispatcher.CheckAccess())
+        {
+            Dispatcher.BeginInvoke(new Action(ClearMsg));
+            return;
+        }
+
         txtMsg.Clear();
         txtMsg.AppendText("----- Message cleared -----\n");
     }
