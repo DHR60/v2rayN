@@ -50,6 +50,13 @@ public partial class MsgView : ReactiveUserControl<MsgViewModel>
 
     private void ShowMsg(object msg)
     {
+        // try avoid non ui thread call
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(() => ShowMsg(msg));
+            return;
+        }
+
         //var lineCount = txtMsg.LineCount;
         //if (lineCount > ViewModel?.NumMaxMsg)
         //{
@@ -70,6 +77,13 @@ public partial class MsgView : ReactiveUserControl<MsgViewModel>
 
     public void ClearMsg()
     {
+        // try avoid non ui thread call
+        if (!Dispatcher.UIThread.CheckAccess())
+        {
+            Dispatcher.UIThread.Post(ClearMsg);
+            return;
+        }
+
         txtMsg.Clear();
         txtMsg.AppendText("----- Message cleared -----\n");
     }
