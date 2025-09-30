@@ -531,7 +531,7 @@ public partial class CoreConfigSingboxService(Config config) : CoreConfigService
         var ret = new RetResult();
         try
         {
-            if (node.ConfigType < EConfigType.Group)
+            if (node.ConfigType.IsGroupType())
             {
                 if (node == null
                     || !node.IsValid())
@@ -573,7 +573,7 @@ public partial class CoreConfigSingboxService(Config config) : CoreConfigService
             };
             singboxConfig.inbounds = new() { inbound };
 
-            if (node.ConfigType > EConfigType.Group)
+            if (node.ConfigType.IsGroupType())
             {
                 singboxConfig.outbounds.RemoveAt(0);
                 await GenGroupOutbound(node, singboxConfig);
