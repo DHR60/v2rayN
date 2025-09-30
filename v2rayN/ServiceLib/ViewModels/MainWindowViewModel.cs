@@ -32,6 +32,8 @@ public class MainWindowViewModel : MyReactiveObject
     public ReactiveCommand<Unit, Unit> AddJuicityServerCmd { get; }
     public ReactiveCommand<Unit, Unit> AddNaiveServerCmd { get; }
     public ReactiveCommand<Unit, Unit> AddShadowquicServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddOvertlsServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> AddMieruServerCmd { get; }
 
     //Subscription
     public ReactiveCommand<Unit, Unit> SubSettingCmd { get; }
@@ -139,6 +141,14 @@ public class MainWindowViewModel : MyReactiveObject
         AddShadowquicServerCmd = ReactiveCommand.CreateFromTask(async () =>
         {
             await AddServerAsync(true, EConfigType.Shadowquic);
+        });
+        AddOvertlsServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(true, EConfigType.Overtls);
+        });
+        AddMieruServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await AddServerAsync(true, EConfigType.Mieru);
         });
         AddCustomServerCmd = ReactiveCommand.CreateFromTask(async () =>
         {
