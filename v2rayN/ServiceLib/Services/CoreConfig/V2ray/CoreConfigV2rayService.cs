@@ -447,7 +447,7 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
         var ret = new RetResult();
         try
         {
-            if (node.ConfigType < EConfigType.Group)
+            if (node.ConfigType.IsGroupType())
             {
                 if (node == null
                     || !node.IsValid())
@@ -494,7 +494,7 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
                 },
             } };
 
-            if (node.ConfigType > EConfigType.Group)
+            if (node.ConfigType.IsGroupType())
             {
                 v2rayConfig.outbounds.RemoveAt(0);
 
@@ -536,7 +536,7 @@ public partial class CoreConfigV2rayService(Config config) : CoreConfigServiceBa
 
             var config = JsonNode.Parse(JsonUtils.Serialize(v2rayConfig)).AsObject();
 
-            if (node.ConfigType < EConfigType.Group)
+            if (node.ConfigType.IsGroupType())
             {
                 config.Remove("routing");
             }
