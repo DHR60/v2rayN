@@ -781,11 +781,29 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Add [Mieru] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddMieruServer {
+            get {
+                return ResourceManager.GetString("menuAddMieruServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Add [Naive] Configuration 的本地化字符串。
         /// </summary>
         public static string menuAddNaiveServer {
             get {
                 return ResourceManager.GetString("menuAddNaiveServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Add [overtls] Configuration 的本地化字符串。
+        /// </summary>
+        public static string menuAddOvertlsServer {
+            get {
+                return ResourceManager.GetString("menuAddOvertlsServer", resourceCulture);
             }
         }
         
