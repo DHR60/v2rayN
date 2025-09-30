@@ -151,6 +151,23 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
 
                 cmbHeaderType103.ItemsSource = Global.CongestionControls;
                 break;
+
+            case EConfigType.Overtls:
+                gridOvertls.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                cmbCoreType.IsEnabled = false;
+                break;
+
+            case EConfigType.Mieru:
+                gridMieru.IsVisible = true;
+                sepa2.IsVisible = false;
+                gridTransport.IsVisible = false;
+                gridTls.IsVisible = false;
+                cmbCoreType.IsEnabled = false;
+
+                cmbNetwork105.ItemsSource = new List<string> { "tcp", "udp" };
+                break;
         }
         cmbStreamSecurity.ItemsSource = lstStreamSecurity;
 
@@ -240,6 +257,18 @@ public partial class AddServerWindow : WindowBase<AddServerViewModel>
                     this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId103.Text).DisposeWith(disposables);
                     this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity103.Text).DisposeWith(disposables);
                     this.Bind(ViewModel, vm => vm.SelectedSource.HeaderType, v => v.cmbHeaderType103.SelectedValue).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Overtls:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId104.Text).DisposeWith(disposables);
+                    break;
+
+                case EConfigType.Mieru:
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Id, v => v.txtId105.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Security, v => v.txtSecurity105.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Network, v => v.cmbNetwork105.SelectedValue).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Ports, v => v.txtPorts105.Text).DisposeWith(disposables);
+                    this.Bind(ViewModel, vm => vm.SelectedSource.Sni, v => v.txtSNI105.Text).DisposeWith(disposables);
                     break;
             }
             this.Bind(ViewModel, vm => vm.SelectedSource.Network, v => v.cmbNetwork.SelectedValue).DisposeWith(disposables);
