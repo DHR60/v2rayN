@@ -280,6 +280,8 @@ public static class ConfigHandler
             EConfigType.Juicity => await AddJuicityServer(config, item),
             EConfigType.Brook => await AddBrookServer(config, item),
             EConfigType.Shadowquic => await AddShadowquicServer(config, item),
+            EConfigType.Overtls => await AddOvertlsServer(config, item),
+            EConfigType.Mieru => await AddMieruServer(config, item),
             _ => -1,
         };
         return ret;
@@ -973,6 +975,71 @@ public static class ConfigHandler
 
         await AddServerCommon(config, profileItem, toFile);
 
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Overtls server
+    /// Validates and processes Overtls-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Overtls profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddOvertlsServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Overtls;
+        profileItem.CoreType = ECoreType.overtls;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = string.Empty;
+
+        if (profileItem.StreamSecurity.IsNullOrEmpty())
+        {
+            profileItem.StreamSecurity = Global.StreamSecurity;
+        }
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        await AddServerCommon(config, profileItem, toFile);
+        return 0;
+    }
+
+    /// <summary>
+    /// Add or edit a Mieru server
+    /// Validates and processes Mieru-specific settings
+    /// </summary>
+    /// <param name="config">Current configuration</param>
+    /// <param name="profileItem">Mieru profile to add</param>
+    /// <param name="toFile">Whether to save to file</param>
+    /// <returns>0 if successful, -1 if failed</returns>
+    public static async Task<int> AddMieruServer(Config config, ProfileItem profileItem, bool toFile = true)
+    {
+        profileItem.ConfigType = EConfigType.Mieru;
+        profileItem.CoreType = ECoreType.mieru;
+
+        profileItem.Address = profileItem.Address.TrimEx();
+        profileItem.Id = profileItem.Id.TrimEx();
+        profileItem.Network = profileItem.Network.TrimEx();
+        profileItem.Security = profileItem.Security.TrimEx();
+        profileItem.Ports = profileItem.Ports.TrimEx();
+        profileItem.Sni = profileItem.Sni.TrimEx();
+
+        if (profileItem.Id.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        if (profileItem.Security.IsNullOrEmpty())
+        {
+            return -1;
+        }
+        if (profileItem.Network.IsNullOrEmpty())
+        {
+            profileItem.Network = "tcp";
+        }
+        await AddServerCommon(config, profileItem, toFile);
         return 0;
     }
 
