@@ -1,7 +1,5 @@
-using System.Buffers.Binary;
 using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 
@@ -316,20 +314,20 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             tasks.Add(Task.Run(async () =>
             {
                 var currentItemId = item.IndexId ?? string.Empty;
-                var pid = -1;
+                ProcessService processService = null;
                 try
                 {
                     if (currentItemId.IsNotEmpty())
                     {
-                        UpdateFunc(currentItemId, "");
+                        await UpdateFunc(currentItemId, "");
                     }
 
-                    pid = await CoreManager.Instance.LoadCoreConfigSpeedtest(item);
-                    if (pid < 0)
+                    processService = await CoreManager.Instance.LoadCoreConfigSpeedtest(item);
+                    if (processService is null)
                     {
                         if (currentItemId.IsNotEmpty())
                         {
-                            UpdateFunc(currentItemId, "-1");
+                            await UpdateFunc(currentItemId, "-1");
                             ProfileExManager.Instance.SetTestDelay(currentItemId, -1);
                         }
                         return; // Exit this Task.Run lambda
@@ -343,7 +341,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 {
                     if (currentItemId.IsNotEmpty())
                     {
-                        UpdateFunc(currentItemId, "-1");
+                        await UpdateFunc(currentItemId, "-1");
                         if (ex is not OperationCanceledException or TimeoutException)
                         {
                             Logging.SaveLog(_tag, ex);
@@ -354,10 +352,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 }
                 finally
                 {
-                    if (pid > 0)
-                    {
-                        await ProcUtils.ProcessKill(pid);
-                    }
+                    await processService?.StopAsync();
                     concurrencySemaphore.Release();
                 }
             }));
@@ -465,11 +460,11 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
 
     private async Task<bool> RunUdpTestForBatchAsync(List<ServerTestItem> selecteds, string exitLoopKey)
     {
-        var pid = -1;
+        ProcessService processService = null;
         try
         {
-            pid = await CoreManager.Instance.LoadCoreConfigSpeedtest(selecteds);
-            if (pid < 0)
+            processService = await CoreManager.Instance.LoadCoreConfigSpeedtest(selecteds);
+            if (processService == null)
             {
                 return false;
             }
@@ -492,7 +487,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 var currentItemId = it.IndexId ?? string.Empty;
                 if (currentItemId.IsNotEmpty())
                 {
-                    UpdateFunc(currentItemId, "");
+                    await UpdateFunc(currentItemId, "");
                 }
 
                 tasks.Add(Task.Run(async () =>
@@ -505,7 +500,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                     {
                         if (currentItemId.IsNotEmpty())
                         {
-                            UpdateFunc(currentItemId, "-1");
+                            await UpdateFunc(currentItemId, "-1");
                             if (ex is not OperationCanceledException or TimeoutException)
                             {
                                 Logging.SaveLog(_tag, ex);
@@ -525,10 +520,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         }
         finally
         {
-            if (pid > 0)
-            {
-                await ProcUtils.ProcessKill(pid);
-            }
+            await processService?.StopAsync();
         }
         return true;
     }
@@ -567,12 +559,12 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         {
             var rttStr = result.RoundTripTime?.TotalMilliseconds.ToString("F0") ?? "-1";
             ProfileExManager.Instance.SetTestDelay(currentIndexId, (int)(result.RoundTripTime?.TotalMilliseconds ?? -1));
-            UpdateFunc(currentIndexId, rttStr);
+            await UpdateFunc(currentIndexId, rttStr);
         }
         else
         {
             ProfileExManager.Instance.SetTestDelay(currentIndexId, -1);
-            UpdateFunc(currentIndexId, "-1");
+            await UpdateFunc(currentIndexId, "-1");
         }
     }
 
