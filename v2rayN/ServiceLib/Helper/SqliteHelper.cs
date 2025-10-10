@@ -12,11 +12,46 @@ public sealed class SQLiteHelper
     private SQLiteAsyncConnection _dbAsync;
     private readonly string _configDB = "guiNDB.db";
 
+    public class TableInfo
+    {
+        public int cid { get; set; }
+        public string name { get; set; }
+        public string type { get; set; }
+        public int notnull { get; set; }
+        public string dflt_value { get; set; }
+        public int pk { get; set; }
+    }
+
     public SQLiteHelper()
     {
         _connstr = Utils.GetConfigPath(_configDB);
         _db = new SQLiteConnection(_connstr, false);
         _dbAsync = new SQLiteAsyncConnection(_connstr, false);
+
+        var columns = _db.Query<TableInfo>("PRAGMA table_info(ProfileGroupItem);");
+        bool hasParentIndexId = columns.Any(c => c.name == "ParentIndexId");
+
+        _db.RunInTransaction(() =>
+        {
+            if (hasParentIndexId)
+            {
+                _db.Execute("ALTER TABLE ProfileGroupItem RENAME COLUMN ParentIndexId TO IndexId;");
+                _db.Execute(@"
+                    UPDATE ProfileItem
+                    SET configType = CASE configType
+                        WHEN 100 THEN 201
+                        WHEN 101 THEN 202
+                        WHEN 102 THEN 203
+                        WHEN 103 THEN 204
+                        WHEN 104 THEN 205
+                        WHEN 105 THEN 206
+                        WHEN 1001 THEN 101
+                        WHEN 1002 THEN 102
+                        ELSE configType
+                    END;
+                ");
+            }
+        });
     }
 
     public CreateTableResult CreateTable<T>()
