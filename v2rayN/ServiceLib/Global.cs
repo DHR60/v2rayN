@@ -620,6 +620,18 @@ public class Global
         @""
     ];
 
+    public static readonly List<string> UdpTestTargets =
+    [
+        "ntp:pool.ntp.org",
+        "ntp:time.google.com",
+        "dns:1.1.1.1",
+        "dns:8.8.8.8",
+        "dns:dns.google",
+        "stun:stun.voztovoice.org",
+        "stun:stun.cloudflare.com",
+        "stun:stun.l.google.com:19302",
+    ];
+
     public static readonly List<string> OutboundTags =
     [
         ProxyTag,
