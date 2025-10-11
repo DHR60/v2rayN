@@ -1669,4 +1669,13 @@
   <data name="menuIPGeoTestServer" xml:space="preserve">
     <value>测试 IP Geo (多选)</value>
   </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>测试 UDP 延迟 (多选)</value>
+  </data>
+  <data name="TbSettingsUdpTestType" xml:space="preserve">
+    <value>UDP 测试类型</value>
+  </data>
+  <data name="TbSettingsUdpTestUrl" xml:space="preserve">
+    <value>UDP 测试地址</value>
+  </data>
 </root>
