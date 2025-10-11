@@ -1630,4 +1630,13 @@ Do not use the "Fetch Certificate" button when "Allow Insecure" is enabled.</val
   <data name="menuIPGeoTestServer" xml:space="preserve">
     <value>Test IP Geo</value>
   </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>Test Configurations UDP Delay</value>
+  </data>
+  <data name="TbSettingsUdpTestType" xml:space="preserve">
+    <value>UDP Test Type</value>
+  </data>
+  <data name="TbSettingsUdpTestUrl" xml:space="preserve">
+    <value>UDP Test Url</value>
+  </data>
 </root>
