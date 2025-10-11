@@ -1623,4 +1623,13 @@
   <data name="menuAddMieruServer" xml:space="preserve">
     <value>Add [Mieru] Configuration</value>
   </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>Test Configurations UDP Delay</value>
+  </data>
+  <data name="TbSettingsUdpTestType" xml:space="preserve">
+    <value>UDP Test Type</value>
+  </data>
+  <data name="TbSettingsUdpTestUrl" xml:space="preserve">
+    <value>UDP Test Url</value>
+  </data>
 </root>
