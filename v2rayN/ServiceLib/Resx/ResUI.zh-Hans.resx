@@ -1609,4 +1609,13 @@
   <data name="TbFetchCertChain" xml:space="preserve">
     <value>获取证书链</value>
   </data>
+  <data name="menuUdpTestServer" xml:space="preserve">
+    <value>测试 UDP 延迟 (多选)</value>
+  </data>
+  <data name="TbSettingsUdpTestType" xml:space="preserve">
+    <value>UDP 测试类型</value>
+  </data>
+  <data name="TbSettingsUdpTestUrl" xml:space="preserve">
+    <value>UDP 测试地址</value>
+  </data>
 </root>
