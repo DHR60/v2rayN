@@ -1596,4 +1596,10 @@
   <data name="menuFastRealPing" xml:space="preserve">
     <value>一鍵測試真連線延遲</value>
   </data>
+  <data name="LvTestResult" xml:space="preserve">
+    <value>Test Result</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>Test IP Geo</value>
+  </data>
 </root>
