@@ -70,6 +70,10 @@ public partial class CoreConfigSingboxService
                 {
                     tunInbound.address = ["172.18.0.1/30"];
                 }
+                if(_config.TunModeItem.AutoRoute && _config.TunModeItem.PreferAutoRedirect && Utils.IsLinux())
+                {
+                    tunInbound.auto_redirect = true;
+                }
 
                 singboxConfig.inbounds.Add(tunInbound);
             }

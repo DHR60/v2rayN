@@ -104,6 +104,7 @@ public class Inbound4Sbox
     public List<string>? address { get; set; }
     public int? mtu { get; set; }
     public bool? auto_route { get; set; }
+    public bool? auto_redirect { get; set; }
     public bool? strict_route { get; set; }
     public bool? endpoint_independent_nat { get; set; }
     public string? stack { get; set; }

@@ -9,6 +9,5 @@
   "mtu": 9000,
   "auto_route": true,
   "strict_route": false,
-  "stack": "system",
-  "sniff": true
+  "stack": "system"
 }
