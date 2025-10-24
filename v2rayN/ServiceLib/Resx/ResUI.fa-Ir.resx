@@ -1612,4 +1612,10 @@ Do not use the "Fetch Certificate" button when "Allow Insecure" is enabled.</val
   <data name="TbFetchCertChain" xml:space="preserve">
     <value>Fetch Certificate Chain</value>
   </data>
+  <data name="LvTestResult" xml:space="preserve">
+    <value>Test Result</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>Test IP Geo</value>
+  </data>
 </root>

@@ -113,6 +113,7 @@
                         <MenuItem x:Name="menuTcpingServer" Header="{x:Static resx:ResUI.menuTcpingServer}" />
                         <MenuItem x:Name="menuRealPingServer" Header="{x:Static resx:ResUI.menuRealPingServer}" />
                         <MenuItem x:Name="menuSpeedServer" Header="{x:Static resx:ResUI.menuSpeedServer}" />
+                        <MenuItem x:Name="menuIPGeoTestServer" Header="{x:Static resx:ResUI.menuIPGeoTestServer}" />
                         <MenuItem x:Name="menuSortServerResult" Header="{x:Static resx:ResUI.menuSortServerResult}" />
                         <Separator />
                         <MenuItem x:Name="menuMoveToGroup" Header="{x:Static resx:ResUI.menuMoveToGroup}">
@@ -232,6 +233,11 @@
                         Binding="{Binding SpeedVal}"
                         Header="{x:Static resx:ResUI.LvTestSpeed}"
                         Tag="SpeedVal" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding TestVal}"
+                        Header="{x:Static resx:ResUI.LvTestResult}"
+                        Tag="TestVal" />
 
                     <DataGridTextColumn
                         Width="100"

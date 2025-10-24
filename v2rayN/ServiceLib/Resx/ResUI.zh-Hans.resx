@@ -1609,4 +1609,10 @@
   <data name="TbFetchCertChain" xml:space="preserve">
     <value>获取证书链</value>
   </data>
+  <data name="LvTestResult" xml:space="preserve">
+    <value>测试结果</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>测试 IP Geo (多选)</value>
+  </data>
 </root>
