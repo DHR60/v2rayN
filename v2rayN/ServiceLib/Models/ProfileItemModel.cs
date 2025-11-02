@@ -19,6 +19,9 @@ public class ProfileItemModel : ProfileItem
     public string SpeedVal { get; set; }
 
     [Reactive]
+    public string TestVal { get; set; }
+
+    [Reactive]
     public string TodayUp { get; set; }
 
     [Reactive]
