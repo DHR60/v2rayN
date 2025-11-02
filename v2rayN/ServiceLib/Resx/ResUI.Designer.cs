@@ -610,6 +610,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Test Result 的本地化字符串。
+        /// </summary>
+        public static string LvTestResult {
+            get {
+                return ResourceManager.GetString("LvTestResult", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Speed (MB/s) 的本地化字符串。
         /// </summary>
         public static string LvTestSpeed {
@@ -1173,6 +1182,15 @@ namespace ServiceLib.Resx {
         public static string menuImportRulesFromUrl {
             get {
                 return ResourceManager.GetString("menuImportRulesFromUrl", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Test IP Geo 的本地化字符串。
+        /// </summary>
+        public static string menuIPGeoTestServer {
+            get {
+                return ResourceManager.GetString("menuIPGeoTestServer", resourceCulture);
             }
         }
         
