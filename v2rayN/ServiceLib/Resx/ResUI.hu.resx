@@ -1638,4 +1638,10 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbSettingsMacOSShowInDock" xml:space="preserve">
     <value>macOS displays this in the Dock (requires restart)</value>
   </data>
+  <data name="LvTestResult" xml:space="preserve">
+    <value>Test Result</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>Test IP Geo</value>
+  </data>
 </root>
