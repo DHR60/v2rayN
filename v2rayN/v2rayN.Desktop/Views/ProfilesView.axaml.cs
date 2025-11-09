@@ -79,6 +79,7 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
             this.BindCommand(ViewModel, vm => vm.RealPingServerCmd, v => v.menuRealPingServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.UdpTestServerCmd, v => v.menuUdpTestServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.SpeedServerCmd, v => v.menuSpeedServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.IPGeoTestServerCmd, v => v.menuIPGeoTestServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.SortServerResultCmd, v => v.menuSortServerResult).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.RemoveInvalidServerResultCmd, v => v.menuRemoveInvalidServerResult).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.FastRealPingCmd, v => v.btnFastRealPing).DisposeWith(disposables);
@@ -404,6 +405,33 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
         try
         {
             var lvColumnItem = _config.UiItem.MainColumnItem.OrderBy(t => t.Index).ToList();
+
+            if (lvColumnItem.Count > 0 && lvColumnItem.All(item => item.Name != "TestVal"))
+            {
+                // Insert after SpeedVal column if exists, otherwise append.
+                var insertIndex = lvColumnItem.FindIndex(item => item.Name == "SpeedVal");
+                if (insertIndex == -1)
+                {
+                    insertIndex = lvColumnItem.Count;
+                }
+                else
+                {
+                    insertIndex += 1;
+                }
+
+                lvColumnItem.Insert(insertIndex, new ColumnItem
+                {
+                    Name = "TestVal",
+                    Width = 100,
+                    Index = insertIndex
+                });
+
+                for (var i = insertIndex + 1; i < lvColumnItem.Count; i++)
+                {
+                    lvColumnItem[i].Index = i;
+                }
+            }
+
             var displayIndex = 0;
             foreach (var item in lvColumnItem)
             {
