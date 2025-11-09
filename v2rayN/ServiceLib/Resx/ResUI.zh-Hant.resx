@@ -1711,4 +1711,10 @@
     <value>僅用於抓取自簽證書，存在中間人風險。</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="LvTestResult" xml:space="preserve">
+    <value>Test Result</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>Test IP Geo</value>
+  </data>
 </root>

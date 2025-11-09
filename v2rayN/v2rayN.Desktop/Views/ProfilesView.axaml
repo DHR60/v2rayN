@@ -140,6 +140,7 @@
                             x:Name="menuSpeedServer"
                             Header="{x:Static resx:ResUI.menuSpeedServer}"
                             InputGesture="Ctrl+T" />
+                        <MenuItem x:Name="menuIPGeoTestServer" Header="{x:Static resx:ResUI.menuIPGeoTestServer}" />
                         <MenuItem x:Name="menuSortServerResult" Header="{x:Static resx:ResUI.menuSortServerResult}" />
                         <Separator />
                         <MenuItem
@@ -274,6 +275,11 @@
                         Binding="{Binding SpeedVal}"
                         Header="{x:Static resx:ResUI.LvTestSpeed}"
                         Tag="SpeedVal" />
+                    <DataGridTextColumn
+                        Width="100"
+                        Binding="{Binding TestVal}"
+                        Header="{x:Static resx:ResUI.LvTestResult}"
+                        Tag="TestVal" />
 
                     <DataGridTextColumn
                         Width="100"
