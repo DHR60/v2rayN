@@ -6,5 +6,6 @@ public enum ESpeedActionType
     Realping,
     Speedtest,
     Mixedtest,
+    IPGeoTest,
     FastRealping
 }
