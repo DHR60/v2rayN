@@ -88,9 +88,14 @@ public class DownloadService
 
     public async Task<string?> TryDownloadString(string url, bool blProxy, string userAgent)
     {
+        return await TryDownloadString(url, await GetWebProxy(blProxy), userAgent);
+    }
+
+    public async Task<string?> TryDownloadString(string url, WebProxy proxy, string userAgent)
+    {
         try
         {
-            var result1 = await DownloadStringAsync(url, blProxy, userAgent, 15);
+            var result1 = await DownloadStringAsync(url, proxy, userAgent, 15);
             if (result1.IsNotEmpty())
             {
                 return result1;
@@ -108,7 +113,7 @@ public class DownloadService
 
         try
         {
-            var result2 = await DownloadStringViaDownloader(url, blProxy, userAgent, 15);
+            var result2 = await DownloadStringViaDownloader(url, proxy, userAgent, 15);
             if (result2.IsNotEmpty())
             {
                 return result2;
@@ -133,13 +138,18 @@ public class DownloadService
     /// <param name="url"></param>
     private async Task<string?> DownloadStringAsync(string url, bool blProxy, string userAgent, int timeout)
     {
+        var webProxy = await GetWebProxy(blProxy);
+        return await DownloadStringAsync(url, webProxy, userAgent, timeout);
+    }
+
+    private async Task<string?> DownloadStringAsync(string url, WebProxy proxy, string userAgent, int timeout)
+    {
         try
         {
-            var webProxy = await GetWebProxy(blProxy);
             var client = new HttpClient(new SocketsHttpHandler()
             {
-                Proxy = webProxy,
-                UseProxy = webProxy != null
+                Proxy = proxy,
+                UseProxy = proxy != null
             });
 
             if (userAgent.IsNullOrEmpty())
@@ -177,15 +187,19 @@ public class DownloadService
     /// <param name="url"></param>
     private async Task<string?> DownloadStringViaDownloader(string url, bool blProxy, string userAgent, int timeout)
     {
+        var webProxy = await GetWebProxy(blProxy);
+        return await DownloadStringViaDownloader(url, webProxy, userAgent, timeout);
+    }
+
+    private async Task<string?> DownloadStringViaDownloader(string url, WebProxy proxy, string userAgent, int timeout)
+    {
         try
         {
-            var webProxy = await GetWebProxy(blProxy);
-
             if (userAgent.IsNullOrEmpty())
             {
                 userAgent = Utils.GetVersion(false);
             }
-            var result = await DownloaderHelper.Instance.DownloadStringAsync(webProxy, url, userAgent, timeout);
+            var result = await DownloaderHelper.Instance.DownloadStringAsync(proxy, url, userAgent, timeout);
             return result;
         }
         catch (Exception ex)
