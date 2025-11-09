@@ -81,6 +81,7 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
             this.BindCommand(ViewModel, vm => vm.TcpingServerCmd, v => v.menuTcpingServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.RealPingServerCmd, v => v.menuRealPingServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.SpeedServerCmd, v => v.menuSpeedServer).DisposeWith(disposables);
+            this.BindCommand(ViewModel, vm => vm.IPGeoTestServerCmd, v => v.menuIPGeoTestServer).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.SortServerResultCmd, v => v.menuSortServerResult).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.RemoveInvalidServerResultCmd, v => v.menuRemoveInvalidServerResult).DisposeWith(disposables);
             this.BindCommand(ViewModel, vm => vm.FastRealPingCmd, v => v.btnFastRealPing).DisposeWith(disposables);
@@ -404,6 +405,31 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
     private void RestoreUI()
     {
         var lvColumnItem = _config.UiItem.MainColumnItem.OrderBy(t => t.Index).ToList();
+        
+        // 检测 TestVal 列是否存在于配置中,如果不存在则自动插入到倒数第五个位置
+        if (!lvColumnItem.Any(item => item.Name == "TestVal"))
+        {
+            // 计算插入位置(倒数第五个,即在 TodayUp, TodayDown, TotalUp, TotalDown 之前)
+            var insertIndex = Math.Max(0, lvColumnItem.Count - 4);
+            
+            // 查找 TestVal 列的当前宽度
+            var testValColumn = lstProfiles.Columns.FirstOrDefault(col => col.Tag?.ToString() == "TestVal");
+            var testValWidth = testValColumn != null ? 100 : 100; // 默认宽度100
+            
+            lvColumnItem.Insert(insertIndex, new ColumnItem
+            {
+                Name = "TestVal",
+                Width = testValWidth,
+                Index = insertIndex
+            });
+            
+            // 重新调整后续列的索引
+            for (var i = insertIndex + 1; i < lvColumnItem.Count; i++)
+            {
+                lvColumnItem[i].Index = i;
+            }
+        }
+        
         var displayIndex = 0;
         foreach (var item in lvColumnItem)
         {
@@ -449,6 +475,26 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
                 Index = item2.DisplayIndex
             });
         }
+        
+        // 确保 TestVal 列存在于配置中
+        if (!lvColumnItem.Any(item => item.Name == "TestVal"))
+        {
+            // 如果 TestVal 不存在,插入到倒数第五个位置
+            var insertIndex = Math.Max(0, lvColumnItem.Count - 4);
+            lvColumnItem.Insert(insertIndex, new ColumnItem
+            {
+                Name = "TestVal",
+                Width = 100,
+                Index = insertIndex
+            });
+            
+            // 重新调整后续列的索引
+            for (var i = insertIndex + 1; i < lvColumnItem.Count; i++)
+            {
+                lvColumnItem[i].Index = i;
+            }
+        }
+        
         _config.UiItem.MainColumnItem = lvColumnItem;
     }
 
