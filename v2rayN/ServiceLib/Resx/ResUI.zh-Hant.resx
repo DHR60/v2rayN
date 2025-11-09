@@ -1729,4 +1729,10 @@
     <value>匯出 v2rayN 內部分享連結至剪貼簿（多選）</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="LvTestResult" xml:space="preserve">
+    <value>Test Result</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>Test IP Geo</value>
+  </data>
 </root>
