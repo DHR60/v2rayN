@@ -56,6 +56,10 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             case ESpeedActionType.Mixedtest:
                 await RunMixedTestAsync(lstSelected, _config.SpeedTestItem.MixedConcurrencyCount, true, exitLoopKey);
                 break;
+
+            case ESpeedActionType.IPGeoTest:
+                await RunIPGeoTestBatchAsync(lstSelected, exitLoopKey);
+                break;
         }
     }
 
@@ -104,6 +108,11 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                     await UpdateFunc(it.IndexId, ResUI.Speedtesting, ResUI.SpeedtestingWait);
                     ProfileExManager.Instance.SetTestDelay(it.IndexId, 0);
                     ProfileExManager.Instance.SetTestSpeed(it.IndexId, 0);
+                    break;
+
+                case ESpeedActionType.IPGeoTest:
+                    await UpdateTestResultFunc(it.IndexId, ResUI.SpeedtestingWait);
+                    ProfileExManager.Instance.SetTestResult(it.IndexId, "");
                     break;
             }
         }
@@ -291,6 +300,87 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         await Task.WhenAll(tasks);
     }
 
+    private async Task RunIPGeoTestBatchAsync(List<ServerTestItem> lstSelected, string exitLoopKey, int pageSize = 0)
+    {
+        if (pageSize <= 0)
+        {
+            pageSize = lstSelected.Count < Global.SpeedTestPageSize ? lstSelected.Count : Global.SpeedTestPageSize;
+        }
+        var lstTest = GetTestBatchItem(lstSelected, pageSize);
+
+        List<ServerTestItem> lstFailed = new();
+        foreach (var lst in lstTest)
+        {
+            var ret = await RunIPGeoTestAsync(lst, exitLoopKey);
+            if (ret == false)
+            {
+                lstFailed.AddRange(lst);
+            }
+            await Task.Delay(100);
+        }
+
+        //Retest the failed part
+        if (lstFailed.Count > 0)
+        {
+            if (ShouldStopTest(exitLoopKey))
+            {
+                await UpdateFunc("", ResUI.SpeedtestingSkip);
+                return;
+            }
+
+            await UpdateFunc("", string.Format(ResUI.SpeedtestingTestFailedPart, lstFailed.Count));
+
+            await RunIPGeoTestAsync(lstFailed, exitLoopKey);
+        }
+    }
+
+    private async Task<bool> RunIPGeoTestAsync(List<ServerTestItem> selecteds, string exitLoopKey)
+    {
+        ProcessService processService = null;
+        var downloadHandle = new DownloadService();
+        try
+        {
+            processService = await CoreManager.Instance.LoadCoreConfigSpeedtest(selecteds);
+            if (processService is null)
+            {
+                return false;
+            }
+            await Task.Delay(1000);
+
+            List<Task> tasks = new();
+            foreach (var it in selecteds)
+            {
+                if (!it.AllowTest)
+                {
+                    continue;
+                }
+
+                if (ShouldStopTest(exitLoopKey))
+                {
+                    return false;
+                }
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    await DoIPGeoTest(downloadHandle, it);
+                }));
+            }
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+        }
+        finally
+        {
+            if (processService != null)
+            {
+                await processService?.StopAsync();
+            }
+        }
+        return true;
+    }
+
     private async Task<int> DoRealPing(ServerTestItem it)
     {
         var webProxy = new WebProxy($"socks5://{Global.Loopback}:{it.Port}");
@@ -349,6 +439,43 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         return responseTime;
     }
 
+    private async Task<string?> DoIPGeoTest(DownloadService downloadHandle, ServerTestItem it)
+    {
+        try
+        {
+            var url = AppManager.Instance.Config.SpeedTestItem.IPAPIUrl;
+            if (url.IsNullOrEmpty())
+            {
+                url = Global.IPAPIUrls.First();
+            }
+
+            var webProxy = new WebProxy($"socks5://{Global.Loopback}:{it.Port}");
+
+            var result = await downloadHandle.TryDownloadString(url, webProxy, "");
+            if (result == null)
+            {
+                await UpdateTestResultFunc(it.IndexId, "unknow");
+                return null;
+            }
+
+            var ipInfo = ConnectionHandler.IpInfoToString(result);
+
+            if (ipInfo.IsNullOrEmpty())
+            {
+                await UpdateTestResultFunc(it.IndexId, "unknow");
+                return null;
+            }
+
+            await UpdateTestResultFunc(it.IndexId, ipInfo);
+            return ipInfo;
+        }
+        catch
+        {
+            await UpdateTestResultFunc(it.IndexId, "unknow");
+            return null;
+        }
+    }
+
     private List<List<ServerTestItem>> GetTestBatchItem(List<ServerTestItem> lstSelected, int pageSize)
     {
         List<List<ServerTestItem>> lstTest = new();
@@ -373,6 +500,15 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         if (indexId.IsNotEmpty() && speed.IsNotEmpty())
         {
             ProfileExManager.Instance.SetTestMessage(indexId, speed);
+        }
+    }
+
+    private async Task UpdateTestResultFunc(string indexId, string result)
+    {
+        await _updateFunc?.Invoke(new() { IndexId = indexId, TestResult = result });
+        if (indexId.IsNotEmpty() && result.IsNotEmpty())
+        {
+            ProfileExManager.Instance.SetTestResult(indexId, result);
         }
     }
 }
