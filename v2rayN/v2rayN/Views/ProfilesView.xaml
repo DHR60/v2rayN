@@ -168,6 +168,10 @@
                             Header="{x:Static resx:ResUI.menuSpeedServer}"
                             InputGestureText="Ctrl+T" />
                         <MenuItem
+                            x:Name="menuIPGeoTestServer"
+                            Height="{StaticResource MenuItemHeight}"
+                            Header="{x:Static resx:ResUI.menuIPGeoTestServer}" />
+                        <MenuItem
                             x:Name="menuSortServerResult"
                             Height="{StaticResource MenuItemHeight}"
                             Header="{x:Static resx:ResUI.menuSortServerResult}" />
@@ -338,6 +342,11 @@
                             </Style>
                         </DataGridTextColumn.ElementStyle>
                     </base:MyDGTextColumn>
+                    <base:MyDGTextColumn
+                        Width="100"
+                        Binding="{Binding TestVal}"
+                        ExName="TestVal"
+                        Header="{x:Static resx:ResUI.LvTestResult}" />
 
                     <base:MyDGTextColumn
                         x:Name="colTodayUp"
