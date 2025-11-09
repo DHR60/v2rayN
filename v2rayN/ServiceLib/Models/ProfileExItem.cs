@@ -8,6 +8,7 @@ public class ProfileExItem
 
     public int Delay { get; set; }
     public decimal Speed { get; set; }
+    public string Test { get; set; }
     public int Sort { get; set; }
     public string? Message { get; set; }
 }

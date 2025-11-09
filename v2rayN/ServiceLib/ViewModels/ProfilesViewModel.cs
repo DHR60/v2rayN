@@ -61,6 +61,7 @@ public class ProfilesViewModel : MyReactiveObject
     public ReactiveCommand<Unit, Unit> TcpingServerCmd { get; }
     public ReactiveCommand<Unit, Unit> RealPingServerCmd { get; }
     public ReactiveCommand<Unit, Unit> SpeedServerCmd { get; }
+    public ReactiveCommand<Unit, Unit> IPGeoTestServerCmd { get; }
     public ReactiveCommand<Unit, Unit> SortServerResultCmd { get; }
     public ReactiveCommand<Unit, Unit> RemoveInvalidServerResultCmd { get; }
     public ReactiveCommand<Unit, Unit> FastRealPingCmd { get; }
@@ -182,6 +183,10 @@ public class ProfilesViewModel : MyReactiveObject
         {
             await ServerSpeedtest(ESpeedActionType.Speedtest);
         }, canEditRemove);
+        IPGeoTestServerCmd = ReactiveCommand.CreateFromTask(async () =>
+        {
+            await ServerSpeedtest(ESpeedActionType.IPGeoTest);
+        }, canEditRemove);
         SortServerResultCmd = ReactiveCommand.CreateFromTask(async () =>
         {
             await SortServer(EServerColName.DelayVal.ToString());
@@ -292,6 +297,10 @@ public class ProfilesViewModel : MyReactiveObject
         if (result.Speed.IsNotEmpty())
         {
             item.SpeedVal = result.Speed ?? string.Empty;
+        }
+        if (result.TestResult.IsNotEmpty())
+        {
+            item.TestVal = result.TestResult ?? string.Empty;
         }
         await Task.CompletedTask;
     }
@@ -432,6 +441,7 @@ public class ProfilesViewModel : MyReactiveObject
                         Speed = t33?.Speed ?? 0,
                         DelayVal = t33?.Delay != 0 ? $"{t33?.Delay}" : string.Empty,
                         SpeedVal = t33?.Speed > 0 ? $"{t33?.Speed}" : t33?.Message ?? string.Empty,
+                        TestVal = t33?.Test ?? string.Empty,
                         TodayDown = t22 == null ? "" : Utils.HumanFy(t22.TodayDown),
                         TodayUp = t22 == null ? "" : Utils.HumanFy(t22.TodayUp),
                         TotalDown = t22 == null ? "" : Utils.HumanFy(t22.TotalDown),
