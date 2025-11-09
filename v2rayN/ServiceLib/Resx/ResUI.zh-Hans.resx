@@ -1651,4 +1651,10 @@
     <value>证书指纹（SHA-256）</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="LvTestResult" xml:space="preserve">
+    <value>测试结果</value>
+  </data>
+  <data name="menuIPGeoTestServer" xml:space="preserve">
+    <value>测试 IP Geo (多选)</value>
+  </data>
 </root>
