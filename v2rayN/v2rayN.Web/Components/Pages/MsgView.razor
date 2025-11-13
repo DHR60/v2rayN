@@ -1,0 +1,38 @@
+@inherits ReactiveComponentBase<MsgViewModel>
+
+<MudContainer>
+    <MudItem xs="12">
+        <MudStack Row="true" Spacing="2" AlignItems="AlignItems.Center">
+            <MudIconButton Icon="@Icons.Material.Filled.ContentCopy"
+                           Color="Color.Primary"
+                           Size="Size.Medium"
+                           Title="@ResUI.menuMsgViewCopyAll"
+                           OnClick="@CopyAllMessages" />
+            <MudIconButton Icon="@Icons.Material.Filled.Delete"
+                           Color="Color.Error"
+                           Size="Size.Medium"
+                           Title="@ResUI.menuMsgViewClear"
+                           OnClick="@ClearAllMessages" />
+            <MudSpacer />
+            <MudTextField @bind-Value="ViewModel!.MsgFilter"
+                          Label="Filter"
+                          Variant="Variant.Outlined"
+                          Clearable="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@Icons.Material.Filled.Filter"
+                          Immediate="true"
+                          DebounceInterval="300"
+                          Style="max-width: 300px;"
+                          TextUpdateSuppression="false" />
+        </MudStack>
+    </MudItem>
+    <div style="
+        height:30vh;
+        overflow-y:auto;
+        overflow-x:hidden;
+        user-select:text;
+        cursor:text;
+        white-space:pre-wrap;">
+        @Maneger.SingletonManager.Instance.MsgViewContent
+    </div>
+</MudContainer>
