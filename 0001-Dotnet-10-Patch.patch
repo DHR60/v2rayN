@@ -1,0 +1,43 @@
+From b362ec969dd798af14f2a4579b19b89ce895435e Mon Sep 17 00:00:00 2001
+From: DHR60 <dehongren60@gmail.com>
+Date: Wed, 12 Nov 2025 18:06:17 +0800
+Subject: [PATCH] Dotnet 10 Patch
+
+---
+ v2rayN/v2rayN/Directory.Build.targets | 8 ++++++++
+ v2rayN/v2rayN/v2rayN.csproj           | 4 ++++
+ 2 files changed, 12 insertions(+)
+ create mode 100644 v2rayN/v2rayN/Directory.Build.targets
+
+diff --git a/v2rayN/v2rayN/Directory.Build.targets b/v2rayN/v2rayN/Directory.Build.targets
+new file mode 100644
+index 000000000..4f181a2fd
+--- /dev/null
++++ b/v2rayN/v2rayN/Directory.Build.targets
+@@ -0,0 +1,8 @@
++<Project>
++  <ItemGroup Condition="'$(TargetFrameworkIdentifier)' == '.NETCoreApp' and '$(TargetFrameworkVersion)' == 'v10.0' and '$(UseWPF)' == 'true'">
++    <Reference Include="System.Private.Windows.GdiPlus">
++      <HintPath>C:\Program Files\dotnet\packs\Microsoft.WindowsDesktop.App.Ref\10.0.0\ref\net10.0\System.Private.Windows.GdiPlus.dll</HintPath>
++      <Private>false</Private>
++    </Reference>
++  </ItemGroup>
++</Project>
+diff --git a/v2rayN/v2rayN/v2rayN.csproj b/v2rayN/v2rayN/v2rayN.csproj
+index 9654625de..e4758a5ba 100644
+--- a/v2rayN/v2rayN/v2rayN.csproj
++++ b/v2rayN/v2rayN/v2rayN.csproj
+@@ -19,6 +19,10 @@
+ 		<PackageReference Include="ReactiveUI.WPF" />
+ 	</ItemGroup>
+ 
++	<ItemGroup>
++		<Reference Include="System.Private.Windows.GdiPlus" />
++	</ItemGroup>
++
+ 	<ItemGroup>
+ 		<AdditionalFiles Include="app.manifest" />
+ 		<EmbeddedResource Include="Resources\v2rayN.ico">
+-- 
+2.51.1.windows.1
+
