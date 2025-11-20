@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -82,6 +82,10 @@
 			<SubType>Designer</SubType>
 			<Generator>PublicResXFileCodeGenerator</Generator>
 		</EmbeddedResource>
+	</ItemGroup>
+
+	<ItemGroup>
+  		<TrimmerRootDescriptor Include="ILLink.Descriptors.xml" />
 	</ItemGroup>
 
 </Project>
