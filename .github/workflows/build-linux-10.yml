@@ -1,4 +1,4 @@
-name: release macOS
+name: release Linux dotnet 10
 
 on:
   workflow_dispatch:
@@ -19,11 +19,13 @@ jobs:
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"osx-x64",  "package_arch":"macos-64",   "self_contained":true},
-          {"runtime":"osx-arm64","package_arch":"macos-arm64","self_contained":true}
+          {"runtime":"linux-x64",  "package_arch":"linux-64-dotnet10",   "self_contained":true},
+          {"runtime":"linux-arm64","package_arch":"linux-arm64-dotnet10","self_contained":true},
+          {"runtime":"linux-arm",  "package_arch":"linux-arm-dotnet10",  "self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
-    runs-on: macos-latest
+
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -35,12 +37,18 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v5.0.1
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
 
     - name: Ensure jq
       run: |
-        brew update
-        brew install jq
+        sudo apt-get update
+        sudo apt-get install -y jq
 
     - name: Build all variants
       shell: bash
@@ -71,28 +79,27 @@ jobs:
     - name: Upload build artifacts (all variants)
       uses: actions/upload-artifact@v6.0.0
       with:
-        name: v2rayN-all-macos
+        name: v2rayN-all-linux
         path: "${{ env.OUTPUT_BASE }}/**"
-    
-    # release osx package
-    - name: Package osx
+
+    # release debian package
+    - name: Package debian
       if: github.event.inputs.release_tag != ''
       shell: bash
       run: |
         set -euo pipefail
-        brew install create-dmg
-        chmod 755 package-osx.sh
+        chmod 755 package-debian.sh
         echo "$BUILD_MATRIX" | jq -c '.[]' | while read -r row; do
           package_arch=$(echo "$row" | jq -r '.package_arch')
           out_dir="${OUTPUT_BASE}/${package_arch}"
-          ./package-osx.sh "${package_arch}" "${out_dir}" "${{ github.event.inputs.release_tag }}" || echo "Warning: Failed to package ${package_arch}, continuing..."
+          ./package-debian.sh "${package_arch}" "${out_dir}" "${{ github.event.inputs.release_tag }}" || echo "Warning: Failed to package ${package_arch}, continuing..."
         done
 
-    - name: Upload dmg to release
+    - name: Upload deb to release
       uses: svenstaro/upload-release-action@v2
       if: github.event.inputs.release_tag != ''
       with:
-        file: ${{ github.workspace }}/v2rayN*.dmg
+        file: ${{ github.workspace }}/v2rayN*.deb
         tag: ${{ github.event.inputs.release_tag }}
         file_glob: true
         prerelease: true
@@ -109,7 +116,7 @@ jobs:
           out_dir="${OUTPUT_BASE}/${package_arch}"
           ./package-release-zip.sh "${package_arch}" "${out_dir}" || echo "Warning: Failed to package ${package_arch}, continuing..."
         done
-
+    
     - name: Upload zip archive to release
       uses: svenstaro/upload-release-action@v2
       if: github.event.inputs.release_tag != ''
@@ -165,5 +172,63 @@ jobs:
         file: ${{ github.workspace }}/v2rayN*.7z
         release_name: build-${{ github.sha }}
         tag: build-${{ github.sha }}
+        file_glob: true
+        prerelease: true
+
+  rpm:
+    needs: build
+    if: github.event.inputs.release_tag != ''
+    runs-on: ubuntu-24.04
+    container:
+      image: quay.io/almalinuxorg/10-base:latest
+      options: --platform=linux/amd64/v2
+    env:
+      RELEASE_TAG: ${{ github.event.inputs.release_tag != '' && github.event.inputs.release_tag || github.ref_name }}
+
+    steps:
+    - name: Prepare tools (Red Hat)
+      run: |
+        dnf -y makecache
+        dnf -y install epel-release
+        dnf -y install sudo git rpm-build rpmdevtools dnf-plugins-core rsync findutils tar gzip unzip which
+
+    - name: Checkout repo (for scripts)
+      uses: actions/checkout@v6.0.1
+      with:
+        submodules: 'recursive'
+        fetch-depth: '0'
+
+    - name: Restore build artifacts
+      uses: actions/download-artifact@v7
+      with:
+        name: v2rayN-linux
+        path: ${{ github.workspace }}/v2rayN/Release
+
+    - name: Ensure script permissions
+      run: chmod 755 package-rhel.sh
+
+    - name: Package RPM (RHEL-family)
+      run: ./package-rhel.sh "${RELEASE_TAG}" --arch all
+
+    - name: Collect RPMs into workspace
+      run: |
+        mkdir -p "$GITHUB_WORKSPACE/dist/rpm"
+        rsync -av "$HOME/rpmbuild/RPMS/" "$GITHUB_WORKSPACE/dist/rpm/" || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.x86_64.rpm"  -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-64-dotnet10.rpm" \;  || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.aarch64.rpm" -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-arm64-dotnet10.rpm" \; || true
+        echo "==== Dist tree ===="
+        ls -R "$GITHUB_WORKSPACE/dist/rpm" || true
+
+    - name: Upload RPM artifacts
+      uses: actions/upload-artifact@v6.0.0
+      with:
+        name: v2rayN-rpm
+        path: dist/rpm/**/*.rpm
+
+    - name: Upload RPMs to release
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: dist/rpm/**/*.rpm
+        tag: ${{ env.RELEASE_TAG }}
         file_glob: true
         prerelease: true
