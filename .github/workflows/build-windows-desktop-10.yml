@@ -1,4 +1,4 @@
-name: release Windows desktop (Avalonia UI)
+name: release Windows desktop (Avalonia UI) dotnet 10
 
 on:
   workflow_dispatch:
@@ -21,29 +21,35 @@ jobs:
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"win-x64",  "package_arch":"windows-64",                      "self_contained":false, "optimize":false},
-          {"runtime":"win-arm64","package_arch":"windows-arm64",                   "self_contained":false, "optimize":false},
-          {"runtime":"win-x64",  "package_arch":"windows-64-SelfContained",        "self_contained":true,  "optimize":false},
-          {"runtime":"win-arm64","package_arch":"windows-arm64-SelfContained",     "self_contained":true,  "optimize":false},
-          {"runtime":"win-x64",  "package_arch":"windows-64-r2r",                  "self_contained":false, "optimize":true},
-          {"runtime":"win-arm64","package_arch":"windows-arm64-r2r",               "self_contained":false, "optimize":true},
-          {"runtime":"win-x86",  "package_arch":"windows-86",                      "self_contained":false, "optimize":false},
-          {"runtime":"win-x86",  "package_arch":"windows-86-SelfContained",        "self_contained":true,  "optimize":false},
-          {"runtime":"win-x86",  "package_arch":"windows-86-r2r",                  "self_contained":false, "optimize":true}
+          {"runtime":"win-x64",  "package_arch":"windows-64-dotnet10",                      "self_contained":false, "optimize":false},
+          {"runtime":"win-arm64","package_arch":"windows-arm64-dotnet10",                   "self_contained":false, "optimize":false},
+          {"runtime":"win-x64",  "package_arch":"windows-64-SelfContained-dotnet10",        "self_contained":true,  "optimize":false},
+          {"runtime":"win-arm64","package_arch":"windows-arm64-SelfContained-dotnet10",     "self_contained":true,  "optimize":false},
+          {"runtime":"win-x64",  "package_arch":"windows-64-r2r-dotnet10",                  "self_contained":false, "optimize":true},
+          {"runtime":"win-arm64","package_arch":"windows-arm64-r2r-dotnet10",               "self_contained":false, "optimize":true},
+          {"runtime":"win-x86",  "package_arch":"windows-86-dotnet10",                      "self_contained":false, "optimize":false},
+          {"runtime":"win-x86",  "package_arch":"windows-86-SelfContained-dotnet10",        "self_contained":true,  "optimize":false},
+          {"runtime":"win-x86",  "package_arch":"windows-86-r2r-dotnet10",                  "self_contained":false, "optimize":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
 
     steps:
     - name: Checkout
-      uses: actions/checkout@v6.0.1
+      uses: actions/checkout@v5.0.0
       with:
         submodules: 'recursive'
         fetch-depth: '0'
 
-    - name: Setup
-      uses: actions/setup-dotnet@v5.0.1
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v5.0.0
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
 
     - name: Build all variants
       shell: pwsh
