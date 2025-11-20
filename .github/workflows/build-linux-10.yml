@@ -1,4 +1,4 @@
-name: release Linux
+name: release Linux dotnet 10
 
 on:
   workflow_dispatch:
@@ -16,28 +16,34 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"linux-x64",  "package_arch":"linux-64",   "self_contained":true},
-          {"runtime":"linux-arm64","package_arch":"linux-arm64","self_contained":true},
-          {"runtime":"linux-arm",  "package_arch":"linux-arm",  "self_contained":true}
+          {"runtime":"linux-x64",  "package_arch":"linux-64-dotnet10",   "self_contained":true},
+          {"runtime":"linux-arm64","package_arch":"linux-arm64-dotnet10","self_contained":true},
+          {"runtime":"linux-arm",  "package_arch":"linux-arm-dotnet10",  "self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
 
+    runs-on: ubuntu-latest
+
     steps:
     - name: Checkout
-      uses: actions/checkout@v6.0.2
+      uses: actions/checkout@v6.0.1
       with:
         submodules: 'recursive'
         fetch-depth: '0'
 
-    - name: Setup .NET
+    - name: Setup
       uses: actions/setup-dotnet@v5
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
 
     - name: Ensure jq
       run: |
@@ -181,79 +187,26 @@ jobs:
     if: github.event.inputs.release_tag != ''
     runs-on: ubuntu-24.04
     container:
-      image: registry.access.redhat.com/ubi10/ubi
+      image: quay.io/almalinuxorg/10-base:latest
+      options: --platform=linux/amd64/v2
     env:
       RELEASE_TAG: ${{ github.event.inputs.release_tag != '' && github.event.inputs.release_tag || github.ref_name }}
 
     steps:
     - name: Prepare tools (Red Hat)
-      shell: bash
       run: |
-        set -euo pipefail
-
-        . /etc/os-release
-        EL_MAJOR="${VERSION_ID%%.*}"
-        echo "EL_MAJOR=${EL_MAJOR}"
-
-        dnf -y makecache || true
-        command -v curl >/dev/null || dnf -y install curl ca-certificates
-
-        ARCH="$(uname -m)"
-        case "$ARCH" in x86_64|aarch64) ;; *) echo "Unsupported arch: $ARCH"; exit 1 ;; esac
-
-        install_epel_from_dir() {
-          local base="$1" rpm
-          echo "Try: $base"
-
-          rpm="$(
-            {
-              curl -fsSL "$base/Packages/"   2>/dev/null
-              curl -fsSL "$base/Packages/e/" 2>/dev/null | sed 's|href="|href="e/|'
-            } |
-            sed -n 's/.*href="\([^"]*epel-release-[^"]*\.noarch\.rpm\)".*/\1/p' |
-            sort -V | tail -n1
-          )" || true
-
-          if [[ -n "$rpm" ]]; then
-            dnf -y install "$base/Packages/$rpm"
-            return 0
-          fi
-          return 1
-        }
-
-        FEDORA="https://dl.fedoraproject.org/pub/epel/epel-release-latest-${EL_MAJOR}.noarch.rpm"
-        echo "Try Fedora: $FEDORA"
-
-        if curl -fsSLI "$FEDORA" >/dev/null; then
-          dnf -y install "$FEDORA"
-        else
-          ROCKY="https://dl.rockylinux.org/pub/rocky/${EL_MAJOR}/extras/${ARCH}/os"
-          if install_epel_from_dir "$ROCKY"; then
-            :
-          else
-            ALMA="https://repo.almalinux.org/almalinux/${EL_MAJOR}/extras/${ARCH}/os"
-            if install_epel_from_dir "$ALMA"; then
-              :
-            else
-              echo "EPEL bootstrap failed (Fedora/Rocky/Alma)"
-              exit 1
-            fi
-          fi
-        fi
-
-        dnf -y install sudo git rpm-build rpmdevtools dnf-plugins-core \
-                       rsync findutils tar gzip unzip which
-
-        dnf repolist | grep -i epel || true
+        dnf -y makecache
+        dnf -y install epel-release
+        dnf -y install sudo git rpm-build rpmdevtools dnf-plugins-core rsync findutils tar gzip unzip which
 
     - name: Checkout repo (for scripts)
-      uses: actions/checkout@v6.0.2
+      uses: actions/checkout@v6.0.1
       with:
         submodules: 'recursive'
         fetch-depth: '0'
 
     - name: Restore build artifacts
-      uses: actions/download-artifact@v8
+      uses: actions/download-artifact@v7
       with:
         name: v2rayN-linux
         path: ${{ github.workspace }}/v2rayN/Release
@@ -268,13 +221,13 @@ jobs:
       run: |
         mkdir -p "$GITHUB_WORKSPACE/dist/rpm"
         rsync -av "$HOME/rpmbuild/RPMS/" "$GITHUB_WORKSPACE/dist/rpm/" || true
-        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.x86_64.rpm"  -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-64.rpm" \;  || true
-        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.aarch64.rpm" -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-arm64.rpm" \; || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.x86_64.rpm"  -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-64-dotnet10.rpm" \;  || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.aarch64.rpm" -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-arm64-dotnet10.rpm" \; || true
         echo "==== Dist tree ===="
         ls -R "$GITHUB_WORKSPACE/dist/rpm" || true
 
     - name: Upload RPM artifacts
-      uses: actions/upload-artifact@v7.0.0
+      uses: actions/upload-artifact@v7
       with:
         name: v2rayN-rpm
         path: dist/rpm/**/*.rpm
