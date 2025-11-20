@@ -14,6 +14,7 @@ global using System.Text.Encodings.Web;
 global using System.Text.Json;
 global using System.Text.Json.Nodes;
 global using System.Text.Json.Serialization;
+global using System.Text.Json.Serialization.Metadata;
 global using System.Text.RegularExpressions;
 global using DynamicData;
 global using DynamicData.Binding;
