@@ -1,4 +1,4 @@
-name: release Linux
+name: release Linux dotnet 10
 
 on:
   workflow_dispatch:
@@ -16,16 +16,16 @@ permissions:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
-
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"linux-x64",  "package_arch":"linux-64",   "self_contained":true},
-          {"runtime":"linux-arm64","package_arch":"linux-arm64","self_contained":true},
-          {"runtime":"linux-arm",  "package_arch":"linux-arm",  "self_contained":true}
+          {"runtime":"linux-x64",  "package_arch":"linux-64-dotnet10",   "self_contained":true},
+          {"runtime":"linux-arm64","package_arch":"linux-arm64-dotnet10","self_contained":true},
+          {"runtime":"linux-arm",  "package_arch":"linux-arm-dotnet10",  "self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
+
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout
@@ -34,10 +34,16 @@ jobs:
         submodules: 'recursive'
         fetch-depth: '0'
 
-    - name: Setup .NET
+    - name: Setup
       uses: actions/setup-dotnet@v5.0.1
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i 's/net8\.0/net10\.0/g'
 
     - name: Ensure jq
       run: |
@@ -174,16 +180,16 @@ jobs:
     if: github.event.inputs.release_tag != ''
     runs-on: ubuntu-24.04
     container:
-      image: registry.access.redhat.com/ubi10/ubi
+      image: quay.io/almalinuxorg/10-base:latest
+      options: --platform=linux/amd64/v2
     env:
       RELEASE_TAG: ${{ github.event.inputs.release_tag != '' && github.event.inputs.release_tag || github.ref_name }}
 
     steps:
     - name: Prepare tools (Red Hat)
       run: |
-        dnf repolist all
         dnf -y makecache
-        dnf -y install https://dl.fedoraproject.org/pub/epel/epel-release-latest-10.noarch.rpm
+        dnf -y install epel-release
         dnf -y install sudo git rpm-build rpmdevtools dnf-plugins-core rsync findutils tar gzip unzip which
 
     - name: Checkout repo (for scripts)
@@ -208,8 +214,8 @@ jobs:
       run: |
         mkdir -p "$GITHUB_WORKSPACE/dist/rpm"
         rsync -av "$HOME/rpmbuild/RPMS/" "$GITHUB_WORKSPACE/dist/rpm/" || true
-        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.x86_64.rpm"  -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-64.rpm" \;  || true
-        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.aarch64.rpm" -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-arm64.rpm" \; || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.x86_64.rpm"  -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-64-dotnet10.rpm" \;  || true
+        find "$GITHUB_WORKSPACE/dist/rpm" -name "v2rayN-*-1*.aarch64.rpm" -exec mv {} "$GITHUB_WORKSPACE/dist/rpm/v2rayN-linux-rhel-arm64-dotnet10.rpm" \; || true
         echo "==== Dist tree ===="
         ls -R "$GITHUB_WORKSPACE/dist/rpm" || true
 
