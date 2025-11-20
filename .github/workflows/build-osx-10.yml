@@ -1,4 +1,4 @@
-name: release macOS
+name: release macOS dotnet 10
 
 on:
   workflow_dispatch:
@@ -19,8 +19,8 @@ jobs:
     env:
       BUILD_MATRIX: |
         [
-          {"runtime":"osx-x64",  "package_arch":"macos-64",   "self_contained":true},
-          {"runtime":"osx-arm64","package_arch":"macos-arm64","self_contained":true}
+          {"runtime":"osx-x64",  "package_arch":"macos-64-dotnet10",   "self_contained":true},
+          {"runtime":"osx-arm64","package_arch":"macos-arm64-dotnet10","self_contained":true}
         ]
       OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
     runs-on: macos-latest
@@ -35,7 +35,13 @@ jobs:
     - name: Setup
       uses: actions/setup-dotnet@v5.0.1
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i '' 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i '' 's/net8\.0/net10\.0/g'
 
     - name: Ensure jq
       run: |
