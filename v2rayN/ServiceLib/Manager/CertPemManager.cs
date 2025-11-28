@@ -451,4 +451,33 @@ public class CertPemManager
             return string.Empty;
         }
     }
+
+    public static string GetCertPublicKeySha256Base64(string pemCert)
+    {
+        var cert = X509Certificate2.CreateFromPem(pemCert);
+
+        byte[] publicKeyDer;
+
+        using (var rsa = cert.GetRSAPublicKey())
+        {
+            if (rsa != null)
+            {
+                publicKeyDer = rsa.ExportSubjectPublicKeyInfo();
+            }
+            else
+            {
+                using var ecdsa = cert.GetECDsaPublicKey();
+                if (ecdsa != null)
+                {
+                    publicKeyDer = ecdsa.ExportSubjectPublicKeyInfo();
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+        }
+        var hash = SHA256.HashData(publicKeyDer);
+        return Convert.ToBase64String(hash);
+    }
 }
