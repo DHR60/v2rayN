@@ -416,4 +416,51 @@ public class CertPemManager
 
         return string.Concat(pemList);
     }
+
+    public static string GetCertSHA256Thumbprint(string pemCert, bool includeColon = false)
+    {
+        try
+        {
+            var cert = X509Certificate2.CreateFromPem(pemCert);
+            var thumbprint = cert.GetCertHashString(HashAlgorithmName.SHA256);
+            if (includeColon)
+            {
+                return string.Join(":", thumbprint.Chunk(2).Select(c => new string(c)));
+            }
+            return thumbprint;
+        }
+        catch
+        {
+            return string.Empty;
+        }
+    }
+
+    public static string GetCertPublicKeySha256Base64(string pemCert)
+    {
+        var cert = X509Certificate2.CreateFromPem(pemCert);
+
+        byte[] publicKeyDer;
+
+        using (var rsa = cert.GetRSAPublicKey())
+        {
+            if (rsa != null)
+            {
+                publicKeyDer = rsa.ExportSubjectPublicKeyInfo();
+            }
+            else
+            {
+                using var ecdsa = cert.GetECDsaPublicKey();
+                if (ecdsa != null)
+                {
+                    publicKeyDer = ecdsa.ExportSubjectPublicKeyInfo();
+                }
+                else
+                {
+                    return string.Empty;
+                }
+            }
+        }
+        var hash = SHA256.HashData(publicKeyDer);
+        return Convert.ToBase64String(hash);
+    }
 }
