@@ -719,11 +719,14 @@ public class Global
 
     public static readonly List<string> IPAPIUrls =
     [
+        @"https://www.cloudflare.com/cdn-cgi/trace",
         @"https://api.ip.sb/geoip",
         @"https://api-ipv4.ip.sb/geoip",
         @"https://api-ipv6.ip.sb/geoip",
         @"https://api.ipapi.is",
         @"https://api.internetdata.io/myip",
+        @"https://www.chatgpt.com/cdn-cgi/trace",
+        @"https://www.grok.com/cdn-cgi/trace",
         @""
     ];
 
