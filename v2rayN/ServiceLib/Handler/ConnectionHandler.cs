@@ -28,15 +28,24 @@ public static class ConnectionHandler
         }
 
         var ipInfo = JsonUtils.Deserialize<IPAPIInfo>(result);
-        if (ipInfo == null)
+        if (ipInfo != null)
         {
-            return null;
+            var ip = ipInfo.ip ?? ipInfo.clientIp ?? ipInfo.ip_addr ?? ipInfo.query;
+            var country = ipInfo.country_code ?? ipInfo.country ?? ipInfo.countryCode ?? ipInfo.location?.country_code;
+
+            return $"({country ?? "unknown"}) {ip}";
+        }
+        else if (result.Contains("ip="))
+        {
+            var dic = CdnCgiRespondToDictionary(result);
+            if (dic.TryGetValue("ip", out var ipCdn))
+            {
+                dic.TryGetValue("loc", out var countryCdn);
+                return $"({countryCdn ?? "unknown"}) {ipCdn}";
+            }
         }
 
-        var ip = ipInfo.ip ?? ipInfo.clientIp ?? ipInfo.ip_addr ?? ipInfo.query;
-        var country = ipInfo.country_code ?? ipInfo.country ?? ipInfo.countryCode ?? ipInfo.location?.country_code;
-
-        return $"({country ?? "unknown"}) {ip}";
+        return null;
     }
 
     private static async Task<int> GetRealPingTimeInfo()
@@ -94,5 +103,22 @@ public static class ConnectionHandler
         {
         }
         return responseTime;
+    }
+
+    private static Dictionary<string, string> CdnCgiRespondToDictionary(string respond)
+    {
+        var dic = new Dictionary<string, string>();
+        var lines = respond.Split(new[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+        foreach (var line in lines)
+        {
+            var index = line.IndexOf('=');
+            if (index > 0)
+            {
+                var key = line[..index].Trim();
+                var value = line[(index + 1)..].Trim();
+                dic[key] = value;
+            }
+        }
+        return dic;
     }
 }
