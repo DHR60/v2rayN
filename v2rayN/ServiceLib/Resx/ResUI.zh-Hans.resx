@@ -1930,4 +1930,5 @@
   <data name="menuHideThisColumn" xml:space="preserve">
     <value>隐藏此列</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

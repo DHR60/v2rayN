@@ -1915,4 +1915,5 @@
   <data name="FillCorrectFakeIPv6Range" xml:space="preserve">
     <value>請輸入至少包含兩個位址的有效 IPv6 網段，例如 fc00::/18。</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
