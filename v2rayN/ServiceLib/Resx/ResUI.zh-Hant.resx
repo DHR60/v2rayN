@@ -1797,4 +1797,5 @@
   <data name="TbLegacyProtectTip" xml:space="preserve">
     <value>啟用則使用 sing-box TUN ,否則使用 xray TUN</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

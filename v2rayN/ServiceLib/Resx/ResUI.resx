@@ -1821,4 +1821,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbRootCertificateProviderTip" xml:space="preserve">
     <value>Only applies to the v2rayN GUI's downloads and network requests. Does not affect the core's certificate validation.</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
