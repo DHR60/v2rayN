@@ -1794,4 +1794,5 @@
   <data name="TbEnabletDnsViaProxy" xml:space="preserve">
     <value>DNS 透過 Bridge</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
