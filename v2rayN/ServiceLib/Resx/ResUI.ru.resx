@@ -1656,4 +1656,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbParallelQuery" xml:space="preserve">
     <value>Parallel Query</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

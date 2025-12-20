@@ -1653,4 +1653,5 @@
   <data name="TbParallelQuery" xml:space="preserve">
     <value>Parallel Query</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
