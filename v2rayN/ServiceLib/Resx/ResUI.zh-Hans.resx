@@ -1749,4 +1749,5 @@
   <data name="TbVerifyPeerCertByName" xml:space="preserve">
     <value>Verify Peer Cert By Name</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
