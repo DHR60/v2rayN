@@ -1860,4 +1860,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="LvCustomCoreType" xml:space="preserve">
     <value>Custom config core</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

@@ -1860,4 +1860,5 @@
   <data name="LvCustomCoreType" xml:space="preserve">
     <value>Ядро пользовательской конфигурации</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
