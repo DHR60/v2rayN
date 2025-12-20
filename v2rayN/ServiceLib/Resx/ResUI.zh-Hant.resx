@@ -1707,4 +1707,5 @@
   <data name="TbAllowInsecureCertFetchTips" xml:space="preserve">
     <value>僅用於抓取自簽證書，存在中間人風險。</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
