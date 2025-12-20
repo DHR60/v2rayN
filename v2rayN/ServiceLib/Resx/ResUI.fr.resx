@@ -1663,4 +1663,7 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
     <value>If unset or "AsIs", DNS resolution is performed by the remote server's DNS; otherwise, the internal DNS module is used.</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>Test Result Divisor</value>
+  </data>
 </root>

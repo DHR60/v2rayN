@@ -158,6 +158,7 @@ public class SpeedTestItem
     public string IPAPIUrl { get; set; }
     public EUdpTest UdpTestType { get; set; }
     public string UdpTestUrl { get; set; }
+    public string TestResultDivisor { get; set; } = "1";
 }
 
 [Serializable]
