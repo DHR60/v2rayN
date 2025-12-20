@@ -1650,4 +1650,5 @@
   <data name="TbCertSha256Tips" xml:space="preserve">
     <value>Certificate fingerprint (SHA-256)</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
