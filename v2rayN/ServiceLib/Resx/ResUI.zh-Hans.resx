@@ -1903,4 +1903,5 @@
   <data name="menuColumns" xml:space="preserve">
     <value>列</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
