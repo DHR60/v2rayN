@@ -1975,4 +1975,5 @@
   <data name="TbSpeedtestSettings" xml:space="preserve">
     <value>測速設定</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
