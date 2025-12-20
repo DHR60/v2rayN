@@ -1677,4 +1677,5 @@
   <data name="TbUsername" xml:space="preserve">
     <value>用户名</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
