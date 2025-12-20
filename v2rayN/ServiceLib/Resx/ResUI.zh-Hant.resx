@@ -1644,4 +1644,5 @@
   <data name="TbEchForceQuery" xml:space="preserve">
     <value>EchForceQuery</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

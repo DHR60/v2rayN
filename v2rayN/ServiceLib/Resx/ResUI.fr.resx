@@ -1644,4 +1644,5 @@ Si un certificat auto-signé est utilisé ou si le système contient une CA non 
   <data name="TbEchForceQuery" xml:space="preserve">
     <value>EchForceQuery</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
