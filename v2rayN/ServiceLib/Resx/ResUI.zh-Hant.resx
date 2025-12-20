@@ -1806,4 +1806,5 @@
   <data name="InvalidHttpOutboundHeaders" xml:space="preserve">
     <value>請填寫合法的HTTP請求頭JSON。</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
