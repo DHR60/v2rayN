@@ -1716,4 +1716,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbSettingsBindInterfaceTip" xml:space="preserve">
     <value>Pour les environnements multi-interfaces, entrez le nom de l'interface à lier. Ne fonctionne que sur les systèmes Windows et en mode TUN</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
