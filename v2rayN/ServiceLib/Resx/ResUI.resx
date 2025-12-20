@@ -1872,4 +1872,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbDNS" xml:space="preserve">
     <value>DNS</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

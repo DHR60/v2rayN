@@ -1861,4 +1861,5 @@
   <data name="LvCustomCoreType" xml:space="preserve">
     <value>自訂設定核心</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

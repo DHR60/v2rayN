@@ -1873,4 +1873,5 @@
   <data name="TbDNS" xml:space="preserve">
     <value>DNS</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
