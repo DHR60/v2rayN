@@ -1695,4 +1695,5 @@
   <data name="TbIcmpRoutingPolicy" xml:space="preserve">
     <value>ICMP routing policy</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
