@@ -1785,4 +1785,5 @@
   <data name="TbHy2RealmUrlTip" xml:space="preserve">
     <value>格式：realm://&lt;token&gt;@&lt;rendezvous-host&gt;[:port]/&lt;realm-name&gt;?stun=&lt;stun-host&gt;[:port]</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

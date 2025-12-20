@@ -1776,4 +1776,5 @@
   <data name="TbSaveNetBridgeRule" xml:space="preserve">
     <value>保存規則</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
