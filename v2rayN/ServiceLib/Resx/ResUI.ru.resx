@@ -1707,4 +1707,5 @@
   <data name="TbAllowInsecureCertFetchTips" xml:space="preserve">
     <value>Only for fetching self-signed certificates. This may expose you to MITM risks.</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

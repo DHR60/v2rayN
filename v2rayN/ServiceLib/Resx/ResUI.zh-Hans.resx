@@ -1710,4 +1710,5 @@
   <data name="TbAllowInsecureCertFetchTips" xml:space="preserve">
     <value>仅用于抓取自签证书，存在中间人风险。</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
