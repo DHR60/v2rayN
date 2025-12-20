@@ -1746,4 +1746,5 @@
   <data name="menuNewUpdate" xml:space="preserve">
     <value>Доступно обновление</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
