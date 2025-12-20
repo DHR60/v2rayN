@@ -1891,4 +1891,5 @@
   <data name="TbSortingProcess" xml:space="preserve">
     <value>进程</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

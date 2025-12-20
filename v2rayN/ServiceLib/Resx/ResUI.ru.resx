@@ -1899,4 +1899,5 @@
   <data name="TbSortingProcess" xml:space="preserve">
     <value>Процесс</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

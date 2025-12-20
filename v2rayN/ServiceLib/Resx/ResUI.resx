@@ -1899,4 +1899,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbSortingProcess" xml:space="preserve">
     <value>Process</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
