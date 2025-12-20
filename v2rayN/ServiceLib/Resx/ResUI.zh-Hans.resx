@@ -1680,4 +1680,5 @@
   <data name="MsgSubscriptionNextProfileNotFound" xml:space="preserve">
     <value>订阅后置节点 {0} 未找到，已跳过。</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
