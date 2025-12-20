@@ -1897,4 +1897,5 @@
   <data name="menuAddMasqueServer" xml:space="preserve">
     <value>添加 [MASQUE]</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
