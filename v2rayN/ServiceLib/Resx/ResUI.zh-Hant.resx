@@ -1845,4 +1845,5 @@
   <data name="TbIpv4Address" xml:space="preserve">
     <value>Ipv4 位址</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
