@@ -1905,4 +1905,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="menuAddMasqueServer" xml:space="preserve">
     <value>Add [MASQUE]</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
