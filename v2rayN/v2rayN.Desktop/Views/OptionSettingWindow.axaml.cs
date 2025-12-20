@@ -98,6 +98,7 @@ public partial class OptionSettingWindow : WindowBase<OptionSettingViewModel>
             this.Bind(ViewModel, vm => vm.SpeedPingTestUrl, v => v.cmbSpeedPingTestUrl.Text).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.UdpTestType, v => v.cmbUdpTestType.SelectedValue).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.UdpTestUrl, v => v.txtUdpTestUrl.Text).DisposeWith(disposables);
+            this.Bind(ViewModel, vm => vm.TestResultDivisor, v => v.txtTestResultDivisor.Text).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.MixedConcurrencyCount, v => v.cmbMixedConcurrencyCount.SelectedValue).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.SubConvertUrl, v => v.cmbSubConvertUrl.Text).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.MainGirdOrientation, v => v.cmbMainGirdOrientation.SelectedIndex).DisposeWith(disposables);

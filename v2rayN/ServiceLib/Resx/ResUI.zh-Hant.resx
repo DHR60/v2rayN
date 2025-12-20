@@ -1654,4 +1654,7 @@
   <data name="TbSettingsUdpTestUrl" xml:space="preserve">
     <value>UDP Test Url</value>
   </data>
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>Test Result Divisor</value>
+  </data>
 </root>
