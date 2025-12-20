@@ -1903,4 +1903,5 @@
   <data name="TbSortingProcess" xml:space="preserve">
     <value>行程</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
