@@ -1728,4 +1728,5 @@
   <data name="menuExport2InnerUri" xml:space="preserve">
     <value>导出 v2rayN 内部分享链接至剪贴板 (多选)</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

@@ -154,14 +154,14 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
 
         if (Utils.IsWindows())
         {
-            Title = $"{Utils.GetVersion()} - {(Utils.IsAdministrator() ? ResUI.RunAsAdmin : ResUI.NotRunAsAdmin)}";
+            Title = $"{Utils.GetVersion()} - Forked Version - {(Utils.IsAdministrator() ? ResUI.RunAsAdmin : ResUI.NotRunAsAdmin)}";
 
             ThreadPool.RegisterWaitForSingleObject(Program.ProgramStarted, OnProgramStarted, null, -1, false);
             HotkeyManager.Instance.Init(_config, OnHotkeyHandler);
         }
         else
         {
-            Title = $"{Utils.GetVersion()}";
+            Title = $"{Utils.GetVersion()} - Forked Version";
             menuAddServerViaScan.IsVisible = false;
         }
 
@@ -495,6 +495,17 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
             };
             item.Click += MenuItem_Click;
             menuHelp.Items.Add(item);
+            // Forked Version
+            if (it.CoreType == ECoreType.v2rayN)
+            {
+                var itemForked = new MenuItem()
+                {
+                    Tag = item.Tag.ToString().Replace("2dust/v2rayN", "DHR60/v2rayN"),
+                    Header = item.Header.ToString().Replace("V2rayN", "Forked V2rayN")
+                };
+                itemForked.Click += MenuItem_Click;
+                menuHelp.Items.Add(itemForked);
+            }
         }
     }
 
