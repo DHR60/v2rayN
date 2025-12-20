@@ -1944,4 +1944,5 @@
   <data name="TransportPathTip6" xml:space="preserve">
     <value>Удаленная папка XDRIVE</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
