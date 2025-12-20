@@ -566,6 +566,9 @@ public class MainWindowViewModel : MyReactiveObject
                 }
             }
 
+            // add fork description
+            NoticeManager.Instance.SendMessage("This is a forked version.");
+
             await Task.Run(async () =>
             {
                 await LoadCore(context);
