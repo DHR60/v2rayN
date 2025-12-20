@@ -1642,4 +1642,7 @@ Si un certificat auto-signé est utilisé ou si le système contient une CA non 
     <value>Avec WebSocket et TLS, l’ALPN doit inclure ‘http/1.1’.</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>Test Result Divisor</value>
+  </data>
 </root>
