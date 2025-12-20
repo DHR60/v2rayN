@@ -1905,4 +1905,5 @@
   <data name="menuAddMasqueServer" xml:space="preserve">
     <value>Добавить сервер [MASQUE]</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
