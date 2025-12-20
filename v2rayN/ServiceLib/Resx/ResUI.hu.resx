@@ -1641,4 +1641,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="menuServerList2" xml:space="preserve">
     <value>Configuration Item 2, Select and add from self-built</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

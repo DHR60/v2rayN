@@ -1638,4 +1638,5 @@
   <data name="menuServerList2" xml:space="preserve">
     <value>子配置项二，从自建中选择添加</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
