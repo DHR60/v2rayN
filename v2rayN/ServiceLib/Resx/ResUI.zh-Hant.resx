@@ -1975,4 +1975,5 @@
   <data name="TransportPathTip6" xml:space="preserve">
     <value>XDRIVE 遠端目錄</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
