@@ -1767,4 +1767,5 @@
   <data name="TbEnableFinalFragmentTip" xml:space="preserve">
     <value>將封包末端拆分為更小的片段進行傳送，可能會影響吞吐量與延遲</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
