@@ -1869,4 +1869,5 @@
   <data name="TbBlockAAAAQueriesTips" xml:space="preserve">
     <value>При включении блокирует DNS-запросы IPv6</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
