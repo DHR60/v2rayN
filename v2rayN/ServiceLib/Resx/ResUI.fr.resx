@@ -1665,4 +1665,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="menuServerListPreview" xml:space="preserve">
     <value>Configuration item preview</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
