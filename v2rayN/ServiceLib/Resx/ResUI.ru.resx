@@ -1686,4 +1686,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbUsername" xml:space="preserve">
     <value>Username</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
