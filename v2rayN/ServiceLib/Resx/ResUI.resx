@@ -1911,4 +1911,5 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="LvPreResolve" xml:space="preserve">
     <value>Pre-resolve server domains</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>

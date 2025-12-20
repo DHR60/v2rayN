@@ -1903,4 +1903,5 @@
   <data name="LvPreResolve" xml:space="preserve">
     <value>预解析节点域名</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
