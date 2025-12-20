@@ -1870,4 +1870,5 @@
   <data name="TbBlockAAAAQueriesTips" xml:space="preserve">
     <value>开启后将阻止 IPv6 查询</value>
   </data>
+  <!-- Forked version, additional resx go here -->
 </root>
