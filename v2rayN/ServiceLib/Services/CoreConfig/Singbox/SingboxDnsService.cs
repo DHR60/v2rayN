@@ -193,12 +193,20 @@ public partial class CoreConfigSingboxService
             && node?.EchConfigList?.Contains("://") == true)
         {
             var idx = node.EchConfigList.IndexOf('+');
-            var queryServerName = idx > 0 ? node.EchConfigList[..idx] : node.Sni;
+            List<string> queryServerNames = new();
+            if (node.ConfigType.IsGroupType())
+            {
+                queryServerNames = (await ProfileGroupItemManager.GetAllChildEchQuerySni(node.IndexId)).ToList();
+            }
+            else
+            {
+                queryServerNames.Add(idx > 0 ? node.EchConfigList[..idx] : node.Sni);
+            }
             singboxConfig.dns.rules.Add(new()
             {
                 query_type = new List<int> { 64, 65 },
                 server = Global.SingboxEchDNSTag,
-                domain = [queryServerName],
+                domain = queryServerNames,
             });
         }
 
