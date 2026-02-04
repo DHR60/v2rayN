@@ -756,7 +756,7 @@ public class ProfilesViewModel : MyReactiveObject
             actionType = ESpeedActionType.Realping;
         }
 
-        var lstSelected = await GetProfileItems(false);
+        var lstSelected = await GetProfileItems(true);
         if (lstSelected == null)
         {
             return;
