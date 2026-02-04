@@ -7,6 +7,7 @@ public class ServerTestItem
     public string? Address { get; set; }
     public int Port { get; set; }
     public EConfigType ConfigType { get; set; }
+    public ECoreType? CoreType { get; set; }
     public bool AllowTest { get; set; }
     public int QueueNum { get; set; }
 }
