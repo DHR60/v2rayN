@@ -80,6 +80,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 Address = it.Address,
                 Port = it.Port,
                 ConfigType = it.ConfigType,
+                CoreType = it.CoreType,
                 QueueNum = selecteds.IndexOf(it)
             });
         }
@@ -353,8 +354,14 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
     private List<List<ServerTestItem>> GetTestBatchItem(List<ServerTestItem> lstSelected, int pageSize)
     {
         List<List<ServerTestItem>> lstTest = new();
-        var lst1 = lstSelected.Where(t => Global.XraySupportConfigType.Contains(t.ConfigType)).ToList();
-        var lst2 = lstSelected.Where(t => Global.SingboxOnlyConfigType.Contains(t.ConfigType)).ToList();
+        var lst1 = lstSelected.Where(t => t.CoreType == ECoreType.Xray).ToList();
+        var lst2 = lstSelected.Where(t => t.CoreType == ECoreType.sing_box).ToList();
+        var remainLst = lstSelected.Except(lst1).Except(lst2).ToList();
+        if (remainLst.Count > 0)
+        {
+            lst1.AddRange(remainLst.Where(t => Global.XraySupportConfigType.Contains(t.ConfigType)).ToList());
+            lst2.AddRange(remainLst.Where(t => Global.SingboxOnlyConfigType.Contains(t.ConfigType)).ToList());
+        }
 
         for (var num = 0; num < (int)Math.Ceiling(lst1.Count * 1.0 / pageSize); num++)
         {
