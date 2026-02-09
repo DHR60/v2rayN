@@ -170,7 +170,8 @@ public static class CoreConfigHandler
                 var ruleOutboundNode = await AppManager.Instance.GetProfileItemViaRemarks(ruleItem.OutboundTag);
                 if (ruleOutboundNode != null)
                 {
-                    await FillNodeContext(context, ruleOutboundNode);
+                    var ruleOutboundNodeAct = await FillNodeContext(context, ruleOutboundNode, false);
+                    context.AllProxiesMap[$"remark:{ruleItem.OutboundTag}"] = ruleOutboundNodeAct;
                 }
             }
         }
