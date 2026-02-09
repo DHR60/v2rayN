@@ -96,9 +96,34 @@ public class GroupProfileManager
             return [];
         }
         var childProfileIds = Utils.String2List(extra.ChildItems)
-            ?.Where(p => !string.IsNullOrEmpty(p)) ?? [];
+            ?.Where(p => !string.IsNullOrEmpty(p))
+            .ToList() ?? [];
+        if (childProfileIds.Count == 0)
+        {
+            return [];
+        }
+
         var childProfiles = await AppManager.Instance.GetProfileItemsByIndexIds(childProfileIds);
-        return childProfiles ?? [];
+        if (childProfiles == null || childProfiles.Count == 0)
+        {
+            return [];
+        }
+
+        var profileMap = childProfiles
+            .Where(p => p != null && !p.IndexId.IsNullOrEmpty())
+            .GroupBy(p => p!.IndexId!)
+            .ToDictionary(g => g.Key, g => g.First());
+
+        var ordered = new List<ProfileItem>(childProfileIds.Count);
+        foreach (var id in childProfileIds)
+        {
+            if (id != null && profileMap.TryGetValue(id, out var item) && item != null)
+            {
+                ordered.Add(item);
+            }
+        }
+
+        return ordered;
     }
 
     private static async Task<List<ProfileItem>> GetSubChildProfileItems(ProtocolExtraItem? extra)
