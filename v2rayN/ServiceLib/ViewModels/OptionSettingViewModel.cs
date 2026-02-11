@@ -59,6 +59,7 @@ public class OptionSettingViewModel : MyReactiveObject
     [Reactive] public string SpeedTestUrl { get; set; }
     [Reactive] public string SpeedPingTestUrl { get; set; }
     [Reactive] public string UdpTestTarget { get; set; }
+    [Reactive] public string TestResultDivisor { get; set; }
     [Reactive] public int MixedConcurrencyCount { get; set; }
     [Reactive] public bool EnableHWA { get; set; }
     [Reactive] public string SubConvertUrl { get; set; }
@@ -194,6 +195,7 @@ public class OptionSettingViewModel : MyReactiveObject
         MixedConcurrencyCount = _config.SpeedTestItem.MixedConcurrencyCount;
         SpeedPingTestUrl = _config.SpeedTestItem.SpeedPingTestUrl;
         UdpTestTarget = _config.SpeedTestItem.UdpTestTarget;
+        TestResultDivisor = _config.SpeedTestItem.TestResultDivisor;
         EnableHWA = _config.GuiItem.EnableHWA;
         SubConvertUrl = _config.ConstItem.SubConvertUrl;
         MainGirdOrientation = (int)_config.UiItem.MainGirdOrientation;
@@ -360,6 +362,7 @@ public class OptionSettingViewModel : MyReactiveObject
         _config.SpeedTestItem.SpeedTestUrl = SpeedTestUrl;
         _config.SpeedTestItem.SpeedPingTestUrl = SpeedPingTestUrl;
         _config.SpeedTestItem.UdpTestTarget = UdpTestTarget;
+        _config.SpeedTestItem.TestResultDivisor = TestResultDivisor;
         _config.GuiItem.EnableHWA = EnableHWA;
         _config.ConstItem.SubConvertUrl = SubConvertUrl;
         _config.UiItem.MainGirdOrientation = (EGirdOrientation)MainGirdOrientation;
