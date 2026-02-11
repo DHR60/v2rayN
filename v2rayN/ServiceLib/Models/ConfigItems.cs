@@ -157,6 +157,7 @@ public class SpeedTestItem
     public int MixedConcurrencyCount { get; set; }
     public string IPAPIUrl { get; set; }
     public string UdpTestTarget { get; set; }
+    public string TestResultDivisor { get; set; } = "1";
 }
 
 [Serializable]
