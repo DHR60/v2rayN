@@ -1699,4 +1699,7 @@
   <data name="TbSettingsUdpTestUrl" xml:space="preserve">
     <value>UDP 测试地址</value>
   </data>
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>测试结果除数</value>
+  </data>
 </root>
