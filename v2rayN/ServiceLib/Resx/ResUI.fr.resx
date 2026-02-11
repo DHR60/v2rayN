@@ -1693,4 +1693,7 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
     <value>Format</value>
   </data>
   <!-- Forked version, additional resx go here -->
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>Test Result Divisor</value>
+  </data>
 </root>

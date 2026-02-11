@@ -153,8 +153,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 {
                     var responseTime = await GetTcpingTime(it.Address, it.Port);
 
-                    ProfileExManager.Instance.SetTestDelay(it.IndexId, responseTime);
-                    await UpdateFunc(it.IndexId, responseTime.ToString());
+                    await UnityUpdateFunc(ESpeedActionType.Tcping, it.IndexId, responseTime);
                 }
                 catch (Exception ex)
                 {
@@ -484,8 +483,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var webProxy = new WebProxy($"socks5://{Global.Loopback}:{it.Port}");
         var responseTime = await ConnectionHandler.GetRealPingTime(_config.SpeedTestItem.SpeedPingTestUrl, webProxy, 10);
 
-        ProfileExManager.Instance.SetTestDelay(it.IndexId, responseTime);
-        await UpdateFunc(it.IndexId, responseTime.ToString());
+        await UnityUpdateFunc(ESpeedActionType.Realping, it.IndexId, responseTime);
         return responseTime;
     }
 
@@ -498,12 +496,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var timeout = _config.SpeedTestItem.SpeedTestTimeout;
         await downloadHandle.DownloadDataAsync(url, webProxy, timeout, async (success, msg) =>
         {
-            decimal.TryParse(msg, out var dec);
-            if (dec > 0)
-            {
-                ProfileExManager.Instance.SetTestSpeed(it.IndexId, dec);
-            }
-            await UpdateFunc(it.IndexId, "", msg);
+            await UnityUpdateFunc(ESpeedActionType.Speedtest, it.IndexId, 0, msg);
         });
     }
 
@@ -520,8 +513,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             // ignored
         }
 
-        ProfileExManager.Instance.SetTestDelay(it.IndexId, responseTime);
-        await UpdateFunc(it.IndexId, responseTime.ToString());
+        await UnityUpdateFunc(ESpeedActionType.UdpTest, it.IndexId, responseTime);
         return responseTime;
     }
 
@@ -570,7 +562,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             var result = await downloadHandle.TryDownloadString(url, webProxy, "");
             if (result == null)
             {
-                await UpdateTestResultFunc(it.IndexId, "unknow");
+                await UnityUpdateFunc(ESpeedActionType.IPGeoTest, it.IndexId, 0, "", "unknow");
                 return null;
             }
 
@@ -578,16 +570,16 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
 
             if (ipInfo.IsNullOrEmpty())
             {
-                await UpdateTestResultFunc(it.IndexId, "unknow");
+                await UnityUpdateFunc(ESpeedActionType.IPGeoTest, it.IndexId, 0, "", "unknow");
                 return null;
             }
 
-            await UpdateTestResultFunc(it.IndexId, ipInfo);
+            await UnityUpdateFunc(ESpeedActionType.IPGeoTest, it.IndexId, 0, "", ipInfo);
             return ipInfo;
         }
         catch
         {
-            await UpdateTestResultFunc(it.IndexId, "unknow");
+            await UnityUpdateFunc(ESpeedActionType.IPGeoTest, it.IndexId, 0, "", "unknow");
             return null;
         }
     }
@@ -625,6 +617,47 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         if (indexId.IsNotEmpty() && result.IsNotEmpty())
         {
             ProfileExManager.Instance.SetTestResult(indexId, result);
+        }
+    }
+
+    private async Task UnityUpdateFunc(ESpeedActionType actionType, string indexId, int delay = 0, string speed = "", string result = "")
+    {
+        var divisor = AppManager.Instance.Config.SpeedTestItem.TestResultDivisor;
+        var divisorValue = 1.0;
+        if (double.TryParse(divisor, out var div) && div > 0)
+        {
+            divisorValue = div;
+        }
+        var finalDelay = (int)(delay / divisorValue);
+        if (indexId.IsNotEmpty())
+        {
+            switch (actionType)
+            {
+                case ESpeedActionType.Tcping:
+                case ESpeedActionType.Realping:
+                case ESpeedActionType.UdpTest:
+                    ProfileExManager.Instance.SetTestDelay(indexId, finalDelay);
+                    await UpdateFunc(indexId, finalDelay.ToString());
+                    break;
+                case ESpeedActionType.Speedtest:
+                    if (decimal.TryParse(speed, out var dec1) && dec1 > 0)
+                    {
+                        ProfileExManager.Instance.SetTestSpeed(indexId, dec1);
+                    }
+                    await UpdateFunc(indexId, "", speed);
+                    break;
+                case ESpeedActionType.Mixedtest:
+                    ProfileExManager.Instance.SetTestDelay(indexId, finalDelay);
+                    if (decimal.TryParse(speed, out var dec2) && dec2 > 0)
+                    {
+                        ProfileExManager.Instance.SetTestSpeed(indexId, dec2);
+                    }
+                    await UpdateFunc(indexId, finalDelay.ToString(), speed);
+                    break;
+                case ESpeedActionType.IPGeoTest:
+                    await UpdateTestResultFunc(indexId, result);
+                    break;
+            }
         }
     }
 }
