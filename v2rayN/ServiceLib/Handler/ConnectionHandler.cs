@@ -38,12 +38,19 @@ public static class ConnectionHandler
             var port = AppManager.Instance.GetLocalPort(EInboundProtocol.socks);
             var webProxy = new WebProxy($"socks5://{Global.Loopback}:{port}");
             var url = AppManager.Instance.Config.SpeedTestItem.SpeedPingTestUrl;
+            var divisor = AppManager.Instance.Config.SpeedTestItem.TestResultDivisor;
+            var divisorValue = 1.0;
+            if (double.TryParse(divisor, out var div) && div > 0)
+            {
+                divisorValue = div;
+            }
 
             for (var i = 0; i < 2; i++)
             {
                 responseTime = await GetRealPingTime(url, webProxy, 10);
                 if (responseTime > 0)
                 {
+                    responseTime = (int)(responseTime / divisorValue);
                     break;
                 }
                 await Task.Delay(500);
