@@ -281,11 +281,10 @@ public sealed class AppManager
         return await SQLiteHelper.Instance.TableAsync<FullConfigTemplateItem>().FirstOrDefaultAsync(it => it.CoreType == eCoreType);
     }
 
+#pragma warning disable CS0618
     public async Task MigrateProfileExtra()
     {
         await MigrateProfileExtraGroup();
-
-#pragma warning disable CS0618
 
         const int pageSize = 100;
         var offset = 0;
@@ -310,7 +309,6 @@ public sealed class AppManager
         }
 
         //await ProfileGroupItemManager.Instance.ClearAll();
-#pragma warning restore CS0618
     }
 
     private async Task<int> MigrateProfileExtraSub(List<ProfileItem> batch)
@@ -356,6 +354,7 @@ public sealed class AppManager
                         break;
 
                     case EConfigType.TUIC:
+                        extra = extra with { CongestionControl = item.HeaderType.NullIfEmpty(), };
                         item.Username = item.Id;
                         item.Id = item.Security;
                         item.Password = item.Security;
@@ -412,7 +411,6 @@ public sealed class AppManager
 
     private async Task<bool> MigrateProfileExtraGroup()
     {
-#pragma warning disable CS0618
         var list = await SQLiteHelper.Instance.TableAsync<ProfileGroupItem>().ToListAsync();
         var groupItems = new ConcurrentDictionary<string, ProfileGroupItem>(list.Where(t => !string.IsNullOrEmpty(t.IndexId)).ToDictionary(t => t.IndexId!));
 
@@ -477,8 +475,8 @@ public sealed class AppManager
         return true;
 
         //await ProfileGroupItemManager.Instance.ClearAll();
-#pragma warning restore CS0618
     }
+#pragma warning restore CS0618
 
     #endregion SqliteHelper
 
