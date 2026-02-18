@@ -1668,4 +1668,7 @@
   <data name="menuGenRegionGroup" xml:space="preserve">
     <value>按區域分組</value>
   </data>
+  <data name="TbUot" xml:space="preserve">
+    <value>UDP over TCP</value>
+  </data>
 </root>
