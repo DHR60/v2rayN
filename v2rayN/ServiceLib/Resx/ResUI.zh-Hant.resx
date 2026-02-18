@@ -1665,4 +1665,7 @@
   <data name="TbFinalmask" xml:space="preserve">
     <value>Finalmask</value>
   </data>
+  <data name="TbUot" xml:space="preserve">
+    <value>UDP over TCP</value>
+  </data>
 </root>
