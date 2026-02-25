@@ -116,11 +116,11 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
 
             foreach (var it in selecteds)
             {
-                if (!Global.XraySupportConfigType.Contains(it.ConfigType))
+                if (!(Global.XraySupportConfigType.Contains(it.ConfigType) || it.ConfigType.IsGroupType()))
                 {
                     continue;
                 }
-                if (it.Port <= 0)
+                if (!it.ConfigType.IsComplexType() && it.Port <= 0)
                 {
                     continue;
                 }
@@ -190,7 +190,7 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                 };
                 if (isBalancer)
                 {
-                    rule.balancerTag = tag;
+                    rule.balancerTag = tag + Global.BalancerTagSuffix;
                     rule.outboundTag = null;
                 }
                 _coreConfig.routing.rules.Add(rule);
