@@ -64,12 +64,12 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         var lstSelected = new List<ServerTestItem>();
         foreach (var it in selecteds)
         {
-            if (it.ConfigType.IsComplexType())
+            if (it.ConfigType == EConfigType.Custom)
             {
                 continue;
             }
 
-            if (it.Port <= 0)
+            if (!it.ConfigType.IsComplexType() && it.Port <= 0)
             {
                 continue;
             }
