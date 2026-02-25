@@ -234,6 +234,7 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
             GenLog();
             GenOutbounds();
 
+            _coreConfig.routing.domainStrategy = Global.AsIs;
             _coreConfig.routing.rules.Clear();
             _coreConfig.inbounds.Clear();
             _coreConfig.inbounds.Add(new()
@@ -243,6 +244,8 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                 port = port,
                 protocol = EInboundProtocol.mixed.ToString(),
             });
+
+            _coreConfig.routing.rules.Add(BuildFinalRule());
 
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
