@@ -70,17 +70,16 @@ public partial class CoreConfigV2rayService
             dnsItem.serveStale = simpleDnsItem?.ServeStale is true ? true : null;
             dnsItem.enableParallelQuery = simpleDnsItem?.ParallelQuery is true ? true : null;
 
-            if (_coreConfig.routing.domainStrategy == Global.IPIfNonMatch)
+            // DNS routing
+            var finalRule = BuildFinalRule();
+            dnsItem.tag = Global.DnsTag;
+            _coreConfig.routing.rules.Add(new()
             {
-                // DNS routing
-                dnsItem.tag = Global.DnsTag;
-                _coreConfig.routing.rules.Add(new RulesItem4Ray
-                {
-                    type = "field",
-                    inboundTag = new List<string> { Global.DnsTag },
-                    outboundTag = Global.ProxyTag,
-                });
-            }
+                type = "field",
+                inboundTag = [Global.DnsTag],
+                outboundTag = finalRule.outboundTag,
+                balancerTag = finalRule.balancerTag
+            });
 
             _coreConfig.dns = dnsItem;
         }
@@ -93,45 +92,6 @@ public partial class CoreConfigV2rayService
     private void FillDnsServers(Dns4Ray dnsItem)
     {
         var simpleDNSItem = context.SimpleDnsItem;
-        static List<string> ParseDnsAddresses(string? dnsInput, string defaultAddress)
-        {
-            var addresses = dnsInput?.Split(dnsInput.Contains(',') ? ',' : ';')
-                .Select(addr => addr.Trim())
-                .Where(addr => !string.IsNullOrEmpty(addr))
-                .Select(addr => addr.StartsWith("dhcp", StringComparison.OrdinalIgnoreCase) ? "localhost" : addr)
-                .Distinct()
-                .ToList() ?? new List<string> { defaultAddress };
-            return addresses.Count > 0 ? addresses : new List<string> { defaultAddress };
-        }
-
-        static object? CreateDnsServer(string dnsAddress, List<string> domains, List<string>? expectedIPs = null)
-        {
-            var (domain, scheme, port, path) = Utils.ParseUrl(dnsAddress);
-            var domainFinal = dnsAddress;
-            int? portFinal = null;
-            if (scheme.IsNullOrEmpty() || scheme.StartsWith("udp", StringComparison.OrdinalIgnoreCase))
-            {
-                domainFinal = domain;
-                portFinal = port > 0 ? port : null;
-            }
-            else if (scheme.StartsWith("tcp", StringComparison.OrdinalIgnoreCase))
-            {
-                domainFinal = scheme + "://" + domain;
-                portFinal = port > 0 ? port : null;
-            }
-            var dnsServer = new DnsServer4Ray
-            {
-                address = domainFinal,
-                port = portFinal,
-                skipFallback = true,
-                domains = domains.Count > 0 ? domains : null,
-                expectedIPs = expectedIPs?.Count > 0 ? expectedIPs : null
-            };
-            return JsonUtils.SerializeToNode(dnsServer, new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
-            });
-        }
 
         var directDNSAddress = ParseDnsAddresses(simpleDNSItem?.DirectDNS, Global.DomainDirectDNSAddress.First());
         var remoteDNSAddress = ParseDnsAddresses(simpleDNSItem?.RemoteDNS, Global.DomainRemoteDNSAddress.First());
@@ -252,17 +212,6 @@ public partial class CoreConfigV2rayService
 
         dnsItem.servers ??= [];
 
-        void AddDnsServers(List<string> dnsAddresses, List<string> domains, List<string>? expectedIPs = null)
-        {
-            if (domains.Count > 0)
-            {
-                foreach (var dnsAddress in dnsAddresses)
-                {
-                    dnsItem.servers.Add(CreateDnsServer(dnsAddress, domains, expectedIPs));
-                }
-            }
-        }
-
         AddDnsServers(remoteDNSAddress, proxyDomainList);
         AddDnsServers(directDNSAddress, directDomainList);
         AddDnsServers(remoteDNSAddress, proxyGeositeList);
@@ -281,6 +230,59 @@ public partial class CoreConfigV2rayService
 
         var defaultDnsServers = useDirectDns ? directDNSAddress : remoteDNSAddress;
         dnsItem.servers.AddRange(defaultDnsServers);
+        return;
+
+        static List<string> ParseDnsAddresses(string? dnsInput, string defaultAddress)
+        {
+            var addresses = dnsInput?.Split(dnsInput.Contains(',') ? ',' : ';')
+                .Select(addr => addr.Trim())
+                .Where(addr => !string.IsNullOrEmpty(addr))
+                .Select(addr => addr.StartsWith("dhcp", StringComparison.OrdinalIgnoreCase) ? "localhost" : addr)
+                .Distinct()
+                .ToList() ?? [defaultAddress];
+            return addresses.Count > 0 ? addresses : new List<string> { defaultAddress };
+        }
+
+        static object? CreateDnsServer(string dnsAddress, List<string> domains, List<string>? expectedIPs = null)
+        {
+            var (domain, scheme, port, path) = Utils.ParseUrl(dnsAddress);
+            var domainFinal = dnsAddress;
+            int? portFinal = null;
+            if (scheme.IsNullOrEmpty() || scheme.StartsWith("udp", StringComparison.OrdinalIgnoreCase))
+            {
+                domainFinal = domain;
+                portFinal = port > 0 ? port : null;
+            }
+            else if (scheme.StartsWith("tcp", StringComparison.OrdinalIgnoreCase))
+            {
+                domainFinal = scheme + "://" + domain;
+                portFinal = port > 0 ? port : null;
+            }
+            var dnsServer = new DnsServer4Ray
+            {
+                address = domainFinal,
+                port = portFinal,
+                skipFallback = true,
+                domains = domains.Count > 0 ? domains : null,
+                expectedIPs = expectedIPs?.Count > 0 ? expectedIPs : null
+            };
+            return JsonUtils.SerializeToNode(dnsServer, new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+            });
+        }
+
+        void AddDnsServers(List<string> dnsAddresses, List<string> domains, List<string>? expectedIPs = null)
+        {
+            if (domains.Count <= 0)
+            {
+                return;
+            }
+            foreach (var dnsAddress in dnsAddresses)
+            {
+                dnsItem.servers.Add(CreateDnsServer(dnsAddress, domains, expectedIPs));
+            }
+        }
     }
 
     private void FillDnsHosts(Dns4Ray dnsItem)
