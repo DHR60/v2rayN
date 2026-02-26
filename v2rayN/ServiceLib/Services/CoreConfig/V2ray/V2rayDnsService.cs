@@ -243,11 +243,17 @@ public partial class CoreConfigV2rayService
             AddDnsServers(bootstrapDNSAddress, dnsServerDomains);
         }
 
-        var useDirectDns = rules?.LastOrDefault() is { } lastRule
-            && lastRule.OutboundTag == Global.DirectTag
-            && (lastRule.Port == "0-65535"
-                || lastRule.Network == "tcp,udp"
-                || lastRule.Ip?.Contains("0.0.0.0/0") == true);
+        var useDirectDns = false;
+
+        if (rules?.LastOrDefault() is { } lastRule && lastRule.OutboundTag == Global.DirectTag)
+        {
+            var noDomain = lastRule.Domain == null || lastRule.Domain.Count == 0;
+            var noProcess = lastRule.Process == null || lastRule.Process.Count == 0;
+            var isAnyIp = lastRule.Ip == null || lastRule.Ip.Count == 0 || lastRule.Ip.Contains("0.0.0.0/0");
+            var isAnyPort = string.IsNullOrEmpty(lastRule.Port) || lastRule.Port == "0-65535";
+            var isAnyNetwork = string.IsNullOrEmpty(lastRule.Network) || lastRule.Network == "tcp,udp";
+            useDirectDns = noDomain && noProcess && isAnyIp && isAnyPort && isAnyNetwork;
+        }
 
         if (!useDirectDns)
         {

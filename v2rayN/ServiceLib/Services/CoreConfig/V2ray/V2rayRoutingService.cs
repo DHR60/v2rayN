@@ -45,7 +45,6 @@ public partial class CoreConfigV2rayService
                         rulesItem.outboundTag = null;
                     }
                 }
-                _coreConfig.routing.rules.Add(BuildFinalRule());
             }
         }
         catch (Exception ex)

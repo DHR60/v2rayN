@@ -60,6 +60,12 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
 
             GenStatistic();
 
+            var finalRule = BuildFinalRule();
+            if (!string.IsNullOrEmpty(finalRule?.balancerTag))
+            {
+                _coreConfig.routing.rules.Add(finalRule);
+            }
+
             ret.Msg = string.Format(ResUI.SuccessfulConfiguration, "");
             ret.Success = true;
             ret.Data = ApplyFullConfigTemplate();
