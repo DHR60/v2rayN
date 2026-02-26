@@ -763,7 +763,8 @@ public class ProfilesViewModel : MyReactiveObject
             return;
         }
 
-        var msgs = await ActionPrecheckManager.Instance.Check(item);
+        var (context, validatorResult) = await CoreConfigContextBuilder.Build(_config, item);
+        var msgs = new List<string>([..validatorResult.Errors, ..validatorResult.Warnings]);
         if (msgs.Count > 0)
         {
             foreach (var msg in msgs)
@@ -771,12 +772,14 @@ public class ProfilesViewModel : MyReactiveObject
                 NoticeManager.Instance.SendMessage(msg);
             }
             NoticeManager.Instance.Enqueue(Utils.List2String(msgs.Take(10).ToList(), true));
-            return;
+            if (!validatorResult.Success)
+            {
+                return;
+            }
         }
 
         if (blClipboard)
         {
-            var context = await CoreConfigHandler.BuildCoreConfigContext(_config, item);
             var result = await CoreConfigHandler.GenerateClientConfig(context, null);
             if (result.Success != true)
             {
@@ -800,7 +803,20 @@ public class ProfilesViewModel : MyReactiveObject
         {
             return;
         }
-        var context = await CoreConfigHandler.BuildCoreConfigContext(_config, item);
+        var (context, validatorResult) = await CoreConfigContextBuilder.Build(_config, item);
+        var msgs = new List<string>([..validatorResult.Errors, ..validatorResult.Warnings]);
+        if (msgs.Count > 0)
+        {
+            foreach (var msg in msgs)
+            {
+                NoticeManager.Instance.SendMessage(msg);
+            }
+            NoticeManager.Instance.Enqueue(Utils.List2String(msgs.Take(10).ToList(), true));
+            if (!validatorResult.Success)
+            {
+                return;
+            }
+        }
         var result = await CoreConfigHandler.GenerateClientConfig(context, fileName);
         if (result.Success != true)
         {
