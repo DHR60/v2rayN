@@ -98,7 +98,7 @@ public static class CoreConfigHandler
         foreach (var testItem in selecteds)
         {
             var node = testItem.Profile;
-            var (actNode, _) = await CoreConfigContextBuilder.FillNodeContext(context, node, true);
+            var (actNode, _) = await CoreConfigContextBuilder.ResolveNodeAsync(context, node, true);
             if (node.IndexId == actNode.IndexId)
             {
                 continue;
