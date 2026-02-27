@@ -1196,15 +1196,22 @@ public static class ConfigHandler
         return 0;
     }
 
-    private const string PolicyGroupDefaultAllFilter = "^(?!.*(?:剩余|过期|到期|重置)).*$";
+    // Matches subscription-info noise words in both Chinese and English.
+    // Chinese: 剩余(remaining), 过期/到期(expired/expiry), 重置(reset)
+    // English: remaining, expir(e/ed/y), reset
+    private const string PolicyGroupExcludeKeywords = @"剩余|过期|到期|重置|[Rr]emaining|[Ee]xpir|[Rr]eset";
+
+    private const string PolicyGroupDefaultAllFilter = $"^(?!.*(?:{PolicyGroupExcludeKeywords})).*$";
 
     /// <summary>
     /// Combines a region pattern with PolicyGroupDefaultAllFilter so results must
-    /// match the region keyword AND not contain expiry/traffic noise words.
-    /// Result pattern: ^(?!.*(?:剩余|过期|到期|重置)).*(?:regionPattern).*$
+    /// match the region keyword AND not contain expiry/traffic noise words (CN + EN).
+    /// Result pattern: ^(?!.*(?:...excludeKeywords...)).*(?:regionPattern).*$
     /// </summary>
     private static string CombineWithDefaultAllFilter(string regionPattern)
-        => $"^(?!.*(?:剩余|过期|到期|重置)).*(?:{regionPattern}).*$";
+    {
+        return $"^(?!.*(?:{PolicyGroupExcludeKeywords})).*(?:{regionPattern}).*$";
+    }
 
     /// <summary>
     /// Create a group server that combines multiple servers for load balancing
