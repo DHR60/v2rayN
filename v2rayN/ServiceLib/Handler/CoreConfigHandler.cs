@@ -94,11 +94,9 @@ public static class CoreConfigHandler
     {
         var result = new RetResult();
         var context = await BuildCoreConfigContext(config, new());
-        var ids = selecteds.Where(serverTestItem => !serverTestItem.IndexId.IsNullOrEmpty())
-            .Select(serverTestItem => serverTestItem.IndexId);
-        var nodes = await AppManager.Instance.GetProfileItemsByIndexIds(ids);
-        foreach (var node in nodes)
+        foreach (var testItem in selecteds)
         {
+            var node = testItem.Profile;
             var actNode = await FillNodeContext(context, node, true);
             if (node.IndexId == actNode.IndexId)
             {
