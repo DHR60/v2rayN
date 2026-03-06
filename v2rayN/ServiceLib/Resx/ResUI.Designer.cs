@@ -3070,6 +3070,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 ICMP routing policy 的本地化字符串。
+        /// </summary>
+        public static string TbIcmpRoutingPolicy {
+            get {
+                return ResourceManager.GetString("TbIcmpRoutingPolicy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 UUID(id) 的本地化字符串。
         /// </summary>
         public static string TbId {

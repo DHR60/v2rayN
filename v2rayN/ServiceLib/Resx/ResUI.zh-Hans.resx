@@ -1677,4 +1677,7 @@
   <data name="menuEditFormat" xml:space="preserve">
     <value>格式化</value>
   </data>
+  <data name="TbIcmpRoutingPolicy" xml:space="preserve">
+    <value>ICMP 路由策略</value>
+  </data>
 </root>
