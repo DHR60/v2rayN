@@ -1,5 +1,7 @@
 using System.Text.Json;
 using System.Xml;
+using AvaloniaEdit.Document;
+using AvaloniaEdit.Editing;
 using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Highlighting.Xshd;
 
@@ -24,6 +26,15 @@ public partial class JsonEditor : UserControl
         set => SetValue(TextProperty, value);
     }
 
+    // opening char -> closing char
+    private static readonly Dictionary<char, char> SPairs = new()
+    {
+        ['{'] = '}',
+        ['['] = ']',
+        ['('] = ')',
+        ['"'] = '"',
+    };
+
     public JsonEditor()
     {
         InitializeComponent();
@@ -46,6 +57,108 @@ public partial class JsonEditor : UserControl
                 Editor.Text = text ?? string.Empty;
             }
         });
+
+        Editor.TextArea.AddHandler(KeyDownEvent, OnPreviewKeyDown, RoutingStrategies.Tunnel);
+        Editor.TextArea.TextEntering += OnTextEntering;
+        Editor.TextArea.TextEntered  += OnTextEntered;
+    }
+
+    private static void OnPreviewKeyDown(object? sender, KeyEventArgs e)
+    {
+        if (e.Key != Key.Back) return;
+
+        var area = (TextArea)sender!;
+        if (!area.Selection.IsEmpty) return;
+
+        var doc = area.Document;
+        var caret = area.Caret.Offset;
+        if (caret <= 0 || caret >= doc.TextLength) return;
+
+        var left = doc.GetCharAt(caret - 1);
+        if (!SPairs.TryGetValue(left, out var right)) return;
+        if (doc.GetCharAt(caret) != right) return;
+
+        doc.Remove(caret - 1, 2);
+        area.Caret.Offset = caret - 1;
+        e.Handled = true;
+    }
+
+    // Before the character is inserted: if user types a closing char that already sits at
+    // the caret (auto-inserted), just skip over it instead of duplicating it.
+    private static void OnTextEntering(object? sender, TextInputEventArgs e)
+    {
+        if (e.Text is not { Length: 1 }) return;
+        var ch = e.Text[0];
+        if (!SPairs.ContainsValue(ch)) return;
+
+        var area = (TextArea)sender!;
+        var doc  = area.Document;
+        var caret = area.Caret.Offset;
+        if (caret < doc.TextLength && doc.GetCharAt(caret) == ch)
+        {
+            // skip over the already-present closing char
+            area.Caret.Offset = caret + 1;
+            e.Handled = true;
+        }
+    }
+
+    // After the character is inserted: auto-insert the matching closing char.
+    private static void OnTextEntered(object? sender, TextInputEventArgs e)
+    {
+        if (e.Text is not { Length: 1 }) return;
+        var ch = e.Text[0];
+        if (!SPairs.TryGetValue(ch, out var closing)) return;
+
+        var area  = (TextArea)sender!;
+        var caret = area.Caret.Offset;
+
+        if (ch == '"' && !ShouldAutoCompleteQuote(area, caret))
+        {
+            return;
+        }
+
+        area.Document.Insert(caret, closing.ToString());
+        // keep caret between the pair
+        area.Caret.Offset = caret;
+    }
+
+    private static bool ShouldAutoCompleteQuote(TextArea area, int caret)
+    {
+        var doc = area.Document;
+        var quoteOffset = caret - 1;
+        if (quoteOffset < 0) return false;
+
+        // Escaped quote (\") should not trigger auto-complete.
+        if (IsEscapedByBackslashes(doc, quoteOffset))
+        {
+            return false;
+        }
+
+        var line = doc.GetLineByOffset(quoteOffset);
+        var start = line.Offset;
+        var end = quoteOffset;
+        var quoteCount = 0;
+        for (var i = start; i <= end; i++)
+        {
+            if (doc.GetCharAt(i) == '"' && !IsEscapedByBackslashes(doc, i))
+            {
+                quoteCount++;
+            }
+        }
+
+        // Odd count means this quote is opening a string in current line context.
+        return (quoteCount & 1) == 1;
+    }
+
+    private static bool IsEscapedByBackslashes(TextDocument doc, int offset)
+    {
+        var slashCount = 0;
+        for (var i = offset - 1; i >= 0 && doc.GetCharAt(i) == '\\'; i--)
+        {
+            slashCount++;
+        }
+
+        return (slashCount & 1) == 1;
     }
 
     private static IHighlightingDefinition BuildHighlighting(bool dark)
