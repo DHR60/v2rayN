@@ -136,6 +136,7 @@
                             x:Name="menuRealPingServer"
                             Header="{x:Static resx:ResUI.menuRealPingServer}"
                             InputGesture="Ctrl+R" />
+                        <MenuItem x:Name="menuUdpTestServer" Header="{x:Static resx:ResUI.menuUdpTestServer}" />
                         <MenuItem
                             x:Name="menuSpeedServer"
                             Header="{x:Static resx:ResUI.menuSpeedServer}"
