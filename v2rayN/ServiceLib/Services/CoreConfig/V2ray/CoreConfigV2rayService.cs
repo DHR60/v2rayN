@@ -163,6 +163,11 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                     listen = Global.Loopback,
                     port = port,
                     protocol = EInboundProtocol.mixed.ToString(),
+                    settings = new Inboundsettings4Ray()
+                    {
+                        udp = true,
+                        auth = "noauth"
+                    },
                 };
                 inbound.tag = inbound.protocol + inbound.port.ToString();
                 _coreConfig.inbounds.Add(inbound);
@@ -254,6 +259,11 @@ public partial class CoreConfigV2rayService(CoreConfigContext context)
                 listen = Global.Loopback,
                 port = port,
                 protocol = EInboundProtocol.mixed.ToString(),
+                settings = new Inboundsettings4Ray()
+                {
+                    udp = true,
+                    auth = "noauth"
+                },
             });
 
             _coreConfig.routing.rules.Add(BuildFinalRule());
