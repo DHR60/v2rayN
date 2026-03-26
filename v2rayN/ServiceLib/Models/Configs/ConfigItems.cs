@@ -160,6 +160,7 @@ public class SpeedTestItem
     public string IPAPIUrl { get; set; }
     public string UdpTestTarget { get; set; }
     public string NatTypeTestUrl { get; set; }
+    public string TestResultDivisor { get; set; } = "1";
 }
 
 [Serializable]
