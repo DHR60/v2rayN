@@ -4654,6 +4654,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Test Result Divisor 的本地化字符串。
+        /// </summary>
+        public static string TbTestResultDivisor {
+            get {
+                return ResourceManager.GetString("TbTestResultDivisor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 UDP over TCP 的本地化字符串。
         /// </summary>
         public static string TbUot {
