@@ -1312,6 +1312,15 @@ namespace ServiceLib.Resx {
         }
         
         /// <summary>
+        ///   查找类似 Test Nat Type 的本地化字符串。
+        /// </summary>
+        public static string menuNatTypeTestServer {
+            get {
+                return ResourceManager.GetString("menuNatTypeTestServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 Open the storage location 的本地化字符串。
         /// </summary>
         public static string menuOpenTheFileLocation {
@@ -4146,6 +4155,15 @@ namespace ServiceLib.Resx {
         public static string TbSettingsN {
             get {
                 return ResourceManager.GetString("TbSettingsN", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 Nat Type Test Url 的本地化字符串。
+        /// </summary>
+        public static string TbSettingsNatTypeTestUrl {
+            get {
+                return ResourceManager.GetString("TbSettingsNatTypeTestUrl", resourceCulture);
             }
         }
         
