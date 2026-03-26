@@ -1735,4 +1735,7 @@
   <data name="TbSettingsNatTypeTestUrl" xml:space="preserve">
     <value>Nat 类型测试地址</value>
   </data>
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>测试结果除数</value>
+  </data>
 </root>
