@@ -1720,4 +1720,7 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="TbSettingsNatTypeTestUrl" xml:space="preserve">
     <value>Nat Type Test Url</value>
   </data>
+  <data name="TbTestResultDivisor" xml:space="preserve">
+    <value>Test Result Divisor</value>
+  </data>
 </root>
