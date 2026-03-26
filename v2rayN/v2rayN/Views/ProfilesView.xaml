@@ -172,6 +172,10 @@
                             Height="{StaticResource MenuItemHeight}"
                             Header="{x:Static resx:ResUI.menuIPGeoTestServer}" />
                         <MenuItem
+                            x:Name="menuNatTypeTestServer"
+                            Height="{StaticResource MenuItemHeight}"
+                            Header="{x:Static resx:ResUI.menuNatTypeTestServer}" />
+                        <MenuItem
                             x:Name="menuSortServerResult"
                             Height="{StaticResource MenuItemHeight}"
                             Header="{x:Static resx:ResUI.menuSortServerResult}" />

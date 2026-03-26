@@ -138,6 +138,10 @@ public static class ConfigHandler
         {
             config.SpeedTestItem.UdpTestTarget = Global.UdpTestTargets.First();
         }
+        if (config.SpeedTestItem.NatTypeTestUrl.IsNullOrEmpty())
+        {
+            config.SpeedTestItem.NatTypeTestUrl = Global.NatTypeTestUrls.First();
+        }
 
         config.Mux4RayItem ??= new()
         {
