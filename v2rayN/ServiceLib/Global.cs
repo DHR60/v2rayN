@@ -654,6 +654,16 @@ public class Global
         "mcbe:bedrock.talonmc.net",
     ];
 
+    public static readonly List<string> NatTypeTestUrls =
+    [
+        "stun.hot-chilli.net",
+        "stun.fitauto.ru",
+        "stun.internetcalls.com",
+        "stun.voip.aebc.com",
+        "stun.voipbuster.com",
+        "stun.voipstunt.com",
+    ];
+
     public static readonly List<string> OutboundTags =
     [
         ProxyTag,
