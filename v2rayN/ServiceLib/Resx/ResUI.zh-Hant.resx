@@ -1708,4 +1708,10 @@
   <data name="TbSettingsUdpTestUrl" xml:space="preserve">
     <value>UDP Test Url</value>
   </data>
+  <data name="menuNatTypeTestServer" xml:space="preserve">
+    <value>Test Nat Type</value>
+  </data>
+  <data name="TbSettingsNatTypeTestUrl" xml:space="preserve">
+    <value>Nat Type Test Url</value>
+  </data>
 </root>

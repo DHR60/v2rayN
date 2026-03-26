@@ -1,4 +1,5 @@
 using ServiceLib.Services.Udp;
+using ServiceLib.Services.Udp.Nat;
 
 namespace ServiceLib.Services;
 
@@ -66,6 +67,10 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
             case ESpeedActionType.IPGeoTest:
                 await RunIPGeoTestBatchAsync(lstSelected, exitLoopKey);
                 break;
+
+            case ESpeedActionType.NatTypeTest:
+                await RunNatTypeTestBatchAsync(lstSelected, exitLoopKey);
+                break;
         }
     }
 
@@ -128,6 +133,7 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                     break;
 
                 case ESpeedActionType.IPGeoTest:
+                case ESpeedActionType.NatTypeTest:
                     await UpdateTestResultFunc(it.IndexId, ResUI.SpeedtestingWait);
                     ProfileExManager.Instance.SetTestResult(it.IndexId, "");
                     break;
@@ -432,6 +438,40 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         }
     }
 
+    private async Task RunNatTypeTestBatchAsync(List<ServerTestItem> lstSelected, string exitLoopKey, int pageSize = 0)
+    {
+        if (pageSize <= 0)
+        {
+            pageSize = lstSelected.Count < Global.SpeedTestPageSize ? lstSelected.Count : Global.SpeedTestPageSize;
+        }
+        var lstTest = GetTestBatchItem(lstSelected, pageSize);
+
+        List<ServerTestItem> lstFailed = new();
+        foreach (var lst in lstTest)
+        {
+            var ret = await RunNatTypeTestAsync(lst, exitLoopKey);
+            if (ret == false)
+            {
+                lstFailed.AddRange(lst);
+            }
+            await Task.Delay(100);
+        }
+
+        //Retest the failed part
+        if (lstFailed.Count > 0)
+        {
+            if (ShouldStopTest(exitLoopKey))
+            {
+                await UpdateFunc("", ResUI.SpeedtestingSkip);
+                return;
+            }
+
+            await UpdateFunc("", string.Format(ResUI.SpeedtestingTestFailedPart, lstFailed.Count));
+
+            await RunIPGeoTestAsync(lstFailed, exitLoopKey);
+        }
+    }
+
     private async Task<bool> RunIPGeoTestAsync(List<ServerTestItem> selecteds, string exitLoopKey)
     {
         ProcessService processService = null;
@@ -461,6 +501,53 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
                 tasks.Add(Task.Run(async () =>
                 {
                     await DoIPGeoTest(downloadHandle, it);
+                }));
+            }
+            await Task.WhenAll(tasks);
+        }
+        catch (Exception ex)
+        {
+            Logging.SaveLog(_tag, ex);
+        }
+        finally
+        {
+            if (processService != null)
+            {
+                await processService?.StopAsync();
+            }
+        }
+        return true;
+    }
+
+    private async Task<bool> RunNatTypeTestAsync(List<ServerTestItem> selecteds, string exitLoopKey)
+    {
+        ProcessService processService = null;
+        var downloadHandle = new DownloadService();
+        try
+        {
+            processService = await CoreManager.Instance.LoadCoreConfigSpeedtest(selecteds);
+            if (processService is null)
+            {
+                return false;
+            }
+            await Task.Delay(1000);
+
+            List<Task> tasks = new();
+            foreach (var it in selecteds)
+            {
+                if (!it.AllowTest)
+                {
+                    continue;
+                }
+
+                if (ShouldStopTest(exitLoopKey))
+                {
+                    return false;
+                }
+
+                tasks.Add(Task.Run(async () =>
+                {
+                    await DoNatTypeTest(downloadHandle, it);
                 }));
             }
             await Task.WhenAll(tasks);
@@ -588,6 +675,29 @@ public class SpeedtestService(Config config, Func<SpeedTestResult, Task> updateF
         catch
         {
             await UpdateTestResultFunc(it.IndexId, "unknow");
+            return null;
+        }
+    }
+
+    private async Task<string?> DoNatTypeTest(DownloadService downloadHandle, ServerTestItem it)
+    {
+        try
+        {
+            var url = AppManager.Instance.Config.SpeedTestItem.NatTypeTestUrl;
+            if (url.IsNullOrEmpty())
+            {
+                url = Global.NatTypeTestUrls.First();
+            }
+            var natTypeTest = new NatTypeTest();
+            await natTypeTest.StartTestAsync(url, it.Port, TimeSpan.FromSeconds(60));
+            var result = natTypeTest.Result;
+            var humanResult = $"BindingSuccess: {result.BindingSuccess}, FilteringBehavior: {result.FilteringBehavior}, MappingBehavior: {result.MappingBehavior}, MappedAddress: {result.MappedAddress}";
+            await UpdateTestResultFunc(it.IndexId, humanResult);
+            return humanResult;
+        }
+        catch (Exception ex)
+        {
+            await UpdateTestResultFunc(it.IndexId, ex.Message);
             return null;
         }
     }
