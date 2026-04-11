@@ -1698,4 +1698,10 @@
   <data name="TbSettingsSendThroughTip" xml:space="preserve">
     <value>For multi-interface environments, enter the local machine's IPv4 address</value>
   </data>
+  <data name="TbAllowInsecureCertFetch" xml:space="preserve">
+    <value>允許不安全獲取證書（自簽名）</value>
+  </data>
+  <data name="TbAllowInsecureCertFetchTips" xml:space="preserve">
+    <value>僅用於抓取自簽證書，存在中間人風險。</value>
+  </data>
 </root>
