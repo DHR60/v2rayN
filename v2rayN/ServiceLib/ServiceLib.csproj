@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<PropertyGroup>
 		<OutputType>Library</OutputType>
@@ -87,5 +87,9 @@
     <ItemGroup>
         <ProjectReference Include="..\ServiceLib.UdpTest\ServiceLib.UdpTest.csproj" />
     </ItemGroup>
+
+	<ItemGroup>
+  		<TrimmerRootDescriptor Include="ILLink.Descriptors.xml" />
+	</ItemGroup>
 
 </Project>
