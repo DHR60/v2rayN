@@ -1732,4 +1732,10 @@ The "Get Certificate" action may fail if a self-signed certificate is used or if
   <data name="menuIPGeoTestServer" xml:space="preserve">
     <value>Test IP Geo</value>
   </data>
+  <data name="menuNatTypeTestServer" xml:space="preserve">
+    <value>Test Nat Type</value>
+  </data>
+  <data name="TbSettingsNatTypeTestUrl" xml:space="preserve">
+    <value>Nat Type Test Url</value>
+  </data>
 </root>
