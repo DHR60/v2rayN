@@ -142,6 +142,7 @@
                             InputGesture="Ctrl+T" />
                         <MenuItem x:Name="menuUdpTestServer" Header="{x:Static resx:ResUI.menuUdpTestServer}" />
                         <MenuItem x:Name="menuIPGeoTestServer" Header="{x:Static resx:ResUI.menuIPGeoTestServer}" />
+                        <MenuItem x:Name="menuNatTypeTestServer" Header="{x:Static resx:ResUI.menuNatTypeTestServer}" />
                         <MenuItem x:Name="menuSortServerResult" Header="{x:Static resx:ResUI.menuSortServerResult}" />
                         <Separator />
                         <MenuItem
