@@ -1735,4 +1735,10 @@
   <data name="menuIPGeoTestServer" xml:space="preserve">
     <value>测试 IP Geo (多选)</value>
   </data>
+  <data name="menuNatTypeTestServer" xml:space="preserve">
+    <value>Nat 类型测试</value>
+  </data>
+  <data name="TbSettingsNatTypeTestUrl" xml:space="preserve">
+    <value>Nat 类型测试地址</value>
+  </data>
 </root>
