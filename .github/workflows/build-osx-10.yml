@@ -1,0 +1,122 @@
+name: release macOS dotnet 10
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - build
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    env:
+      BUILD_MATRIX: |
+        [
+          {"runtime":"osx-x64",  "package_arch":"macos-64-dotnet10",   "self_contained":true},
+          {"runtime":"osx-arm64","package_arch":"macos-arm64-dotnet10","self_contained":true}
+        ]
+      OUTPUT_BASE: ${{ github.workspace }}/v2rayN/Release
+    runs-on: macos-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v6.0.1
+      with:
+        submodules: 'recursive'
+        fetch-depth: '0'
+
+    - name: Setup
+      uses: actions/setup-dotnet@v5
+      with:
+        dotnet-version: '10.0.x'
+
+    - name: Replace net8.0 with net10.0
+      shell: bash
+      run: |
+        find . -name "*.csproj" -type f -print0 | xargs -0 sed -i '' 's/net8\.0/net10\.0/g'
+        find . -name "*.props" -type f -print0 | xargs -0 sed -i '' 's/net8\.0/net10\.0/g'
+
+    - name: Ensure jq
+      run: |
+        brew update
+        brew install jq
+
+    - name: Build all variants
+      shell: bash
+      run: |
+        set -euo pipefail
+        cd v2rayN
+
+        echo "$BUILD_MATRIX" | jq -c '.[]' | while read -r row; do
+          runtime=$(echo "$row" | jq -r '.runtime')
+          package_arch=$(echo "$row" | jq -r '.package_arch')
+          self_contained=$(echo "$row" | jq -r '.self_contained')
+
+          out_dir="${OUTPUT_BASE}/${package_arch}"
+          mkdir -p "$out_dir"
+
+          common_args="-c Release -r ${runtime} -p:SelfContained=true -o \"${out_dir}\""
+
+          echo "==> Building ${package_arch} (RID=${runtime}, SC=${self_contained})"
+
+          # v2rayN.Desktop
+          eval dotnet publish ./v2rayN.Desktop/v2rayN.Desktop.csproj ${common_args}
+
+          # AmazTool：保持原有 Trim 行为
+          amaz_args="${common_args} -p:PublishTrimmed=true"
+          eval dotnet publish ./AmazTool/AmazTool.csproj ${amaz_args}
+        done
+
+    - name: Upload build artifacts (all variants)
+      if: false
+      uses: actions/upload-artifact@v7
+      with:
+        name: v2rayN-all-macos
+        path: "${{ env.OUTPUT_BASE }}/**"
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Package release 7z archive
+      shell: bash
+      run: |
+        set -euo pipefail
+        chmod 755 package-release-7z.sh
+        echo "$BUILD_MATRIX" | jq -c '.[]' | while read -r row; do
+          package_arch=$(echo "$row" | jq -r '.package_arch')
+          out_dir="${OUTPUT_BASE}/${package_arch}"
+          ./package-release-7z.sh "${package_arch}" "${out_dir}" || echo "Warning: Failed to package ${package_arch}, continuing..."
+        done
+
+    - name: Create git tag
+      uses: actions/github-script@v8
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: ${{ github.workspace }}/v2rayN*.7z
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
+        file_glob: true
+        prerelease: true
