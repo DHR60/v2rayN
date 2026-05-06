@@ -5,8 +5,18 @@ OutputPath="$2"
 Version="$3"
 
 FileName="v2rayN-${Arch}.zip"
-wget -nv -O $FileName "https://github.com/2dust/v2rayN-core-bin/raw/refs/heads/master/$FileName"
-7z x $FileName
+URL="https://github.com/2dust/v2rayN-core-bin/raw/refs/heads/master/$FileName"
+
+# Try to download, skip this architecture if failed
+if command -v wget &> /dev/null; then
+    wget -nv -O $FileName "$URL" || { echo "ERROR: Failed to download $FileName, skipping..."; exit 1; }
+elif command -v curl &> /dev/null; then
+    curl -fsSL -o $FileName "$URL" || { echo "ERROR: Failed to download $FileName, skipping..."; exit 1; }
+else
+    echo "ERROR: Neither wget nor curl is available"; exit 1
+fi
+
+7z x $FileName || { echo "ERROR: Failed to extract $FileName"; exit 1; }
 cp -rf v2rayN-${Arch}/* $OutputPath
 
 PackagePath="v2rayN-Package-${Arch}"
