@@ -6,7 +6,7 @@ public partial class NetBridgeView : ReactiveUserControl<NetBridgeViewModel>
     {
         InitializeComponent();
 
-        ViewModel = new NetBridgeViewModel(UpdateViewHandler);
+        ViewModel = new NetBridgeViewModel();
 
         this.WhenActivated(disposables =>
         {
@@ -15,6 +15,13 @@ public partial class NetBridgeView : ReactiveUserControl<NetBridgeViewModel>
             this.Bind(ViewModel, vm => vm.EnableNetBridge, v => v.togEnableNetBridge.IsChecked).DisposeWith(disposables);
             
             this.Bind(ViewModel, vm => vm.RuleProcess, v => v.txtRuleProcess.Text).DisposeWith(disposables);
+
+            ViewModel.Interaction.RegisterHandler(async interaction =>
+            {
+                var (action, obj) = interaction.Input;
+                var result = await UpdateViewHandler(action, obj);
+                interaction.SetOutput(result);
+            }).DisposeWith(disposables);
         });
     }
 

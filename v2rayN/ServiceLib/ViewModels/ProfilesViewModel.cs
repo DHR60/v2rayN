@@ -82,10 +82,9 @@ public class ProfilesViewModel : MyReactiveObject
 
     #region Init
 
-    public ProfilesViewModel(Func<EViewAction, object?, Task<bool>>? updateView)
+    public ProfilesViewModel()
     {
         _config = AppManager.Instance.Config;
-        _updateView = updateView;
 
         #region WhenAnyValue && ReactiveCommand
 
@@ -350,7 +349,7 @@ public class ProfilesViewModel : MyReactiveObject
 
         await RefreshServers();
 
-        await _updateView?.Invoke(EViewAction.ProfilesFocus, null);
+        await Interaction.Handle((EViewAction.ProfilesFocus, null));
     }
 
     private async Task ServerFilterChanged(bool c)
@@ -392,7 +391,7 @@ public class ProfilesViewModel : MyReactiveObject
             SelectedProfile = selected ?? lstModel.First();
         }
 
-        await _updateView?.Invoke(EViewAction.DispatcherRefreshServersBiz, null);
+        await Interaction.Handle((EViewAction.DispatcherRefreshServersBiz, null));
     }
 
     private async Task RefreshSubscriptions()
@@ -493,15 +492,15 @@ public class ProfilesViewModel : MyReactiveObject
         bool? ret = false;
         if (eConfigType == EConfigType.Custom)
         {
-            ret = await _updateView?.Invoke(EViewAction.AddServer2Window, item);
+            ret = await Interaction.Handle((EViewAction.AddServer2Window, item));
         }
         else if (eConfigType.IsGroupType())
         {
-            ret = await _updateView?.Invoke(EViewAction.AddGroupServerWindow, item);
+            ret = await Interaction.Handle((EViewAction.AddGroupServerWindow, item));
         }
         else
         {
-            ret = await _updateView?.Invoke(EViewAction.AddServerWindow, item);
+            ret = await Interaction.Handle((EViewAction.AddServerWindow, item));
         }
         if (ret == true)
         {
@@ -520,7 +519,7 @@ public class ProfilesViewModel : MyReactiveObject
         {
             return;
         }
-        if (await _updateView?.Invoke(EViewAction.ShowYesNo, null) == false)
+        if (await Interaction.Handle((EViewAction.ShowYesNo, null)) == false)
         {
             return;
         }
@@ -541,7 +540,7 @@ public class ProfilesViewModel : MyReactiveObject
 
     private async Task RemoveDuplicateServer()
     {
-        if (await _updateView?.Invoke(EViewAction.ShowYesNo, null) == false)
+        if (await Interaction.Handle((EViewAction.ShowYesNo, null)) == false)
         {
             return;
         }
@@ -616,7 +615,7 @@ public class ProfilesViewModel : MyReactiveObject
             return;
         }
 
-        await _updateView?.Invoke(EViewAction.ShareServer, url);
+        await Interaction.Handle((EViewAction.ShareServer, url));
     }
 
     private async Task GenGroupAllServer()
@@ -785,13 +784,13 @@ public class ProfilesViewModel : MyReactiveObject
             }
             else
             {
-                await _updateView?.Invoke(EViewAction.SetClipboardData, result.Data);
+                await Interaction.Handle((EViewAction.SetClipboardData, result.Data));
                 NoticeManager.Instance.SendMessage(ResUI.OperationSuccess);
             }
         }
         else
         {
-            await _updateView?.Invoke(EViewAction.SaveFileDialog, item);
+            await Interaction.Handle((EViewAction.SaveFileDialog, item));
         }
     }
 
@@ -840,11 +839,11 @@ public class ProfilesViewModel : MyReactiveObject
         {
             if (blEncode)
             {
-                await _updateView?.Invoke(EViewAction.SetClipboardData, Utils.Base64Encode(sb.ToString()));
+                await Interaction.Handle((EViewAction.SetClipboardData, Utils.Base64Encode(sb.ToString())));
             }
             else
             {
-                await _updateView?.Invoke(EViewAction.SetClipboardData, sb.ToString());
+                await Interaction.Handle((EViewAction.SetClipboardData, sb.ToString()));
             }
             NoticeManager.Instance.SendMessage(ResUI.BatchExportURLSuccessfully);
         }
@@ -867,7 +866,7 @@ public class ProfilesViewModel : MyReactiveObject
 
         if (!result.IsNullOrEmpty())
         {
-            await _updateView?.Invoke(EViewAction.SetClipboardData, result);
+            await Interaction.Handle((EViewAction.SetClipboardData, result));
             NoticeManager.Instance.SendMessage(ResUI.BatchExportURLSuccessfully);
         }
         else
@@ -895,7 +894,7 @@ public class ProfilesViewModel : MyReactiveObject
                 return;
             }
         }
-        if (await _updateView?.Invoke(EViewAction.SubEditWindow, item) == true)
+        if (await Interaction.Handle((EViewAction.SubEditWindow, item)) == true)
         {
             await RefreshSubscriptions();
             await SubSelectedChangedAsync(true);
@@ -910,7 +909,7 @@ public class ProfilesViewModel : MyReactiveObject
             return;
         }
 
-        if (await _updateView?.Invoke(EViewAction.ShowYesNo, null) == false)
+        if (await Interaction.Handle((EViewAction.ShowYesNo, null)) == false)
         {
             return;
         }

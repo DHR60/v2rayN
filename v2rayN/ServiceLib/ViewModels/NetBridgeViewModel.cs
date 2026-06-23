@@ -13,10 +13,9 @@ public class NetBridgeViewModel : MyReactiveObject
 
     public ReactiveCommand<Unit, Unit> SaveRulesCmd { get; }
 
-    public NetBridgeViewModel(Func<EViewAction, object?, Task<bool>>? updateView)
+    public NetBridgeViewModel()
     {
         _config = AppManager.Instance.Config;
-        _updateView = updateView;
 
         SaveRulesCmd = ReactiveCommand.CreateFromTask(async () =>
         {

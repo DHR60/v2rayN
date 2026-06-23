@@ -6,7 +6,7 @@ public partial class NetBridgeView
     {
         InitializeComponent();
 
-        ViewModel = new NetBridgeViewModel(UpdateViewHandler);
+        ViewModel = new NetBridgeViewModel();
 
         this.WhenActivated(disposables =>
         {
@@ -16,6 +16,12 @@ public partial class NetBridgeView
             this.Bind(ViewModel, vm => vm.EnabletDnsViaProxy, v => v.togEnabletDnsViaProxy.IsChecked).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.RuleProcess, v => v.txtRuleProcess.Text).DisposeWith(disposables);
 
+            ViewModel.Interaction.RegisterHandler(async interaction =>
+            {
+                var (action, obj) = interaction.Input;
+                var result = await UpdateViewHandler(action, obj);
+                interaction.SetOutput(result);
+            }).DisposeWith(disposables);
         });
     }
 
