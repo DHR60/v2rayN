@@ -67,7 +67,7 @@
                         Margin="{StaticResource MarginLr4}"
                         VerticalContentAlignment="Center"
                         Text="{Binding ServerFilter, Mode=TwoWay}"
-                        Watermark="{x:Static resx:ResUI.MsgServerTitle}" />
+                        PlaceholderText="{x:Static resx:ResUI.MsgServerTitle}" />
                 </WrapPanel>
 
                 <!--  Profiles grid  -->
