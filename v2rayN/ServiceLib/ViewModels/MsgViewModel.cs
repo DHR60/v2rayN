@@ -1,8 +1,8 @@
 namespace ServiceLib.ViewModels;
 
-public class MsgViewModel : MyReactiveObject
+public partial class MsgViewModel : MyReactiveObject
 {
-    public Interaction<string, Unit> DispatcherShowMsgInteraction { get; } = new();
+    public Interaction<string, RxVoid> DispatcherShowMsgInteraction { get; } = new();
 
     private readonly ConcurrentQueue<string> _queueMsg = new();
     private volatile bool _lastMsgFilterNotAvailable;
@@ -10,10 +10,10 @@ public class MsgViewModel : MyReactiveObject
     public int NumMaxMsg { get; } = 500;
 
     [Reactive]
-    public string MsgFilter { get; set; }
+    public partial string MsgFilter { get; set; }
 
     [Reactive]
-    public bool AutoRefresh { get; set; }
+    public partial bool AutoRefresh { get; set; }
 
     public MsgViewModel()
     {

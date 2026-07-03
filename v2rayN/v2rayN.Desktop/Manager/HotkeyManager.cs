@@ -74,9 +74,13 @@ public sealed class HotkeyManager
             }
         }
 
-        _hotKeyManager?.HotKeyPressed
-            .ObserveOn(AvaloniaScheduler.Instance)
-            .Subscribe(OnNext);
+        var observable = _hotKeyManager?.HotKeyPressed
+            .ObserveOn(AvaloniaScheduler.Instance);
+
+        if (observable != null)
+        {
+            ObservableExtensions.Subscribe(observable, OnNext);
+        }
     }
 
     private void OnNext(HotKey key)

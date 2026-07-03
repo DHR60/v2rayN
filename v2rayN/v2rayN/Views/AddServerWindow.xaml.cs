@@ -1,4 +1,3 @@
-using System.Reactive.Disposables;
 using System.Windows.Controls;
 
 namespace v2rayN.Views;
@@ -36,7 +35,8 @@ public partial class AddServerWindow
 
         this.WhenActivated(disposables =>
         {
-            var configTypeBindings = new SerialDisposable().DisposeWith(disposables);
+            var configTypeBindings = new SingleReplaceableDisposable();
+            configTypeBindings.DisposeWith(disposables);
 
             this.Bind(ViewModel, vm => vm.CoreType, v => v.cmbCoreType.Text).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.SelectedSource.Remarks, v => v.txtRemarks.Text).DisposeWith(disposables);
@@ -46,8 +46,8 @@ public partial class AddServerWindow
             this.WhenAnyValue(v => v.ViewModel.SelectedSource.ConfigType)
                 .Subscribe(configType =>
                 {
-                    var currentTypeDisposables = new CompositeDisposable();
-                    configTypeBindings.Disposable = currentTypeDisposables;
+                    var currentTypeDisposables = new MultipleDisposable();
+                    configTypeBindings.Create(currentTypeDisposables);
 
                     switch (configType)
                     {
@@ -178,7 +178,7 @@ public partial class AddServerWindow
             this.BindCommand(ViewModel, vm => vm.SaveCmd, v => v.btnSave).DisposeWith(disposables);
 
             this.WhenAnyValue(v => v.ViewModel.SelectedSource)
-                .WhereNotNull()
+                .KeepNotNull()
                 .Subscribe(InitializeData)
                 .DisposeWith(disposables);
         });

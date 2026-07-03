@@ -37,7 +37,7 @@ public partial class RoutingRuleDetailsWindow : WindowBase<RoutingRuleDetailsVie
             this.BindCommand(ViewModel, vm => vm.SaveCmd, v => v.btnSave).DisposeWith(disposables);
 
             this.WhenAnyValue(v => v.ViewModel.SelectedSource)
-                .WhereNotNull()
+                .KeepNotNull()
                 .Subscribe(InitializeData)
                 .DisposeWith(disposables);
         });
