@@ -25,7 +25,7 @@
                 Width="200"
                 Margin="{StaticResource MarginLr8}"
                 VerticalContentAlignment="Center"
-                Watermark="{x:Static resx:ResUI.ConnectionsHostFilterTitle}" />
+                PlaceholderText="{x:Static resx:ResUI.ConnectionsHostFilterTitle}" />
 
             <Button
                 x:Name="btnConnectionCloseAll"
