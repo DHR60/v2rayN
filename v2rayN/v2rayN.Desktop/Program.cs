@@ -61,6 +61,9 @@ internal class Program
            .UsePlatformDetect()
            //.WithInterFont()
            .WithFontByDefault()
+#if DEBUG
+           .WithDeveloperTools()
+#endif
            .LogToTrace()
            .UseReactiveUI(_ => { });
 
