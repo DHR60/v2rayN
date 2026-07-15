@@ -1,5 +1,6 @@
 using Avalonia.Controls.Notifications;
 using Avalonia.Controls.Primitives;
+using Avalonia.Layout;
 using AvaloniaEdit;
 using Semi.Avalonia;
 
@@ -106,6 +107,7 @@ public partial class ThemeSettingViewModel : MyReactiveObject
             x.OfType<Menu>(),
             x.OfType<ContextMenu>(),
             x.OfType<DataGridRow>(),
+            x.OfType<TableViewRow>(),
             x.OfType<ListBoxItem>(),
             x.OfType<HeaderedContentControl>(),
             x.OfType<TextEditor>()
@@ -122,11 +124,25 @@ public partial class ThemeSettingViewModel : MyReactiveObject
 
     private void ModifyFontSizeEx(double size)
     {
-        //DataGrid
         var rowHeight = 20 + (size / 2);
-        var style = new Style(x => x.OfType<DataGrid>());
-        style.Add(new Setter(DataGrid.RowHeightProperty, rowHeight));
-        Application.Current?.Styles.Add(style);
+        //TableView
+        {
+            var rowStyle = new Style(x => x.OfType<TableViewRow>());
+            rowStyle.Add(new Setter(Layoutable.HeightProperty, rowHeight));
+            rowStyle.Add(new Setter(ContentControl.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+            var cellStyle = new Style(x => x.OfType<TableViewCell>());
+            //cellStyle.Add(new Setter(Layoutable.HeightProperty, rowHeight));
+            cellStyle.Add(new Setter(TemplatedControl.PaddingProperty, new Thickness(2)));
+            cellStyle.Add(new Setter(ContentControl.VerticalContentAlignmentProperty, VerticalAlignment.Center));
+            Application.Current?.Styles.Add(rowStyle);
+            Application.Current?.Styles.Add(cellStyle);
+        }
+        //DataGrid
+        {
+            var style = new Style(x => x.OfType<DataGrid>());
+            style.Add(new Setter(DataGrid.RowHeightProperty, rowHeight));
+            Application.Current?.Styles.Add(style);
+        }
     }
 
     private void ModifyFontFamily()
@@ -147,6 +163,7 @@ public partial class ThemeSettingViewModel : MyReactiveObject
                 x.OfType<Menu>(),
                 x.OfType<ContextMenu>(),
                 x.OfType<DataGridRow>(),
+                x.OfType<TableViewRow>(),
                 x.OfType<ListBoxItem>(),
                 x.OfType<HeaderedContentControl>(),
                 x.OfType<WindowNotificationManager>(),

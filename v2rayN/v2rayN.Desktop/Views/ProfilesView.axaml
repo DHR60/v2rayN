@@ -100,22 +100,17 @@
                 </StackPanel>
 
             </WrapPanel>
-            <DataGrid
+            <TableView
                 x:Name="lstProfiles"
-                AutoGenerateColumns="False"
                 BorderThickness="1"
-                CanUserReorderColumns="True"
                 CanUserResizeColumns="True"
                 Classes.InsetContent="True"
-                GridLinesVisibility="All"
-                HeadersVisibility="All"
-                IsReadOnly="True"
                 ItemsSource="{Binding ProfileItems}">
-                <DataGrid.KeyBindings>
+                <TableView.KeyBindings>
                     <KeyBinding Command="{Binding Export2ShareUrlCmd}" Gesture="Ctrl+C" />
                     <KeyBinding Command="{Binding SetDefaultServerCmd}" Gesture="Enter" />
-                </DataGrid.KeyBindings>
-                <DataGrid.ContextMenu>
+                </TableView.KeyBindings>
+                <TableView.ContextMenu>
                     <ContextMenu>
                         <MenuItem
                             x:Name="menuSetDefaultServer"
@@ -205,20 +200,16 @@
                             <MenuItem x:Name="menuGenGroupRegionServer" Header="{x:Static resx:ResUI.menuGenRegionGroup}" />
                         </MenuItem>
                     </ContextMenu>
-                </DataGrid.ContextMenu>
+                </TableView.ContextMenu>
 
-                <DataGrid.Columns>
-                    <DataGridTextColumn
+                <TableView.Columns>
+                    <TableViewColumn
                         Width="80"
                         Binding="{Binding ConfigType}"
-                        Header="{x:Static resx:ResUI.LvServiceType}"
-                        Tag="ConfigType" />
+                        Header="{x:Static resx:ResUI.LvServiceType}" />
 
-                    <DataGridTemplateColumn SortMemberPath="Remarks" Tag="Remarks">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{x:Static resx:ResUI.LvRemarks}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
+                    <TableViewColumn Header="{x:Static resx:ResUI.LvRemarks}">
+                        <TableViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Margin="{StaticResource MarginLr8}" Orientation="Horizontal">
                                     <Label
@@ -233,39 +224,31 @@
                                         Text="{Binding Remarks}" />
                                 </StackPanel>
                             </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                        </TableViewColumn.CellTemplate>
+                    </TableViewColumn>
 
-                    <DataGridTextColumn
+                    <TableViewColumn
                         Width="120"
                         Binding="{Binding Address}"
-                        Header="{x:Static resx:ResUI.LvAddress}"
-                        Tag="Address" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvAddress}" />
+                    <TableViewColumn
                         Width="60"
                         Binding="{Binding Port}"
-                        Header="{x:Static resx:ResUI.LvPort}"
-                        Tag="Port" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvPort}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding Network}"
-                        Header="{x:Static resx:ResUI.LvTransportProtocol}"
-                        Tag="Network" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvTransportProtocol}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding StreamSecurity}"
-                        Header="{x:Static resx:ResUI.LvTLS}"
-                        Tag="StreamSecurity" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvTLS}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding SubRemarks}"
-                        Header="{x:Static resx:ResUI.LvSubscription}"
-                        Tag="SubRemarks" />
-                    <DataGridTemplateColumn SortMemberPath="Delay" Tag="DelayVal">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{x:Static resx:ResUI.LvTestDelay}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
+                        Header="{x:Static resx:ResUI.LvSubscription}" />
+                    <TableViewColumn Header="{x:Static resx:ResUI.LvTestDelay}">
+                        <TableViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock
                                     Margin="{StaticResource MarginLr8}"
@@ -274,50 +257,42 @@
                                     Foreground="{Binding Delay, Converter={StaticResource DelayColorConverter}}"
                                     Text="{Binding Path=DelayVal, Mode=OneWay}" />
                             </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
-                    <DataGridTextColumn
+                        </TableViewColumn.CellTemplate>
+                    </TableViewColumn>
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding SpeedVal}"
-                        Header="{x:Static resx:ResUI.LvTestSpeed}"
-                        Tag="SpeedVal" />
+                        Header="{x:Static resx:ResUI.LvTestSpeed}" />
 
-                    <DataGridTemplateColumn SortMemberPath="IpInfo" Tag="IpInfo">
-                        <DataGridTemplateColumn.Header>
-                            <TextBlock Text="{x:Static resx:ResUI.LvTestIpInfo}" />
-                        </DataGridTemplateColumn.Header>
-                        <DataGridTemplateColumn.CellTemplate>
+                    <TableViewColumn Header="{x:Static resx:ResUI.LvTestIpInfo}">
+                        <TableViewColumn.CellTemplate>
                             <DataTemplate>
                                 <SelectableTextBlock
                                     Margin="{StaticResource MarginLr8}"
                                     VerticalAlignment="Center"
                                     Text="{Binding Path=IpInfo, Mode=OneWay}" />
                             </DataTemplate>
-                        </DataGridTemplateColumn.CellTemplate>
-                    </DataGridTemplateColumn>
+                        </TableViewColumn.CellTemplate>
+                    </TableViewColumn>
 
-                    <DataGridTextColumn
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding TodayUp}"
-                        Header="{x:Static resx:ResUI.LvTodayUploadDataAmount}"
-                        Tag="TodayUp" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvTodayUploadDataAmount}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding TodayDown}"
-                        Header="{x:Static resx:ResUI.LvTodayDownloadDataAmount}"
-                        Tag="TodayDown" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvTodayDownloadDataAmount}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding TotalUp}"
-                        Header="{x:Static resx:ResUI.LvTotalUploadDataAmount}"
-                        Tag="TotalUp" />
-                    <DataGridTextColumn
+                        Header="{x:Static resx:ResUI.LvTotalUploadDataAmount}" />
+                    <TableViewColumn
                         Width="100"
                         Binding="{Binding TotalDown}"
-                        Header="{x:Static resx:ResUI.LvTotalDownloadDataAmount}"
-                        Tag="TotalDown" />
-                </DataGrid.Columns>
-            </DataGrid>
+                        Header="{x:Static resx:ResUI.LvTotalDownloadDataAmount}" />
+                </TableView.Columns>
+            </TableView>
         </DockPanel>
     </Grid>
 </UserControl>

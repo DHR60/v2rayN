@@ -1,3 +1,4 @@
+using Avalonia.Collections;
 using Avalonia.VisualTree;
 using DialogHostAvalonia;
 using v2rayN.Desktop.Common;
@@ -21,8 +22,8 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
         lstProfiles.KeyDown += LstProfiles_KeyDown;
         lstProfiles.SelectionChanged += lstProfiles_SelectionChanged;
         lstProfiles.DoubleTapped += LstProfiles_DoubleTapped;
-        lstProfiles.LoadingRow += LstProfiles_LoadingRow;
-        lstProfiles.Sorting += LstProfiles_Sorting;
+        //lstProfiles.LoadingRow += LstProfiles_LoadingRow;
+        //lstProfiles.Sorting += LstProfiles_Sorting;
         if (_config.UiItem.EnableDragDropSort)
         {
             lstProfiles.SetValue(DragDrop.AllowDropProperty, true);
@@ -186,7 +187,8 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
     {
         if (lstProfiles.SelectedIndex >= 0)
         {
-            lstProfiles.ScrollIntoView(lstProfiles.SelectedItem, null);
+            //lstProfiles.ScrollIntoView(lstProfiles.SelectedItem, null);
+            lstProfiles.ScrollIntoView(lstProfiles.SelectedItem);
         }
     }
 
@@ -326,14 +328,14 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
             //First scroll horizontally to the initial position to avoid the control crash bug
             if (lstProfiles.SelectedIndex >= 0)
             {
-                lstProfiles.ScrollIntoView(lstProfiles.SelectedItem, lstProfiles.Columns[0]);
+                lstProfiles.ScrollIntoView(lstProfiles.SelectedIndex);
             }
             else
             {
                 var model = lstProfiles.ItemsSource.Cast<ProfileItemModel>();
                 if (model.Any())
                 {
-                    lstProfiles.ScrollIntoView(model.First(), lstProfiles.Columns[0]);
+                    lstProfiles.ScrollIntoView(model.First());
                 }
                 else
                 {
@@ -343,7 +345,8 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
 
             foreach (var it in lstProfiles.Columns)
             {
-                it.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                //it.Width = new DataGridLength(1, DataGridLengthUnitType.Auto);
+                it.Width = new GridLength(1, GridUnitType.Auto);
             }
         }
         catch (Exception ex)
@@ -366,40 +369,47 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
 
     private void RestoreUI()
     {
+        return;
         try
         {
             var lvColumnItem = _config.UiItem.MainColumnItem.OrderBy(t => t.Index).ToList();
-            var displayIndex = 0;
+            //var displayIndex = 0;
+
+            var lstColumns = new AvaloniaList<TableViewColumn>();
             foreach (var item in lvColumnItem)
             {
-                foreach (var item2 in lstProfiles.Columns)
+                foreach (var item2 in lstProfiles.Columns ?? [])
                 {
-                    if (item2.Tag == null)
+                    if (item2.Header == null)
                     {
                         continue;
                     }
-                    if (item2.Tag.Equals(item.Name))
+                    if (!item2.Header.Equals(item.Name))
                     {
-                        if (item.Width < 0)
-                        {
-                            item2.IsVisible = false;
-                        }
-                        else
-                        {
-                            item2.Width = new DataGridLength(item.Width, DataGridLengthUnitType.Pixel);
-                            item2.DisplayIndex = displayIndex++;
-                        }
-                        if (item.Name.StartsWith("to", StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            item2.IsVisible = _config.GuiItem.EnableStatistics;
-                        }
-                        if (item.Name.Equals("IpInfo", StringComparison.CurrentCultureIgnoreCase))
-                        {
-                            item2.IsVisible = _config.SpeedTestItem.IPAPIUrl.IsNotEmpty() && !_config.UiItem.HideColumnIpInfo;
-                        }
+                        continue;
                     }
+                    if (item.Width < 0)
+                    {
+                        item2.IsVisible = false;
+                    }
+                    else
+                    {
+                        item2.Width = new GridLength(item.Width, GridUnitType.Pixel);
+                        //item2.DisplayIndex = displayIndex++;
+                    }
+                    if (item.Name.StartsWith("to", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        item2.IsVisible = _config.GuiItem.EnableStatistics;
+                    }
+                    if (item.Name.Equals("IpInfo", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        item2.IsVisible = _config.SpeedTestItem.IPAPIUrl.IsNotEmpty() && !_config.UiItem.HideColumnIpInfo;
+                    }
+                    lstColumns.Add(item2);
                 }
             }
+
+            lstProfiles.Columns = lstColumns;
         }
         catch (Exception ex)
         {
@@ -409,20 +419,23 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
 
     private void StorageUI()
     {
+        return;
         try
         {
             List<ColumnItem> lvColumnItem = [];
+            var index = 0;
             foreach (var item2 in lstProfiles.Columns)
             {
-                if (item2.Tag == null)
+                if (item2.Header == null)
                 {
                     continue;
                 }
+                index += 1;
                 lvColumnItem.Add(new()
                 {
-                    Name = (string)item2.Tag,
+                    Name = (string)item2.Header,
                     Width = (int)(item2.IsVisible == true ? item2.ActualWidth : -1),
-                    Index = item2.DisplayIndex
+                    Index = index,
                 });
             }
             _config.UiItem.MainColumnItem = lvColumnItem;
@@ -484,7 +497,7 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
             {
                 return;
             }
-            var row = visualSource.FindAncestorOfType<DataGridRow>(true);
+            var row = visualSource.FindAncestorOfType<TableViewRow>(true);
             if (row?.DataContext == null)
             {
                 return;
@@ -549,7 +562,7 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
             return;
         }
 
-        var targetRow = visualTarget.FindAncestorOfType<DataGridRow>(true);
+        var targetRow = visualTarget.FindAncestorOfType<TableViewRow>(true);
         if (targetRow is not { DataContext: ProfileItemModel targetItem })
         {
             return;
