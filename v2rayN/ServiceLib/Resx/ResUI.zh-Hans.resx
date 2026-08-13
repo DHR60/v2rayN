@@ -1897,4 +1897,7 @@
   <data name="menuAddMasqueServer" xml:space="preserve">
     <value>添加 [MASQUE]</value>
   </data>
+  <data name="LvPreResolve" xml:space="preserve">
+    <value>预解析节点域名</value>
+  </data>
 </root>
