@@ -195,6 +195,7 @@ public partial class UpdateService(Config config, Func<bool, string, Task> updat
                 if (remoteVersion > lockedMaxVersion)
                 {
                     var fallbackRelease = gitHubReleases?
+                        .Where(r => preRelease || !r.Prerelease)
                         .Select(r => new { Release = r, IsValid = SemanticVersion.TryParse(r.TagName, out var v), Version = v })
                         .Where(x => x.IsValid && x.Version <= coreInfo.LockedMaxVersion)
                         .MaxBy(x => x.Version)?
