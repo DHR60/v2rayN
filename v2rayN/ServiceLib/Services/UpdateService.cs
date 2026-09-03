@@ -174,7 +174,7 @@ public partial class UpdateService(Config config, Func<bool, string, Task> updat
     {
         var coreInfo = CoreInfoManager.Instance.GetCoreInfo(type);
         var tagName = string.Empty;
-        if (preRelease)
+        if (preRelease || coreInfo?.LockedMaxVersion != null)
         {
             var url = coreInfo?.ReleaseApiUrl;
             var result = await downloadHandle.TryDownloadString(url, true, Global.AppName);
@@ -187,6 +187,23 @@ public partial class UpdateService(Config config, Func<bool, string, Task> updat
             var gitHubRelease = preRelease ? gitHubReleases?.First() : gitHubReleases?.First(r => r.Prerelease == false);
             tagName = gitHubRelease?.TagName;
             //var body = gitHubRelease?.Body;
+
+            if (coreInfo?.LockedMaxVersion != null)
+            {
+                var lockedMaxVersion = coreInfo.LockedMaxVersion;
+                var remoteVersion = new SemanticVersion(tagName);
+                if (remoteVersion > lockedMaxVersion)
+                {
+                    var fallbackRelease = gitHubReleases?
+                        .Select(r => new { Release = r, IsValid = SemanticVersion.TryParse(r.TagName, out var v), Version = v })
+                        .Where(x => x.IsValid && x.Version <= coreInfo.LockedMaxVersion)
+                        .MaxBy(x => x.Version)?
+                        .Release;
+
+                    gitHubRelease = fallbackRelease;
+                    tagName = gitHubRelease?.TagName;
+                }
+            }
         }
         else
         {

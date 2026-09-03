@@ -1,6 +1,6 @@
 namespace ServiceLib.Models.Dto;
 
-public class SemanticVersion : IEquatable<SemanticVersion>
+public class SemanticVersion : IEquatable<SemanticVersion>, IComparable
 {
     private readonly string? build;
     private readonly int major;
@@ -85,6 +85,20 @@ public class SemanticVersion : IEquatable<SemanticVersion>
         return major == other.major && minor == other.minor && patch == other.patch && prerelease == other.prerelease;
     }
 
+    public static bool TryParse(string? version, out SemanticVersion? result)
+    {
+        try
+        {
+            result = new SemanticVersion(version);
+            return true;
+        }
+        catch
+        {
+            result = null;
+            return false;
+        }
+    }
+
     public override bool Equals(object? obj)
     {
         return obj is SemanticVersion other && Equals(other);
@@ -156,6 +170,19 @@ public class SemanticVersion : IEquatable<SemanticVersion>
             return patch.CompareTo(other.patch);
         }
         return ComparePreRelease(prerelease, other.prerelease);
+    }
+
+    public int CompareTo(object? obj)
+    {
+        if (obj is null)
+        {
+            return 1;
+        }
+        if (obj is SemanticVersion other)
+        {
+            return CompareTo(other);
+        }
+        throw new ArgumentException("Object is not a SemanticVersion");
     }
 
     private static int ComparePreRelease(string? left, string? right)
