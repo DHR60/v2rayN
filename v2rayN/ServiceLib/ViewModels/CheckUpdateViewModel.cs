@@ -193,7 +193,7 @@ public partial class CheckUpdateViewModel : MyReactiveObject
                 }
                 await CheckUpdateN(EnableCheckPreReleaseUpdate);
             }
-            else if (item.CoreType == ECoreType.Xray)
+            else if (item.CoreType is ECoreType.Xray or ECoreType.sing_box)
             {
                 await CheckUpdateCore(item, EnableCheckPreReleaseUpdate);
             }
