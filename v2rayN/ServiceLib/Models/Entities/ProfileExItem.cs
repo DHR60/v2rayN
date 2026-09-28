@@ -1,9 +1,8 @@
 namespace ServiceLib.Models.Entities;
 
-[Serializable]
 public class ProfileExItem
 {
-    [PrimaryKey]
+    [Key]
     public string IndexId { get; set; }
 
     public int Delay { get; set; }

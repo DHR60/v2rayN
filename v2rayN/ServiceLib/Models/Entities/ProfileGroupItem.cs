@@ -1,10 +1,9 @@
 namespace ServiceLib.Models.Entities;
 
 [Obsolete("Use ProtocolExtraItem instead.")]
-[Serializable]
 public class ProfileGroupItem
 {
-    [PrimaryKey]
+    [Key]
     public string IndexId { get; set; }
 
     public string ChildItems { get; set; }

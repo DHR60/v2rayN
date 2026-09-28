@@ -1,6 +1,5 @@
 namespace ServiceLib.Models.Entities;
 
-[Serializable]
 public class ProfileItem
 {
     private ProtocolExtraItem? _protocolExtraCache;
@@ -153,7 +152,7 @@ public class ProfileItem
 
     #endregion function
 
-    [PrimaryKey]
+    [Key]
     public string IndexId { get; set; }
 
     public EConfigType ConfigType { get; set; }

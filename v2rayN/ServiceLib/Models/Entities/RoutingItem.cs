@@ -1,9 +1,8 @@
 namespace ServiceLib.Models.Entities;
 
-[Serializable]
 public class RoutingItem
 {
-    [PrimaryKey]
+    [Key]
     public string Id { get; set; }
 
     public string Remarks { get; set; }
