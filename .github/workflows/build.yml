@@ -41,6 +41,7 @@ jobs:
         ${{
           case(
             inputs.target == 'windows', '-p:EnableWindowsTargeting=true',
+            inputs.target == 'linux', (matrix.arch == 'arm64' && '-p:LinkerFlavor=lld -p:ObjCopyName=llvm-objcopy' || ''),
             ''
           )
         }}
@@ -71,25 +72,110 @@ jobs:
     - name: Setup .NET
       uses: actions/setup-dotnet@v6
       with:
-        dotnet-version: 10.0.1xx
-        
-    - name: Build v2rayN
-      shell: bash
-      working-directory: ./v2rayN
-      run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt -o $Output
+        dotnet-version: 10.0.x
 
-    - name: Build AmazTool
+    - name: Install dependencies
+      shell: bash
+      if: inputs.target == 'linux'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y clang zlib1g-dev build-essential
+
+    - name: Install dependencies cross-arch
+      shell: bash
+      if: inputs.target == 'linux' && matrix.arch == 'arm64'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y lld llvm binutils-aarch64-linux-gnu gcc-aarch64-linux-gnu g++-aarch64-linux-gnu libc6-dev-arm64-cross
+        
+    # - name: Build v2rayN
+    #   shell: bash
+    #   working-directory: ./v2rayN
+    #   run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt -o $Output
+
+    # - name: Build AmazTool
+    #   shell: bash
+    #   working-directory: ./v2rayN
+    #   run: dotnet publish ./AmazTool/AmazTool.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true $ExtOpt -o $Output
+
+    - name: Build AmazTool (AOT)
       shell: bash
       working-directory: ./v2rayN
-      run: dotnet publish ./AmazTool/AmazTool.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true $ExtOpt -o $Output
+      run: dotnet publish ./AmazTool/AmazTool.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true -p:PublishAot=true $ExtOpt -o $Output
+
+    - name: Build v2rayN WPF
+      shell: bash
+      if: inputs.project == './v2rayN/v2rayN.csproj'
+      working-directory: ./v2rayN
+      run: dotnet publish ./v2rayN/v2rayN.csproj -c Release -r $RID -p:SelfContained=true $ExtOpt -o $Output
+
+    - name: Build v2rayN Desktop (AOT)
+      shell: bash
+      if: inputs.project == './v2rayN.Desktop/v2rayN.Desktop.csproj'
+      working-directory: ./v2rayN
+      run: dotnet publish ./v2rayN.Desktop/v2rayN.Desktop.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true -p:PublishAot=true $ExtOpt -o $Output
 
     - name: Remove Debug Symbols
       shell: bash
+      if: false
       run: |
         find ${{ matrix.arch }} -type f -name '*.pdb' -delete
+        find ${{ matrix.arch }} -type f -name '*.debug' -delete
+        find ${{ matrix.arch }} -type f -name '*.sym' -delete
+        find ${{ matrix.arch }} -type f -name '*.dSYM' -exec rm -rf {} +
 
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7
       with:
         name: ${{ matrix.arch }}
         path: ${{ matrix.arch }}
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Set artifact name
+      id: set-artifact-name
+      shell: bash
+      run: |
+        if [[ "${{ inputs.target }}" == "windows" && "${{ inputs.project }}" == "./v2rayN.Desktop/v2rayN.Desktop.csproj" ]]; then
+          echo "ARTIFACT_NAME=v2rayN-${{ inputs.target }}-${{ matrix.arch }}-Desktop.7z" >> "$GITHUB_OUTPUT"
+        else
+          echo "ARTIFACT_NAME=v2rayN-${{ inputs.target }}-${{ matrix.arch }}.7z" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Package release 7z archive
+      shell: bash
+      run: |
+        set -euo pipefail
+        7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=32m -ms=on ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }} ${{ matrix.arch }}
+
+    - name: Create git tag
+      uses: actions/github-script@v8
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
+        file_glob: true
+        prerelease: true

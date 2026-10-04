@@ -243,5 +243,3 @@ jobs:
       release_tag: ${{ inputs.release_tag }}
       artifact_name: release-windows-x86-${{ matrix.flavor }}
       file_pattern: '*.zip'
-    secrets:
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}

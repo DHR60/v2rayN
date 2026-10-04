@@ -17,8 +17,6 @@ jobs:
     uses: ./.github/workflows/pub-key.yml
     with:
       release_tag: ${{ inputs.release_tag }}
-    secrets:
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
 
   update:
     runs-on: ubuntu-latest
