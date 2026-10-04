@@ -9,9 +9,6 @@ on:
       target: # windows linux macos windows-desktop
         required: true
         type: string
-    secrets:
-      GPG_PRIVATE_KEY:
-        required: true
 
 permissions:
   contents: write
@@ -77,5 +74,3 @@ jobs:
       release_tag: ${{ inputs.release_tag }}
       artifact_name: release-${{ inputs.target }}-${{ matrix.arch }}
       file_pattern: '*.zip'
-    secrets:
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}

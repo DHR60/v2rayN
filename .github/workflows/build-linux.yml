@@ -8,7 +8,7 @@ on:
         type: string
   push:
     branches:
-      - master
+      - build
 
 permissions:
   contents: write
@@ -507,39 +507,33 @@ jobs:
     needs: deb
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-deb, file_pattern: "*.deb" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-rpm:
     name: sign and upload rpm x64 arm64
     needs: rpm
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-rpm, file_pattern: "*.rpm" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-rpm-riscv64:
     name: sign and upload rpm riscv64
     needs: rpm-riscv64
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-rpm-riscv64, file_pattern: "*.rpm" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-deb-riscv64:
     name: sign and upload deb riscv64
     needs: deb-riscv64
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-deb-riscv64, file_pattern: "*.deb" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-deb-loong64:
     name: sign and upload deb loong64
     needs: deb-loong64
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-deb-loong64, file_pattern: "*.deb" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-rpm-loong64:
     name: sign and upload rpm loong64
     needs: rpm-loong64
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ case(inputs.release_tag != '', inputs.release_tag, github.ref_name) }}", artifact_name: release-rpm-loong64, file_pattern: "*.rpm" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
