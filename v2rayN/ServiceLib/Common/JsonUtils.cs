@@ -7,40 +7,45 @@ public class JsonUtils
     private static readonly JsonSerializerOptions _defaultDeserializeOptions = new()
     {
         PropertyNameCaseInsensitive = true,
-        ReadCommentHandling = JsonCommentHandling.Skip
+        ReadCommentHandling = JsonCommentHandling.Skip,
+        TypeInfoResolver = AppJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions _defaultSerializeOptions = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AppJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions _defaultSerializeNoIndentedOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AppJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions _nullValueSerializeOptions = new()
     {
         WriteIndented = true,
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AppJsonContext.Default,
     };
 
     private static readonly JsonSerializerOptions _nullValueSerializeNoIndentedOptions = new()
     {
         WriteIndented = false,
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        TypeInfoResolver = AppJsonContext.Default,
     };
 
     private static readonly JsonDocumentOptions _defaultDocumentOptions = new()
     {
-        CommentHandling = JsonCommentHandling.Skip
+        CommentHandling = JsonCommentHandling.Skip,
     };
 
     /// <summary>
@@ -163,8 +168,78 @@ public class JsonUtils
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public static JsonNode? SerializeToNode(object? obj, JsonSerializerOptions? options = null)
+    public static JsonNode? SerializeToNode<T>(T? obj, JsonSerializerOptions? options = null)
     {
-        return JsonSerializer.SerializeToNode(obj, options);
+        return JsonSerializer.SerializeToNode(obj, options ?? _defaultSerializeOptions);
+    }
+
+    public static JsonArray? SerializeToArray(IEnumerable<string>? values)
+    {
+        if (values is null)
+        {
+            return null;
+        }
+        var array = new JsonArray();
+        foreach (var value in values)
+        {
+            array.Add(value);
+        }
+        return array;
     }
 }
+
+[JsonSerializable(typeof(Config))]
+[JsonSerializable(typeof(RulesItem))]
+[JsonSerializable(typeof(ProfileItem))]
+[JsonSerializable(typeof(List<RulesItem>))]
+[JsonSerializable(typeof(List<ProfileItem>))]
+[JsonSerializable(typeof(RoutingTemplate))]
+[JsonSerializable(typeof(DNSItem))]
+[JsonSerializable(typeof(SimpleDNSItem))]
+[JsonSerializable(typeof(IPAPIInfo))]
+[JsonSerializable(typeof(SsSIP008))]
+[JsonSerializable(typeof(List<SsServer>))]
+[JsonSerializable(typeof(SsServer))]
+[JsonSerializable(typeof(VmessQRCode))]
+[JsonSerializable(typeof(ClashProxies))]
+[JsonSerializable(typeof(ClashProviders))]
+[JsonSerializable(typeof(ClashConnections))]
+[JsonSerializable(typeof(ProtocolExtraItem))]
+[JsonSerializable(typeof(TransportExtraItem))]
+[JsonSerializable(typeof(TrafficItem))]
+[JsonSerializable(typeof(V2rayMetricsVars))]
+[JsonSerializable(typeof(V2rayMetricsVarsLink))]
+[JsonSerializable(typeof(GitHubRelease))]
+[JsonSerializable(typeof(List<GitHubRelease>))]
+[JsonSerializable(typeof(ServerStatItem))]
+[JsonSerializable(typeof(WebDavItem))]
+[JsonSerializable(typeof(KeyEventItem))]
+[JsonSerializable(typeof(SubItem))]
+[JsonSerializable(typeof(SingboxConfig))]
+[JsonSerializable(typeof(Dns4Sbox))]
+[JsonSerializable(typeof(Inbound4Sbox))]
+[JsonSerializable(typeof(List<Inbound4Sbox>))]
+[JsonSerializable(typeof(Endpoints4Sbox))]
+[JsonSerializable(typeof(List<Endpoints4Sbox>))]
+[JsonSerializable(typeof(Outbound4Sbox))]
+[JsonSerializable(typeof(List<Outbound4Sbox>))]
+[JsonSerializable(typeof(Rule4Sbox))]
+[JsonSerializable(typeof(Ruleset4Sbox))]
+[JsonSerializable(typeof(List<Rule4Sbox>))]
+[JsonSerializable(typeof(List<Ruleset4Sbox>))]
+[JsonSerializable(typeof(V2rayConfig))]
+[JsonSerializable(typeof(Dns4Ray))]
+[JsonSerializable(typeof(DnsServer4Ray))]
+[JsonSerializable(typeof(Inbounds4Ray))]
+[JsonSerializable(typeof(List<Inbounds4Ray>))]
+[JsonSerializable(typeof(Outbounds4Ray))]
+[JsonSerializable(typeof(List<Outbounds4Ray>))]
+[JsonSerializable(typeof(RulesItem4Ray))]
+[JsonSerializable(typeof(List<RulesItem4Ray>))]
+[JsonSerializable(typeof(Finalmask4Ray))]
+[JsonSerializable(typeof(JsonNode))]
+[JsonSerializable(typeof(JsonObject))]
+[JsonSerializable(typeof(JsonArray))]
+[JsonSerializable(typeof(List<string>))]
+[JsonSerializable(typeof(List<int>))]
+internal partial class AppJsonContext : JsonSerializerContext;
