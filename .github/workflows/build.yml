@@ -137,3 +137,53 @@ jobs:
       with:
         name: ${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}
         path: ${{ env.OUTPUT }}
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Set artifact name
+      id: set-artifact-name
+      shell: bash
+      run: |
+        if [[ "${{ inputs.target }}" == "windows" && "${{ inputs.project }}" == "./v2rayN.Desktop/v2rayN.Desktop.csproj" ]]; then
+          echo "ARTIFACT_NAME=v2rayN-${{ inputs.target }}-${{ matrix.arch }}-Desktop${{ inputs.isAot && '-aot' || '' }}".7z" >> "$GITHUB_OUTPUT"
+        else
+          echo "ARTIFACT_NAME=v2rayN-${{ inputs.target }}-${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}".7z" >> "$GITHUB_OUTPUT"
+        fi
+
+    - name: Package release 7z archive
+      shell: bash
+      run: |
+        set -euo pipefail
+        7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=32m -ms=on ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }} ${{ env.OUTPUT }}
+
+    - name: Create git tag
+      uses: actions/github-script@v8
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
+        file_glob: true
+        prerelease: true
