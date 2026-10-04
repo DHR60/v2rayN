@@ -14,34 +14,6 @@ on:
         required: false
         default: ''
         type: string
-  pull_request:
-    branches: [master]
-    paths:
-      - 'v2rayN/v2rayN.WebAPI/**'
-      - 'v2rayN/ServiceLib/**'
-      - 'v2rayN/ServiceLib.Tests/**'
-      - 'v2rayN/Directory.Build.*'
-      - 'v2rayN/Directory.Packages.props'
-      - 'v2rayN/v2rayN.slnx'
-      - 'global.json'
-      - '.github/workflows/build-WebAPI.yml'
-      - '.github/workflows/release-WebAPI.yml'
-      - '.github/workflows/build-all.yml'
-      - '.github/workflows/upload-sign.yml'
-  push:
-    branches: [master]
-    paths:
-      - 'v2rayN/v2rayN.WebAPI/**'
-      - 'v2rayN/ServiceLib/**'
-      - 'v2rayN/ServiceLib.Tests/**'
-      - 'v2rayN/Directory.Build.*'
-      - 'v2rayN/Directory.Packages.props'
-      - 'v2rayN/v2rayN.slnx'
-      - 'global.json'
-      - '.github/workflows/build-WebAPI.yml'
-      - '.github/workflows/release-WebAPI.yml'
-      - '.github/workflows/build-all.yml'
-      - '.github/workflows/upload-sign.yml'
 permissions:
   contents: read
 

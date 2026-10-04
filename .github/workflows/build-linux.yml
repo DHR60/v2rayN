@@ -8,7 +8,7 @@ on:
         type: string
   push:
     branches:
-      - master
+      - build
 
 permissions:
   contents: write
@@ -253,25 +253,21 @@ jobs:
     needs: deb
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ inputs.release_tag || github.ref_name }}", artifact_name: release-deb, file_pattern: "*.deb" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-rpm:
     name: sign and upload rpm x64 arm64 riscv64 ppc64le loong64
     needs: rpm
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ inputs.release_tag || github.ref_name }}", artifact_name: release-rpm, file_pattern: "*.rpm" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-deb-x86:
     name: sign and upload deb x86
     needs: deb-x86
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ inputs.release_tag || github.ref_name }}", artifact_name: release-deb-x86, file_pattern: "*.deb" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }
 
   release-rpm-x86:
     name: sign and upload rpm x86
     needs: rpm-x86
     uses: ./.github/workflows/upload-sign.yml
     with: { release_tag: "${{ inputs.release_tag || github.ref_name }}", artifact_name: release-rpm-x86, file_pattern: "*.rpm" }
-    secrets: { GPG_PRIVATE_KEY: "${{ secrets.GPG_PRIVATE_KEY }}" }

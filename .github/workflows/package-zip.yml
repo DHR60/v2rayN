@@ -13,9 +13,6 @@ on:
         required: false
         type: boolean
         default: false
-    secrets:
-      GPG_PRIVATE_KEY:
-        required: true
 
 permissions:
   contents: write
@@ -116,5 +113,3 @@ jobs:
       release_tag: ${{ inputs.release_tag }}
       artifact_name: release-${{ inputs.target }}-${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}
       file_pattern: '*.zip'
-    secrets:
-      GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
