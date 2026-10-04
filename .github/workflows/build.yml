@@ -21,6 +21,7 @@ jobs:
     strategy:
       matrix:
         arch: [ x64, arm64 ]
+        tfm: [ net10.0, net11.0 ]
     runs-on: |-
       ${{
         case(
@@ -73,9 +74,16 @@ jobs:
         dotnet --list-sdks 2>$null; $LASTEXITCODE=0
 
     - name: Setup .NET
+      if: matrix.tfm != 'net11.0'
       uses: actions/setup-dotnet@v6
       with:
         dotnet-version: 10.0.x
+
+    - name: Setup .NET 11
+      if: matrix.tfm == 'net11.0'
+      uses: actions/setup-dotnet@v6
+      with:
+        dotnet-version: 11.0.x
 
     - name: Install dependencies
       shell: bash
@@ -103,25 +111,37 @@ jobs:
     - name: Set OUTPUT Environment Variable
       shell: bash
       run: |
-        RAW_PATH="${{ github.workspace }}/${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}"
+        RAW_PATH="${{ github.workspace }}/${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}${{ matrix.tfm == 'net11.0' && '-net11' || '' }}"
         echo "OUTPUT=${RAW_PATH//\\//}" >> "$GITHUB_ENV"
+
+    - name: Set Runtime Async Environment Variable
+      shell: bash
+      if: matrix.tfm == 'net11.0'
+      run: |
+        echo "RUNTIME_ASYNC=-p:Features=runtime-async=on" >> "$GITHUB_ENV"
+
+    - name: Replace v2rayN target framework
+      shell: bash
+      if: matrix.tfm == 'net11.0'
+      run: |
+        find . \( -name "*.csproj" -o -name "*.props" \) -type f -exec sed -i 's/net10\.0/net11\.0/g' {} +
 
     - name: Build AmazTool
       shell: bash
       working-directory: ./v2rayN
-      run: dotnet publish ./AmazTool/AmazTool.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true $ExtOpt ${{ env.DOTNET_AOT_ARG }} -o ${{ env.OUTPUT }}
+      run: dotnet publish ./AmazTool/AmazTool.csproj -c Release -r $RID -p:SelfContained=true -p:PublishTrimmed=true $ExtOpt ${{ env.DOTNET_AOT_ARG }} ${{ env.RUNTIME_ASYNC }} -o ${{ env.OUTPUT }}
 
     - name: Build v2rayN WPF
       shell: bash
       if: inputs.project == './v2rayN.Windows/v2rayN.Windows.csproj'
       working-directory: ./v2rayN
-      run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt -o ${{ env.OUTPUT }}
+      run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt ${{ env.RUNTIME_ASYNC }} -o ${{ env.OUTPUT }}
 
     - name: Build v2rayN Avalonia
       shell: bash
       if: inputs.project == './v2rayN.Desktop/v2rayN.Desktop.csproj'
       working-directory: ./v2rayN
-      run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt ${{ env.DOTNET_AOT_ARG }} -o ${{ env.OUTPUT }}
+      run: dotnet publish $Project -c Release -r $RID -p:SelfContained=true $ExtOpt ${{ env.DOTNET_AOT_ARG }} ${{ env.RUNTIME_ASYNC }} -o ${{ env.OUTPUT }}
 
     - name: Remove Debug Symbols
       shell: bash
@@ -135,5 +155,56 @@ jobs:
     - name: Upload build artifacts
       uses: actions/upload-artifact@v7
       with:
-        name: ${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}
+        name: ${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}${{ matrix.tfm == 'net11.0' && '-net11' || '' }}
         path: ${{ env.OUTPUT }}
+
+    # upload 7z archive to release for testing
+    - name: Install 7z
+      uses: milliewalky/setup-7-zip@v2
+
+    - name: Set artifact name
+      id: set-artifact-name
+      shell: bash
+      run: |
+        if [[ "${{ inputs.target }}" == "windows" && "${{ inputs.project }}" == "./v2rayN.Desktop/v2rayN.Desktop.csproj" ]]; then
+          artifact_name="v2rayN-${{ inputs.target }}-${{ matrix.arch }}-Desktop${{ inputs.isAot && '-aot' || '' }}${{ matrix.tfm == 'net11.0' && '-net11' || '' }}.7z"
+        else
+          artifact_name="v2rayN-${{ inputs.target }}-${{ matrix.arch }}${{ inputs.isAot && '-aot' || '' }}${{ matrix.tfm == 'net11.0' && '-net11' || '' }}.7z"
+        fi
+        printf 'ARTIFACT_NAME=%s\n' "$artifact_name" >> "$GITHUB_OUTPUT"
+
+    - name: Package release 7z archive
+      shell: bash
+      run: |
+        set -euo pipefail
+        7z a -t7z -m0=lzma2 -mx=9 -mfb=64 -md=32m -ms=on ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }} ${{ env.OUTPUT }}
+
+    - name: Create git tag
+      uses: actions/github-script@v8
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
+        script: |
+          try {
+            await github.rest.git.createRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: 'refs/tags/build-${{ github.sha }}',
+              sha: context.sha
+            });
+            core.info('✅ Tag created: build-${{ github.sha }}');
+          } catch (err) {
+            if (err.status === 422) {
+              core.info('⚠️ Tag already exists: build-${{ github.sha }} (no override)');
+            } else {
+              throw err;
+            }
+          }
+
+    - name: Upload 7z archive to release for testing
+      uses: svenstaro/upload-release-action@v2
+      with:
+        file: ${{ steps.set-artifact-name.outputs.ARTIFACT_NAME }}
+        release_name: build-${{ github.sha }}
+        tag: build-${{ github.sha }}
+        file_glob: true
+        prerelease: true
