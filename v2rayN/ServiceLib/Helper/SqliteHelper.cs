@@ -1,4 +1,4 @@
-using System.Collections;
+using System.Linq.Expressions;
 
 namespace ServiceLib.Helper;
 
@@ -7,70 +7,140 @@ public sealed class SQLiteHelper
     private static readonly Lazy<SQLiteHelper> _instance = new(() => new());
     public static SQLiteHelper Instance => _instance.Value;
     private readonly string _connstr;
-    private SQLiteConnection _db;
-    private SQLiteAsyncConnection _dbAsync;
+    private SQLiteDatabase _db;
     private readonly string _configDB = "guiNDB.db";
 
     public SQLiteHelper()
     {
         _connstr = Utils.GetConfigPath(_configDB);
-        _db = new SQLiteConnection(_connstr, false);
-        _dbAsync = new SQLiteAsyncConnection(_connstr, false);
+        var options = new SQLiteOptionsBuilder(_connstr)
+            .UseGeneratedMaterializers()
+            .Build();
+        _db = new SQLiteDatabase(options);
     }
 
-    public CreateTableResult CreateTable<T>()
+    public int CreateTable<T>()
     {
-        return _db.CreateTable<T>();
+        return _db.Schema.CreateTable<T>();
     }
 
-    public async Task<int> InsertAllAsync(IEnumerable models)
+    public Task<int> CreateTableAsync<T>()
     {
-        return await _dbAsync.InsertAllAsync(models, runInTransaction: true).ConfigureAwait(false);
+        return _db.Schema.CreateTableAsync<T>();
     }
 
-    public async Task<int> InsertAsync(object model)
+    public Task<int> InsertAllAsync<T>(IEnumerable<T> models)
     {
-        return await _dbAsync.InsertAsync(model);
+        return _db.Table<T>().AddRangeAsync(models, runInTransaction: true);
     }
 
-    public async Task<int> ReplaceAsync(object model)
+    public Task<int> InsertAsync<T>(T model)
     {
-        return await _dbAsync.InsertOrReplaceAsync(model);
+        return _db.Table<T>().AddAsync(model);
     }
 
-    public async Task<int> UpdateAsync(object model)
+    public Task<int> ReplaceAsync<T>(T model)
     {
-        return await _dbAsync.UpdateAsync(model);
+        return _db.Table<T>().AddOrUpdateAsync(model);
     }
 
-    public async Task<int> UpdateAllAsync(IEnumerable models)
+    public Task<int> UpdateAsync<T>(T model)
     {
-        return await _dbAsync.UpdateAllAsync(models, runInTransaction: true).ConfigureAwait(false);
+        return _db.Table<T>().UpdateAsync(model);
     }
 
-    public async Task<int> DeleteAsync(object model)
+    public Task<int> UpdateAllAsync<T>(IEnumerable<T> models)
     {
-        return await _dbAsync.DeleteAsync(model);
+        return _db.Table<T>().UpdateRangeAsync(models, runInTransaction: true);
     }
 
-    public async Task<int> DeleteAllAsync<T>()
+    public Task<int> DeleteAsync<T>(T model)
     {
-        return await _dbAsync.DeleteAllAsync<T>();
+        return _db.Table<T>().RemoveAsync(model);
     }
 
-    public async Task<int> ExecuteAsync(string sql)
+    public Task<int> DeleteAllAsync<T>()
     {
-        return await _dbAsync.ExecuteAsync(sql);
+        return _db.Table<T>().ClearAsync();
+        // return _db.Schema.DropTableAsync<T>();
     }
 
-    public async Task<List<T>> QueryAsync<T>(string sql) where T : new()
+    //public Task<int> ExecuteAsync(string sql)
+    //{
+    //    return _db.ExecuteAsync(sql);
+    //}
+
+    //public Task<List<T>> QueryAsync<T>(string sql) where T : new()
+    //{
+    //    return _db.QueryAsync<T>(sql);
+    //}
+
+    public Task<T?> FirstOrDefaultAsync<T>()
     {
-        return await _dbAsync.QueryAsync<T>(sql);
+        return _db.Table<T>().FirstOrDefaultAsync();
     }
 
-    public AsyncTableQuery<T> TableAsync<T>() where T : new()
+    public Task<T?> FirstOrDefaultAsync<T>(Expression<Func<T, bool>> predicate)
     {
-        return _dbAsync.Table<T>();
+        return _db.Table<T>().FirstOrDefaultAsync(predicate);
+    }
+
+    public Task<List<T>> FetchAllAsync<T>()
+    {
+        return _db.Table<T>().ToListAsync();
+    }
+
+    public Task<List<T>> FetchAsync<T>(Expression<Func<T, bool>> predicate)
+    {
+        return _db.Table<T>().Where(predicate).ToListAsync();
+    }
+
+    public Task<List<T>> FetchPagedAsync<T>(
+        Expression<Func<T, bool>> predicate,
+        int? take = null,
+        int? offset = null)
+    {
+        var query = _db.Table<T>().Where(predicate);
+        if (offset.HasValue)
+        {
+            query = query.Skip(offset.Value);
+        }
+        if (take.HasValue)
+        {
+            query = query.Take(take.Value);
+        }
+        return query.ToListAsync();
+    }
+
+    public Task<int> DeleteWhereAsync<T>(Expression<Func<T, bool>> predicate)
+    {
+        return _db.Table<T>()
+            .Where(predicate)
+            .ExecuteDeleteAsync();
+    }
+
+    public Task<int> DeleteOrphanServerStatsAsync()
+    {
+        const string sql = @"
+        DELETE FROM ServerStatItem 
+        WHERE IndexId NOT IN (SELECT IndexId FROM ProfileItem)";
+
+        return _db.ExecuteAsync(sql, Array.Empty<object>());
+    }
+
+    public Task<int> CountAsync<T>()
+    {
+        return _db.Table<T>().CountAsync();
+    }
+
+    public Task<int> CountAsync<T>(Expression<Func<T, bool>> predicate)
+    {
+        return _db.Table<T>().Where(predicate).CountAsync();
+    }
+
+    public SQLiteTable<T> Table<T>()
+    {
+        return _db.Table<T>();
     }
 
     public async Task DisposeDbConnectionAsync()
@@ -79,23 +149,12 @@ public sealed class SQLiteHelper
         {
             try
             {
-                _db?.Close();
+                //_db?.Close();
                 _db?.Dispose();
             }
             finally
             {
                 _db = null;
-            }
-
-            try
-            {
-                var conn = _dbAsync?.GetConnection();
-                conn?.Close();
-                conn?.Dispose();
-            }
-            finally
-            {
-                _dbAsync = null;
             }
         });
     }

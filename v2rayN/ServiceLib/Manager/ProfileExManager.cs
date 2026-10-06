@@ -25,9 +25,14 @@ public class ProfileExManager
 
     private async Task InitData()
     {
-        await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem where indexId not in ( select indexId from ProfileItem )");
+        //await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem where indexId not in ( select indexId from ProfileItem )");
 
-        _lstProfileEx = new(await SQLiteHelper.Instance.TableAsync<ProfileExItem>().ToListAsync());
+        //var validIndexIds = SQLiteHelper.Instance.Table<ProfileItem>().Select(p => p.IndexId);
+        //await SQLiteHelper.Instance.DeleteWhereAsync<ServerStatItem>(s => !validIndexIds.Contains(s.IndexId));
+
+        await SQLiteHelper.Instance.DeleteOrphanServerStatsAsync();
+
+        _lstProfileEx = new(await SQLiteHelper.Instance.FetchAllAsync<ProfileExItem>());
     }
 
     private void IndexIdEnqueue(string indexId)
@@ -43,7 +48,7 @@ public class ProfileExManager
         var cnt = _queIndexIds.Count;
         if (cnt > 0)
         {
-            var lstExists = await SQLiteHelper.Instance.TableAsync<ProfileExItem>().ToListAsync();
+            var lstExists = await SQLiteHelper.Instance.FetchAllAsync<ProfileExItem>();
             List<ProfileExItem> lstInserts = [];
             List<ProfileExItem> lstUpdates = [];
 
@@ -108,7 +113,8 @@ public class ProfileExManager
 
     public async Task ClearAll()
     {
-        await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem ");
+        //await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem ");
+        await SQLiteHelper.Instance.DeleteAllAsync<ProfileExItem>();
         _lstProfileEx = [];
     }
 

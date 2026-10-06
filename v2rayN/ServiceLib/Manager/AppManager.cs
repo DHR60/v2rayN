@@ -174,23 +174,23 @@ public sealed class AppManager
 
     public async Task<List<SubItem>?> SubItems()
     {
-        return await SQLiteHelper.Instance.TableAsync<SubItem>().OrderBy(t => t.Sort).ToListAsync();
+        return (await SQLiteHelper.Instance.FetchAllAsync<SubItem>()).OrderBy(t => t.Sort).ToList();
     }
 
-    public async Task<SubItem?> GetSubItem(string? subid)
+    public Task<SubItem?> GetSubItem(string? subid)
     {
-        return await SQLiteHelper.Instance.TableAsync<SubItem>().FirstOrDefaultAsync(t => t.Id == subid);
+        return SQLiteHelper.Instance.FirstOrDefaultAsync<SubItem>(t => t.Id == subid);
     }
 
-    public async Task<List<ProfileItem>?> ProfileItems(string subid)
+    public Task<List<ProfileItem>?> ProfileItems(string subid)
     {
         if (subid.IsNullOrEmpty())
         {
-            return await SQLiteHelper.Instance.TableAsync<ProfileItem>().ToListAsync();
+            return SQLiteHelper.Instance.FetchAllAsync<ProfileItem>();
         }
         else
         {
-            return await SQLiteHelper.Instance.TableAsync<ProfileItem>().Where(t => t.Subid == subid).ToListAsync();
+            return SQLiteHelper.Instance.FetchAsync<ProfileItem>(t => t.Subid == subid);
         }
     }
 
@@ -201,32 +201,60 @@ public sealed class AppManager
 
     public async Task<List<ProfileItemModel>?> ProfileModels(string subid, string filter)
     {
-        var sql = @$"select a.IndexId
-                           ,a.ConfigType
-                           ,a.Remarks
-                           ,a.Address
-                           ,a.Port
-                           ,a.Network
-                           ,a.StreamSecurity
-                           ,a.Subid
-                           ,b.remarks as subRemarks
-                        from ProfileItem a
-                        left join SubItem b on a.subid = b.id
-                        where 1=1 ";
-        if (subid.IsNotEmpty())
-        {
-            sql += $" and a.subid = '{subid}'";
-        }
-        if (filter.IsNotEmpty())
-        {
-            if (filter.Contains('\''))
+        //var sql = @$"select a.IndexId
+        //                   ,a.ConfigType
+        //                   ,a.Remarks
+        //                   ,a.Address
+        //                   ,a.Port
+        //                   ,a.Network
+        //                   ,a.StreamSecurity
+        //                   ,a.Subid
+        //                   ,b.remarks as subRemarks
+        //                from ProfileItem a
+        //                left join SubItem b on a.subid = b.id
+        //                where 1=1 ";
+        //if (subid.IsNotEmpty())
+        //{
+        //    sql += $" and a.subid = '{subid}'";
+        //}
+        //if (filter.IsNotEmpty())
+        //{
+        //    if (filter.Contains('\''))
+        //    {
+        //        filter = filter.Replace("'", "");
+        //    }
+        //    sql += string.Format(" and (a.remarks like '%{0}%' or a.address like '%{0}%') ", filter);
+        //}
+
+        //return await SQLiteHelper.Instance.QueryAsync<ProfileItemModel>(sql);
+
+        var query = from a in SQLiteHelper.Instance.Table<ProfileItem>()
+            join b in SQLiteHelper.Instance.Table<SubItem>() on a.Subid equals b.Id into subGroup
+            from b in subGroup.DefaultIfEmpty()
+            select new ProfileItemModel
             {
-                filter = filter.Replace("'", "");
-            }
-            sql += string.Format(" and (a.remarks like '%{0}%' or a.address like '%{0}%') ", filter);
+                IndexId = a.IndexId,
+                ConfigType = a.ConfigType,
+                Remarks = a.Remarks,
+                Address = a.Address,
+                Port = a.Port,
+                Network = a.Network,
+                StreamSecurity = a.StreamSecurity,
+                Subid = a.Subid,
+                SubRemarks = b != null ? b.Remarks : null
+            };
+
+        if (!string.IsNullOrEmpty(subid))
+        {
+            query = query.Where(x => x.Subid == subid);
         }
 
-        return await SQLiteHelper.Instance.QueryAsync<ProfileItemModel>(sql);
+        if (!string.IsNullOrEmpty(filter))
+        {
+            query = query.Where(x => x.Remarks.Contains(filter) || x.Address.Contains(filter));
+        }
+
+        return await query.ToListAsync();
     }
 
     public async Task<ProfileItem?> GetProfileItem(string indexId)
@@ -235,7 +263,7 @@ public sealed class AppManager
         {
             return null;
         }
-        return await SQLiteHelper.Instance.TableAsync<ProfileItem>().FirstOrDefaultAsync(it => it.IndexId == indexId);
+        return await SQLiteHelper.Instance.FirstOrDefaultAsync<ProfileItem>(it => it.IndexId == indexId);
     }
 
     public async Task<List<ProfileItem>> GetProfileItemsByIndexIds(IEnumerable<string> indexIds)
@@ -248,18 +276,14 @@ public sealed class AppManager
 
         if (ids.Count <= Global.SqliteMaxBatchSize)
         {
-            return await SQLiteHelper.Instance.TableAsync<ProfileItem>()
-                .Where(it => ids.Contains(it.IndexId))
-                .ToListAsync();
+            return await SQLiteHelper.Instance.FetchAsync<ProfileItem>(it => ids.Contains(it.IndexId));
         }
 
         var items = new List<ProfileItem>();
         for (var size = 0; size < ids.Count; size += Global.SqliteMaxBatchSize)
         {
             var chunk = ids.Skip(size).Take(Global.SqliteMaxBatchSize).ToList();
-            var chunkItems = await SQLiteHelper.Instance.TableAsync<ProfileItem>()
-                .Where(it => chunk.Contains(it.IndexId))
-                .ToListAsync();
+            var chunkItems = await SQLiteHelper.Instance.FetchAsync<ProfileItem>(it => chunk.Contains(it.IndexId));
 
             items.AddRange(chunkItems);
         }
@@ -290,37 +314,37 @@ public sealed class AppManager
         {
             return null;
         }
-        return await SQLiteHelper.Instance.TableAsync<ProfileItem>().FirstOrDefaultAsync(it => it.Remarks == remarks);
+        return await SQLiteHelper.Instance.FirstOrDefaultAsync<ProfileItem>(it => it.Remarks == remarks);
     }
 
     public async Task<List<RoutingItem>?> RoutingItems()
     {
-        return await SQLiteHelper.Instance.TableAsync<RoutingItem>().OrderBy(t => t.Sort).ToListAsync();
+        return (await SQLiteHelper.Instance.FetchAllAsync<RoutingItem>()).OrderBy(t => t.Sort).ToList();
     }
 
-    public async Task<RoutingItem?> GetRoutingItem(string id)
+    public Task<RoutingItem?> GetRoutingItem(string id)
     {
-        return await SQLiteHelper.Instance.TableAsync<RoutingItem>().FirstOrDefaultAsync(it => it.Id == id);
+        return SQLiteHelper.Instance.FirstOrDefaultAsync<RoutingItem>(it => it.Id == id);
     }
 
-    public async Task<List<DNSItem>?> DNSItems()
+    public Task<List<DNSItem>?> DNSItems()
     {
-        return await SQLiteHelper.Instance.TableAsync<DNSItem>().ToListAsync();
+        return SQLiteHelper.Instance.FetchAllAsync<DNSItem>();
     }
 
-    public async Task<DNSItem?> GetDNSItem(ECoreType eCoreType)
+    public Task<DNSItem?> GetDNSItem(ECoreType eCoreType)
     {
-        return await SQLiteHelper.Instance.TableAsync<DNSItem>().FirstOrDefaultAsync(it => it.CoreType == eCoreType);
+        return SQLiteHelper.Instance.FirstOrDefaultAsync<DNSItem>(it => it.CoreType == eCoreType);
     }
 
-    public async Task<List<FullConfigTemplateItem>?> FullConfigTemplateItem()
+    public Task<List<FullConfigTemplateItem>?> FullConfigTemplateItem()
     {
-        return await SQLiteHelper.Instance.TableAsync<FullConfigTemplateItem>().ToListAsync();
+        return SQLiteHelper.Instance.FetchAllAsync<FullConfigTemplateItem>();
     }
 
-    public async Task<FullConfigTemplateItem?> GetFullConfigTemplateItem(ECoreType eCoreType)
+    public Task<FullConfigTemplateItem?> GetFullConfigTemplateItem(ECoreType eCoreType)
     {
-        return await SQLiteHelper.Instance.TableAsync<FullConfigTemplateItem>().FirstOrDefaultAsync(it => it.CoreType == eCoreType);
+        return SQLiteHelper.Instance.FirstOrDefaultAsync<FullConfigTemplateItem>(it => it.CoreType == eCoreType);
     }
 
 #pragma warning disable CS0618
@@ -341,12 +365,13 @@ public sealed class AppManager
 
         while (true)
         {
-            var sql = $"SELECT * FROM ProfileItem " +
-                $"WHERE ConfigVersion < 3 " +
-                $"AND ConfigType NOT IN ({(int)EConfigType.PolicyGroup}, {(int)EConfigType.ProxyChain}) " +
-                $"LIMIT {pageSize} OFFSET {offset}";
-            var batch = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
-            if (batch is null || batch.Count == 0)
+            //var sql = $"SELECT * FROM ProfileItem " +
+            //    $"WHERE ConfigVersion < 3 " +
+            //    $"AND ConfigType NOT IN ({(int)EConfigType.PolicyGroup}, {(int)EConfigType.ProxyChain}) " +
+            //    $"LIMIT {pageSize} OFFSET {offset}";
+            //var batch = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
+            var batch = await SQLiteHelper.Instance.FetchPagedAsync<ProfileItem>(t => t.ConfigVersion < 3 && t.ConfigType != EConfigType.PolicyGroup && t.ConfigType != EConfigType.ProxyChain, pageSize, offset);
+            if (batch is not { Count: > 0 })
             {
                 break;
             }
@@ -368,9 +393,10 @@ public sealed class AppManager
 
         while (true)
         {
-            var sql = $"SELECT * FROM ProfileItem WHERE ConfigVersion = 3 LIMIT {pageSize} OFFSET {offset}";
-            var batch = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
-            if (batch is null || batch.Count == 0)
+            //var sql = $"SELECT * FROM ProfileItem WHERE ConfigVersion = 3 LIMIT {pageSize} OFFSET {offset}";
+            //var batch = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
+            var batch = await SQLiteHelper.Instance.FetchPagedAsync<ProfileItem>(t => t.ConfigVersion == 3, pageSize, offset);
+            if (batch is not { Count: > 0 })
             {
                 break;
             }
@@ -574,11 +600,12 @@ public sealed class AppManager
 
     private async Task<bool> MigrateProfileExtraGroupV2ToV3()
     {
-        var list = await SQLiteHelper.Instance.TableAsync<ProfileGroupItem>().ToListAsync();
+        var list = await SQLiteHelper.Instance.FetchAllAsync<ProfileGroupItem>();
         var groupItems = new ConcurrentDictionary<string, ProfileGroupItem>(list.Where(t => !string.IsNullOrEmpty(t.IndexId)).ToDictionary(t => t.IndexId!));
 
-        var sql = $"SELECT * FROM ProfileItem WHERE ConfigVersion < 3 AND ConfigType IN ({(int)EConfigType.PolicyGroup}, {(int)EConfigType.ProxyChain})";
-        var items = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
+        //var sql = $"SELECT * FROM ProfileItem WHERE ConfigVersion < 3 AND ConfigType IN ({(int)EConfigType.PolicyGroup}, {(int)EConfigType.ProxyChain})";
+        //var items = await SQLiteHelper.Instance.QueryAsync<ProfileItem>(sql);
+        var items = await SQLiteHelper.Instance.FetchAsync<ProfileItem>(t => t.ConfigVersion < 3 && (t.ConfigType == EConfigType.PolicyGroup || t.ConfigType == EConfigType.ProxyChain));
 
         if (items is null || items.Count == 0)
         {
