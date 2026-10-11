@@ -26,9 +26,11 @@ public class ProfileExManager
 
     private async Task InitData()
     {
-        await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem where indexId not in ( select indexId from ProfileItem )");
+        //await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem where indexId not in ( select indexId from ProfileItem )");
 
-        var lstProfileEx = new ConcurrentBag<ProfileExItem>(await SQLiteHelper.Instance.TableAsync<ProfileExItem>().ToListAsync());
+        await SQLiteHelper.Instance.DeleteOrphanServerStatsAsync();
+
+        var lstProfileEx = new ConcurrentBag<ProfileExItem>(await SQLiteHelper.Instance.FetchAllAsync<ProfileExItem>());
         lock (_profileExLock)
         {
             _lstProfileEx = lstProfileEx;
@@ -55,7 +57,7 @@ public class ProfileExManager
 
         if (lstIds.Count > 0)
         {
-            var lstExists = await SQLiteHelper.Instance.TableAsync<ProfileExItem>().ToListAsync();
+            var lstExists = await SQLiteHelper.Instance.FetchAllAsync<ProfileExItem>();
             List<ProfileExItem> lstInserts = [];
             List<ProfileExItem> lstUpdates = [];
 
@@ -129,7 +131,8 @@ public class ProfileExManager
 
     public async Task ClearAll()
     {
-        await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem ");
+        //await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileExItem ");
+        await SQLiteHelper.Instance.DeleteAllAsync<ProfileExItem>();
         lock (_profileExLock)
         {
             _lstProfileEx = [];
