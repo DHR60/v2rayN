@@ -432,7 +432,7 @@ public static class ConfigHandler
             return 0;
         }
 
-        if (await SQLiteHelper.Instance.TableAsync<ProfileItem>().FirstOrDefaultAsync(t => t.IndexId == config.IndexId) != null)
+        if (await SQLiteHelper.Instance.FirstOrDefaultAsync<ProfileItem>(t => t.IndexId == config.IndexId) != null)
         {
             return 0;
         }
@@ -441,7 +441,7 @@ public static class ConfigHandler
             return await SetDefaultServerIndex(config, lstProfile.FirstOrDefault(t => t.Port > 0)?.IndexId);
         }
 
-        var item = await SQLiteHelper.Instance.TableAsync<ProfileItem>().FirstOrDefaultAsync(t => t.Port > 0);
+        var item = await SQLiteHelper.Instance.FirstOrDefaultAsync<ProfileItem>(t => t.Port > 0);
         return await SetDefaultServerIndex(config, item?.IndexId);
     }
 
@@ -456,7 +456,7 @@ public static class ConfigHandler
         var item = await AppManager.Instance.GetProfileItem(config.IndexId);
         if (item is null)
         {
-            var item2 = await SQLiteHelper.Instance.TableAsync<ProfileItem>().FirstOrDefaultAsync();
+            var item2 = await SQLiteHelper.Instance.FirstOrDefaultAsync<ProfileItem>();
             await SetDefaultServerIndex(config, item2?.IndexId);
             return item2;
         }
@@ -2175,7 +2175,7 @@ public static class ConfigHandler
     public static async Task<int> AddSubItem(Config config, string url)
     {
         //already exists
-        var count = await SQLiteHelper.Instance.TableAsync<SubItem>().CountAsync(e => e.Url == url);
+        var count = await SQLiteHelper.Instance.CountAsync<SubItem>(e => e.Url == url);
         if (count > 0)
         {
             return 0;
@@ -2245,7 +2245,7 @@ public static class ConfigHandler
             if (item.Sort <= 0)
             {
                 var maxSort = 0;
-                if (await SQLiteHelper.Instance.TableAsync<SubItem>().CountAsync() > 0)
+                if (await SQLiteHelper.Instance.CountAsync<SubItem>() > 0)
                 {
                     var lstSubs = await AppManager.Instance.SubItems();
                     maxSort = lstSubs.LastOrDefault()?.Sort ?? 0;
@@ -2276,14 +2276,14 @@ public static class ConfigHandler
         {
             return -1;
         }
-        var customProfile = await SQLiteHelper.Instance.TableAsync<ProfileItem>().Where(t => t.Subid == subid && (t.ConfigType == EConfigType.Custom || t.ConfigType == EConfigType.Outbound)).ToListAsync();
+        var customProfile = await SQLiteHelper.Instance.FetchAsync<ProfileItem>(t => t.Subid == subid && (t.ConfigType == EConfigType.Custom || t.ConfigType == EConfigType.Outbound));
         if (isSub)
         {
-            await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileItem where isSub = 1 and subid = '{subid}'");
+            await SQLiteHelper.Instance.DeleteWhereAsync<ProfileItem>(t => t.IsSub && t.Subid == subid);
         }
         else
         {
-            await SQLiteHelper.Instance.ExecuteAsync($"delete from ProfileItem where subid = '{subid}'");
+            await SQLiteHelper.Instance.DeleteWhereAsync<ProfileItem>(t => t.Subid == subid);
         }
         foreach (var item in customProfile)
         {
@@ -2522,10 +2522,10 @@ public static class ConfigHandler
     /// <returns>The default routing item</returns>
     public static async Task<RoutingItem> GetDefaultRouting(Config config)
     {
-        var item = await SQLiteHelper.Instance.TableAsync<RoutingItem>().FirstOrDefaultAsync(it => it.IsActive == true);
+        var item = await SQLiteHelper.Instance.FirstOrDefaultAsync<RoutingItem>(it => it.IsActive == true);
         if (item is null)
         {
-            var item2 = await SQLiteHelper.Instance.TableAsync<RoutingItem>().FirstOrDefaultAsync();
+            var item2 = await SQLiteHelper.Instance.FirstOrDefaultAsync<RoutingItem>();
             await SetDefaultRouting(config, item2);
             return item2;
         }
