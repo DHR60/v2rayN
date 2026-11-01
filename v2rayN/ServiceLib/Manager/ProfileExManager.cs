@@ -56,7 +56,7 @@ public class ProfileExManager
         {
             List<ProfileExItem> lstSaves = [];
 
-            foreach (var id in lstIds)
+            foreach (var id in lstIds.Distinct())
             {
                 var itemNew = _lstProfileEx?.FirstOrDefault(t => t.IndexId == id);
                 if (itemNew is null)
