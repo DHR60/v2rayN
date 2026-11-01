@@ -62,7 +62,7 @@ public class ProfileExManager
         {
             List<ProfileExItem> lstSaves = [];
 
-            foreach (var id in lstIds)
+            foreach (var id in lstIds.Distinct())
             {
                 if (!_dicProfileEx.TryGetValue(id, out var itemNew))
                 {
