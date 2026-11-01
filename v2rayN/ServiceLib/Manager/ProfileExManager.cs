@@ -59,7 +59,7 @@ public class ProfileExManager
             List<ProfileExItem> lstInserts = [];
             List<ProfileExItem> lstUpdates = [];
 
-            foreach (var id in lstIds)
+            foreach (var id in lstIds.Distinct())
             {
                 var item = lstExists.FirstOrDefault(t => t.IndexId == id);
                 var itemNew = _lstProfileEx?.FirstOrDefault(t => t.IndexId == id);
