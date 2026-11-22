@@ -78,6 +78,18 @@ public partial class CheckUpdateViewModel : MyReactiveObject
         }
 
         AppManager.Instance.LastCheckUpdateResults.TryGetValue(coreType, out var lastResult);
+        if (coreType == _v2rayN)
+        {
+            return new()
+            {
+                IsSelected = _config.CheckUpdateItem.SelectedCoreTypes?.Contains(coreType.ToString()) ?? true,
+                IsCheckPreRelease = true,
+                ShowCheckPreRelease = false,
+                CoreType = coreType,
+                IsGeoFile = false,
+                Remarks = lastResult ?? ResUI.menuCheckUpdate,
+            };
+        }
         return new()
         {
             IsSelected = _config.CheckUpdateItem.SelectedCoreTypes?.Contains(coreType.ToString()) ?? true,

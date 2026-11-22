@@ -35,20 +35,32 @@ public partial class UpdateService(DownloadService downloadService, Config confi
         };
 
         await UpdateFunc(false, string.Format(ResUI.MsgStartUpdating, ECoreType.v2rayN));
-        var result = await CheckUpdateAsync(ECoreType.v2rayN, preRelease, cancellationToken);
-        if (result.Success)
-        {
-            await UpdateFunc(false, string.Format(ResUI.MsgParsingSuccessfully, ECoreType.v2rayN));
-            await UpdateFunc(false, result.Msg);
 
-            url = result.Url!;
-            fileName = Utils.GetTempPath(Utils.GetGuid());
-            await downloadService.DownloadFileAsync(new() { FileUrl = url, FilePath = fileName }, cancellationToken);
-        }
-        else
+        // Fork repo
+        // well, it’s better to only support pre-release versions?
+        // latest doesn’t mean more stable; I just forgot to update it.
+        var result = await CheckHasUpdateGuiN(cancellationToken);
+        if (!result.Success)
         {
-            await UpdateFunc(false, result.Msg);
+            await UpdateFunc(false, ResUI.OperationFailed);
+            return;
         }
+        var commitHash = result.version;
+        if (string.IsNullOrWhiteSpace(commitHash))
+        {
+            await UpdateFunc(false, ResUI.IsLatestCore);
+            return;
+        }
+        var tag = $"build-{commitHash}";
+        url = string.Format(await GetUrlFromCore(CoreInfoManager.Instance.GetCoreInfo(ECoreType.v2rayN)) ?? "", tag);
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            await UpdateFunc(false, ResUI.OperationFailed);
+            return;
+        }
+        url = url.Replace("2dust/v2rayN", "DHR60/v2rayN");
+        fileName = Utils.GetTempPath(Utils.GetGuid());
+        await downloadService.DownloadFileAsync(new() { FileUrl = url, FilePath = fileName }, cancellationToken);
     }
 
     public async Task CheckUpdateCore(ECoreType type, bool preRelease, CancellationToken cancellationToken = default)
@@ -130,6 +142,25 @@ public partial class UpdateService(DownloadService downloadService, Config confi
                 continue;
             }
 
+            if (type == ECoreType.v2rayN)
+            {
+                var resultGuiN = await CheckHasUpdateGuiN(cancellationToken);
+                if (resultGuiN is not { Success: true })
+                {
+                    AppManager.Instance.SetLastCheckUpdateResult(type, ResUI.OperationFailed);
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(resultGuiN.version))
+                {
+                    AppManager.Instance.SetLastCheckUpdateResult(type, ResUI.IsLatestCore);
+                    continue;
+                }
+                var msgGuiN = string.Format(ResUI.MsgCheckUpdateHasNewVersion, type, resultGuiN.version);
+                msgs.Add(msgGuiN);
+                AppManager.Instance.SetLastCheckUpdateResult(type, msgGuiN);
+                continue;
+            }
+
             var preRelease = _config.CheckUpdateItem.CheckPreReleaseCoreTypes?.Contains(type.ToString()) ?? false;
             var result = await CheckHasUpdateOnly(type, preRelease, cancellationToken);
             if (result.Success && result.Version != null)
@@ -144,6 +175,45 @@ public partial class UpdateService(DownloadService downloadService, Config confi
             }
         }
         return msgs;
+    }
+
+    public async Task<(bool Success, string? version)> CheckHasUpdateGuiN(CancellationToken cancellationToken = default)
+    {
+        // Fork repo
+        // well, it’s better to only support pre-release versions?
+        // latest doesn’t mean more stable; I just forgot to update it.
+        const string current = global::BuildInfo.GitCommit;
+
+        if (current.IsNullOrEmpty())
+        {
+            return (false, null);
+        }
+
+        // Get remote commit hash
+        const string repoUrl = "https://github.com/DHR60/v2rayN.git/info/refs?service=git-upload-pack";
+
+        var result = await downloadService.TryDownloadString(repoUrl, cancellationToken);
+        if (string.IsNullOrEmpty(result))
+        {
+            return (false, null);
+        }
+
+        // Get "build" branch commit hash
+        var targetHash = ParseGitInfoRefs(result)
+            .LastOrDefault(t => t.Ref == "refs/heads/build")
+            .Hash;
+
+        if (string.IsNullOrWhiteSpace(targetHash))
+        {
+            return (false, null);
+        }
+
+        if (current.Equals(targetHash, StringComparison.OrdinalIgnoreCase))
+        {
+            return (true, null);
+        }
+
+        return (true, targetHash);
     }
 
     public async Task UpdateGeoFileAll(CancellationToken cancellationToken = default)
@@ -253,11 +323,52 @@ public partial class UpdateService(DownloadService downloadService, Config confi
             return null;
         }
         const string targetRefPrefix = "refs/tags/";
-        var tags = new List<string>();
+        var tags = ParseGitInfoRefs(result)
+            .Where(t => t.Ref.StartsWith(targetRefPrefix, StringComparison.Ordinal))
+            .Select(t => t.Ref[targetRefPrefix.Length..])
+            .ToList();
+        var lockedMaxVersion = coreInfo?.LockedMaxVersion ?? new SemanticVersion(int.MaxValue, int.MaxValue, int.MaxValue);
+        // Verify and filter
+        var tagsVersions = tags
+            .Select(tag => new { Tag = tag, IsValid = SemanticVersion.TryParse(tag, out var v), Version = v })
+            .Where(x => x.IsValid && x.Version <= lockedMaxVersion)
+            .ToList();
+        // Sort by version descending
+        var sortedTags = tagsVersions
+            .OrderByDescending(x => x.Version)
+            .Select(x => x.Tag)
+            .ToList();
+        // Check is there is a valid release
+        // TODO: anit-pattern for now
+        using var httpClient = new HttpClient(downloadService.Handler, false);
+        foreach (var tag in sortedTags)
+        {
+            try
+            {
+                using var request = new HttpRequestMessage(HttpMethod.Head, $"{coreInfo?.Url}/tag/{tag}");
+                using var response = await httpClient.SendAsync(request, cancellationToken);
+                if (response.IsSuccessStatusCode)
+                {
+                    return tag;
+                }
+            }
+            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+            {
+                throw;
+            }
+            catch
+            {
+                // Ignore
+            }
+        }
+        return null;
+    }
 
-        var remaining = result.AsSpan();
-        ReadOnlySpan<char> targetRefSpan = targetRefPrefix;
+    private static List<(string Hash, string Ref)> ParseGitInfoRefs(string content)
+    {
+        var refs = new List<(string Hash, string Ref)>();
 
+        var remaining = content.AsSpan();
         while (!remaining.IsEmpty)
         {
             var newlineIndex = remaining.IndexOf('\n');
@@ -298,52 +409,15 @@ public partial class UpdateService(DownloadService downloadService, Config confi
             {
                 refSpan = refSpan[..nulIndex].TrimEnd();
             }
-            if (refSpan.EndsWith("^{}", StringComparison.Ordinal))
+            if (refSpan.EndsWith("^{}", StringComparison.Ordinal)
+                || !refSpan.StartsWith("refs/", StringComparison.Ordinal))
             {
                 continue;
             }
 
-            if (refSpan.StartsWith(targetRefSpan, StringComparison.Ordinal))
-            {
-                var tag = refSpan[targetRefSpan.Length..].ToString();
-                tags.Add(tag);
-            }
+            refs.Add((payload[..spaceIndex].ToString(), refSpan.ToString()));
         }
-        var lockedMaxVersion = coreInfo?.LockedMaxVersion ?? new SemanticVersion(int.MaxValue, int.MaxValue, int.MaxValue);
-        // Verify and filter
-        var tagsVersions = tags
-            .Select(tag => new { Tag = tag, IsValid = SemanticVersion.TryParse(tag, out var v), Version = v })
-            .Where(x => x.IsValid && x.Version <= lockedMaxVersion)
-            .ToList();
-        // Sort by version descending
-        var sortedTags = tagsVersions
-            .OrderByDescending(x => x.Version)
-            .Select(x => x.Tag)
-            .ToList();
-        // Check is there is a valid release
-        // TODO: anit-pattern for now
-        using var httpClient = new HttpClient(downloadService.Handler, false);
-        foreach (var tag in sortedTags)
-        {
-            try
-            {
-                using var request = new HttpRequestMessage(HttpMethod.Head, $"{coreInfo?.Url}/tag/{tag}");
-                using var response = await httpClient.SendAsync(request, cancellationToken);
-                if (response.IsSuccessStatusCode)
-                {
-                    return tag;
-                }
-            }
-            catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
-            {
-                throw;
-            }
-            catch
-            {
-                // Ignore
-            }
-        }
-        return null;
+        return refs;
     }
 
     [GeneratedRegex(@"v?(?<version>\d+\.\d+\.\d+(?:-[0-9a-zA-Z.-]+)?(?:\+[0-9a-zA-Z.-]+)?)", RegexOptions.IgnoreCase)]
@@ -467,6 +541,9 @@ public partial class UpdateService(DownloadService downloadService, Config confi
 #if V2RAYN_IS_AOT
             url = url?.Replace(".zip", "-aot.zip");
 #endif
+#if V2RAYN_TFW_NET11
+            url = url?.Replace(".zip", "-net11.zip");
+#endif
 
             return url;
         }
@@ -493,7 +570,7 @@ public partial class UpdateService(DownloadService downloadService, Config confi
         return await Task.FromResult("");
     }
 
-    #endregion CheckUpdate private
+#endregion CheckUpdate private
 
     #region Geo private
 
