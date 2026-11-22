@@ -35,20 +35,32 @@ public partial class UpdateService(DownloadService downloadService, Config confi
         };
 
         await UpdateFunc(false, string.Format(ResUI.MsgStartUpdating, ECoreType.v2rayN));
-        var result = await CheckUpdateAsync(ECoreType.v2rayN, preRelease, cancellationToken);
-        if (result.Success)
-        {
-            await UpdateFunc(false, string.Format(ResUI.MsgParsingSuccessfully, ECoreType.v2rayN));
-            await UpdateFunc(false, result.Msg);
 
-            url = result.Url!;
-            fileName = Utils.GetTempPath(Utils.GetGuid());
-            await downloadService.DownloadFileAsync(new() { FileUrl = url, FilePath = fileName }, cancellationToken);
-        }
-        else
+        // Fork repo
+        // well, it’s better to only support pre-release versions?
+        // latest doesn’t mean more stable; I just forgot to update it.
+        var result = await CheckHasUpdateGuiN(cancellationToken);
+        if (!result.Success)
         {
-            await UpdateFunc(false, result.Msg);
+            await UpdateFunc(false, ResUI.OperationFailed);
+            return;
         }
+        var commitHash = result.version;
+        if (string.IsNullOrWhiteSpace(commitHash))
+        {
+            await UpdateFunc(false, ResUI.IsLatestCore);
+            return;
+        }
+        var tag = $"build-{commitHash}";
+        url = string.Format(await GetUrlFromCore(CoreInfoManager.Instance.GetCoreInfo(ECoreType.v2rayN)) ?? "", tag);
+        if (string.IsNullOrWhiteSpace(url))
+        {
+            await UpdateFunc(false, ResUI.OperationFailed);
+            return;
+        }
+        url = url.Replace("2dust/v2rayN", "DHR60/v2rayN");
+        fileName = Utils.GetTempPath(Utils.GetGuid());
+        await downloadService.DownloadFileAsync(new() { FileUrl = url, FilePath = fileName }, cancellationToken);
     }
 
     public async Task CheckUpdateCore(ECoreType type, bool preRelease, CancellationToken cancellationToken = default)
@@ -130,6 +142,25 @@ public partial class UpdateService(DownloadService downloadService, Config confi
                 continue;
             }
 
+            if (type == ECoreType.v2rayN)
+            {
+                var resultGuiN = await CheckHasUpdateGuiN(cancellationToken);
+                if (resultGuiN is not { Success: true })
+                {
+                    AppManager.Instance.SetLastCheckUpdateResult(type, ResUI.OperationFailed);
+                    continue;
+                }
+                if (string.IsNullOrWhiteSpace(resultGuiN.version))
+                {
+                    AppManager.Instance.SetLastCheckUpdateResult(type, ResUI.IsLatestCore);
+                    continue;
+                }
+                var msgGuiN = string.Format(ResUI.MsgCheckUpdateHasNewVersion, type, resultGuiN.version);
+                msgs.Add(msgGuiN);
+                AppManager.Instance.SetLastCheckUpdateResult(type, msgGuiN);
+                continue;
+            }
+
             var preRelease = _config.CheckUpdateItem.CheckPreReleaseCoreTypes?.Contains(type.ToString()) ?? false;
             var result = await CheckHasUpdateOnly(type, preRelease, cancellationToken);
             if (result.Success && result.Version != null)
@@ -144,6 +175,88 @@ public partial class UpdateService(DownloadService downloadService, Config confi
             }
         }
         return msgs;
+    }
+
+    public async Task<(bool Success, string? version)> CheckHasUpdateGuiN(CancellationToken cancellationToken = default)
+    {
+        // Fork repo
+        // well, it’s better to only support pre-release versions?
+        // latest doesn’t mean more stable; I just forgot to update it.
+        const string current = global::BuildInfo.GitCommit;
+
+        if (current.IsNullOrEmpty())
+        {
+            return (false, null);
+        }
+
+        // Get remote commit hash
+        const string repoUrl = "https://github.com/DHR60/v2rayN.git/info/refs?service=git-upload-pack";
+
+        var result = await downloadService.TryDownloadString(repoUrl, cancellationToken);
+        if (string.IsNullOrEmpty(result))
+        {
+            return (false, null);
+        }
+
+        // Get "build" branch commit hash
+        const string targetRef = "refs/heads/build";
+
+        string? targetHash = null;
+
+        var remaining = result.AsSpan();
+        ReadOnlySpan<char> targetRefSpan = targetRef;
+
+        while (!remaining.IsEmpty)
+        {
+            var newlineIndex = remaining.IndexOf('\n');
+            var line = newlineIndex >= 0
+                ? remaining[..newlineIndex]
+                : remaining;
+
+            remaining = newlineIndex >= 0
+                ? remaining[(newlineIndex + 1)..]
+                : ReadOnlySpan<char>.Empty;
+
+            line = line.TrimEnd('\r');
+
+            // Remove pkt-line length prefix (4 hex digits)
+            if (line.Length <= 4)
+            {
+                continue;
+            }
+
+            var payload = line[4..];
+            if (payload.IsEmpty || payload is "0000")
+            {
+                continue;
+            }
+
+            var spaceIndex = payload.IndexOf(' ');
+            if (spaceIndex <= 0)
+            {
+                continue;
+            }
+
+            var hashSpan = payload[..spaceIndex];
+            var refSpan = payload[(spaceIndex + 1)..].Trim();
+
+            if (refSpan.SequenceEqual(targetRefSpan))
+            {
+                targetHash = hashSpan.ToString();
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(targetHash))
+        {
+            return (false, null);
+        }
+
+        if (current.Equals(targetHash, StringComparison.OrdinalIgnoreCase))
+        {
+            return (true, null);
+        }
+
+        return (true, targetHash);
     }
 
     public async Task UpdateGeoFileAll(CancellationToken cancellationToken = default)
@@ -350,6 +463,9 @@ public partial class UpdateService(DownloadService downloadService, Config confi
 #if V2RAYN_IS_AOT
             url = url?.Replace(".zip", "-aot.zip");
 #endif
+#if V2RAYN_TFW_NET11
+            url = url?.Replace(".zip", "-net11.zip");
+#endif
 
             return url;
         }
@@ -376,7 +492,7 @@ public partial class UpdateService(DownloadService downloadService, Config confi
         return await Task.FromResult("");
     }
 
-    #endregion CheckUpdate private
+#endregion CheckUpdate private
 
     #region Geo private
 

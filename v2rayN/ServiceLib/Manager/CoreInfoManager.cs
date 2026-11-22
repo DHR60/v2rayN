@@ -88,7 +88,7 @@ public sealed class CoreInfoManager
     {
         return type switch
         {
-            ECoreType.v2rayN => preRelease,
+            ECoreType.v2rayN => true,
             ECoreType.Xray => preRelease,
             _ => false,
         };

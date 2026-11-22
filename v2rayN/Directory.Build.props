@@ -32,6 +32,8 @@
 
     <PropertyGroup>
         <IsAot Condition="'$(IsAot)' == ''">false</IsAot>
+        <TFWNet11 Condition="'$(TFWNet11)' == ''">false</TFWNet11>
+        <GitCommit Condition="'$(GitCommit)' == ''" />
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(IsAot)' == 'true'">
@@ -39,4 +41,25 @@
         <PublishTrimmed>true</PublishTrimmed>
         <DefineConstants>$(DefineConstants);V2RAYN_IS_AOT</DefineConstants>
     </PropertyGroup>
+
+    <PropertyGroup Condition="'$(TFWNet11)' == 'true'">
+        <!--<TargetFramework>net11.0</TargetFramework>-->
+        <Features>$(Features);runtime-async=on</Features>
+        <DefineConstants>$(DefineConstants);V2RAYN_TFW_NET11</DefineConstants>
+    </PropertyGroup>
+
+    <Target Name="GenerateBuildInfo" BeforeTargets="CoreCompile">
+        <PropertyGroup>
+            <BuildInfoFile>$(IntermediateOutputPath)BuildInfo.g.cs</BuildInfoFile>
+        </PropertyGroup>
+        <WriteLinesToFile File="$(BuildInfoFile)" Overwrite="true" Lines="
+internal static class BuildInfo
+{
+    public const string GitCommit = &quot;$(GitCommit)&quot;%3B
+}
+" />
+        <ItemGroup>
+            <Compile Include="$(BuildInfoFile)" />
+        </ItemGroup>
+    </Target>
 </Project>
