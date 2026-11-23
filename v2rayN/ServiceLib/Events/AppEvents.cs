@@ -13,5 +13,7 @@ public static class AppEvents
     public static readonly EventChannel<RxVoid> AppExitRequested = new();
     public static readonly EventChannel<bool> ShutdownRequested = new();
 
+    public static readonly EventChannel<RxVoid> RebuildViewRequested = new();
+
     public static readonly EventChannel<ESysProxyType> SysProxyChangeRequested = new();
 }

@@ -426,7 +426,7 @@ public partial class ProfilesView : ReactiveUserControl<ProfilesViewModel>
         }
     }
 
-    private void StorageUI()
+    public void StorageUI()
     {
         try
         {

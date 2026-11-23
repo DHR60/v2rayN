@@ -30,23 +30,10 @@ public partial class StatusBarView : ReactiveUserControl<StatusBarViewModel>
             this.Bind(ViewModel, vm => vm.SystemProxySelected, v => v.cmbSystemProxy.SelectedIndex).DisposeWith(disposables);
             this.Bind(ViewModel, vm => vm.SelectedRouting, v => v.cmbRoutings2.SelectedItem).DisposeWith(disposables);
 
-            ViewModel.SetClipboardDataInteraction.RegisterHandler(async interaction =>
-            {
-                var strData = interaction.Input;
-                await AvaUtils.SetClipboardData(this, strData);
-                interaction.SetOutput(RxVoid.Default);
-            }).DisposeWith(disposables);
-
             ViewModel.PasswordInputInteraction.RegisterHandler(async interaction =>
             {
                 var result = await PasswordInputAsync();
                 interaction.SetOutput(result);
-            }).DisposeWith(disposables);
-
-            ViewModel.DispatcherRefreshIconInteraction.RegisterHandler(interaction =>
-            {
-                Dispatcher.UIThread.Post(RefreshIcon, DispatcherPriority.Default);
-                interaction.SetOutput(RxVoid.Default);
             }).DisposeWith(disposables);
         });
 

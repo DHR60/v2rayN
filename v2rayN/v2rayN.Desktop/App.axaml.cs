@@ -23,6 +23,7 @@ public partial class App : Application
             if (!Design.IsDesignMode)
             {
                 AppManager.Instance.InitComponents();
+                AppManager.Instance.SupportsViewRebuild = true;
                 DataContext = StatusBarViewModel.Instance;
             }
 
@@ -31,13 +32,54 @@ public partial class App : Application
             mainWindow.ViewModel = mainWindowViewModel;
             desktop.MainWindow = mainWindow;
 
+            if (!ConfigTextHandler.Config.UiItem.AutoHideStartup)
+            {
+                mainWindow.EnsureMainView();
+            }
+
             if (OperatingSystem.IsMacOS())
             {
                 Current?.TryGetFeature<IActivatableLifetime>()?.Activated += OnMacOSActivated;
             }
+
+            // The tray menu is not part of the recyclable main view, so refresh its texts on rebuild.
+            AppEvents.RebuildViewRequested
+                .AsObservable()
+                .ObserveOn(RxSchedulers.MainThreadScheduler)
+                .Subscribe(_ => UpdateTrayMenuTexts());
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    private void UpdateTrayMenuTexts()
+    {
+        var icons = TrayIcon.GetIcons(this);
+        var items = icons is { Count: > 0 } ? icons[0].Menu?.Items : null;
+        if (items is null || items.Count < 14)
+        {
+            return;
+        }
+
+        SetTrayHeader(items[0], ResUI.TbDisplayGUI);
+        SetTrayHeader(items[1], ResUI.menuShowOrHideMainWindow);
+        SetTrayHeader(items[2], ResUI.menuCopyProxyCmdToClipboard);
+        SetTrayHeader(items[4], ResUI.menuSystemProxyClear);
+        SetTrayHeader(items[5], ResUI.menuSystemProxySet);
+        SetTrayHeader(items[6], ResUI.menuSystemProxyNothing);
+        SetTrayHeader(items[7], ResUI.menuSystemProxyPac);
+        SetTrayHeader(items[9], ResUI.menuAddServerViaClipboard);
+        SetTrayHeader(items[10], ResUI.menuSubUpdate);
+        SetTrayHeader(items[11], ResUI.menuSubUpdateViaProxy);
+        SetTrayHeader(items[13], ResUI.menuExit);
+    }
+
+    private static void SetTrayHeader(NativeMenuItemBase item, string? header)
+    {
+        if (item is NativeMenuItem menuItem)
+        {
+            menuItem.Header = header;
+        }
     }
 
     #region MacOS Activation

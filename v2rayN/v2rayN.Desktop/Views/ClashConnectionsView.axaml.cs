@@ -102,7 +102,7 @@ public partial class ClashConnectionsView : ReactiveUserControl<ClashConnections
         }
     }
 
-    private void StorageUI()
+    public void StorageUI()
     {
         try
         {

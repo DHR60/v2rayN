@@ -320,11 +320,16 @@ public partial class OptionSettingViewModel : MyReactiveObject, ICloseable
             NoticeManager.Instance.Enqueue(ResUI.FillFragmentParameterError);
             return;
         }
+        var needRebuildView = EnableDragDropSort != _config.UiItem.EnableDragDropSort
+                             || CurrentFontFamily != _config.UiItem.CurrentFontFamily;
         var needReboot = EnableStatistics != _config.GuiItem.EnableStatistics
-                          || DisplayRealTimeSpeed != _config.GuiItem.DisplayRealTimeSpeed
-                        || EnableDragDropSort != _config.UiItem.EnableDragDropSort
-                        || EnableHWA != _config.GuiItem.EnableHWA
-                        || CurrentFontFamily != _config.UiItem.CurrentFontFamily;
+                        || DisplayRealTimeSpeed != _config.GuiItem.DisplayRealTimeSpeed
+                        || EnableHWA != _config.GuiItem.EnableHWA;
+        if (!AppManager.Instance.SupportsViewRebuild)
+        {
+            needReboot |= needRebuildView;
+            needRebuildView = false;
+        }
 
         //Core
         var inbound = _config.Inbound.First();
@@ -421,6 +426,11 @@ public partial class OptionSettingViewModel : MyReactiveObject, ICloseable
 
             NoticeManager.Instance.Enqueue(needReboot ? ResUI.NeedRebootTips : ResUI.OperationSuccess);
             RequestClose?.Invoke(this, EventArgs.Empty);
+
+            if (needRebuildView)
+            {
+                AppEvents.RebuildViewRequested.Publish();
+            }
         }
         else
         {

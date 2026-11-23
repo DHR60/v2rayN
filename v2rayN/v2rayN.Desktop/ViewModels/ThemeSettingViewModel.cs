@@ -1,4 +1,4 @@
-using Semi.Avalonia;
+using v2rayN.Desktop.Common;
 
 namespace v2rayN.Desktop.ViewModels;
 
@@ -20,9 +20,9 @@ public partial class ThemeSettingViewModel : MyReactiveObject
 
     private void RestoreUI()
     {
-        ModifyTheme();
-        ModifyFontFamily();
-        ModifyFontSize();
+        AppStyles.ApplyTheme(_config.UiItem.CurrentTheme);
+        AppStyles.ApplyFontFamily(_config.UiItem.CurrentFontFamily);
+        AppStyles.ApplyFontSize(_config.UiItem.CurrentFontSize);
     }
 
     private void BindingUI()
@@ -32,7 +32,7 @@ public partial class ThemeSettingViewModel : MyReactiveObject
         CurrentLanguage = _config.UiItem.CurrentLanguage;
 
         // Set Default Value
-        ModifyFontSizeEx(12);
+        AppStyles.ApplyDataGridRowHeight(12);
 
         this.WhenAnyValue(x => x.CurrentTheme)
             .Where(y => y.IsNotEmpty())
@@ -41,7 +41,7 @@ public partial class ThemeSettingViewModel : MyReactiveObject
                 if (_config.UiItem.CurrentTheme != CurrentTheme)
                 {
                     _config.UiItem.CurrentTheme = CurrentTheme;
-                    ModifyTheme();
+                    AppStyles.ApplyTheme(CurrentTheme);
                     await ConfigTextHandler.SaveConfig();
                 }
             });
@@ -53,7 +53,7 @@ public partial class ThemeSettingViewModel : MyReactiveObject
                 if (_config.UiItem.CurrentFontSize != CurrentFontSize && CurrentFontSize >= Global.MinFontSize)
                 {
                     _config.UiItem.CurrentFontSize = CurrentFontSize;
-                    ModifyFontSize();
+                    AppStyles.ApplyFontSize(CurrentFontSize);
                     await ConfigTextHandler.SaveConfig();
                 }
             });
@@ -65,65 +65,12 @@ public partial class ThemeSettingViewModel : MyReactiveObject
                 if (CurrentLanguage.IsNotEmpty() && _config.UiItem.CurrentLanguage != CurrentLanguage)
                 {
                     _config.UiItem.CurrentLanguage = CurrentLanguage;
-                    Thread.CurrentThread.CurrentUICulture = new(CurrentLanguage);
+                    var culture = new CultureInfo(CurrentLanguage);
+                    Thread.CurrentThread.CurrentUICulture = culture;
+                    CultureInfo.DefaultThreadCurrentUICulture = culture;
                     await ConfigTextHandler.SaveConfig();
-                    NoticeManager.Instance.Enqueue(ResUI.NeedRebootTips);
+                    AppEvents.RebuildViewRequested.Publish();
                 }
             });
-    }
-
-    private void ModifyTheme()
-    {
-        var app = Application.Current;
-        if (app is null)
-        {
-            return;
-        }
-        app.RequestedThemeVariant = CurrentTheme switch
-        {
-            nameof(ETheme.Dark) => ThemeVariant.Dark,
-            nameof(ETheme.Light) => ThemeVariant.Light,
-            nameof(ETheme.Aquatic) => SemiTheme.Aquatic,
-            nameof(ETheme.Desert) => SemiTheme.Desert,
-            nameof(ETheme.Dusk) => SemiTheme.Dusk,
-            nameof(ETheme.NightSky) => SemiTheme.NightSky,
-            _ => ThemeVariant.Default,
-        };
-    }
-
-    private void ModifyFontSize()
-    {
-        double size = CurrentFontSize;
-        if (size < Global.MinFontSize)
-        {
-            return;
-        }
-        Application.Current!.Resources["AppFontSize"] = size;
-        ModifyFontSizeEx(size);
-    }
-
-    private void ModifyFontSizeEx(double size)
-    {
-        //DataGrid
-        var rowHeight = 20 + (size / 2);
-        Application.Current!.Resources["DataGridRowHeight"] = rowHeight;
-    }
-
-    private void ModifyFontFamily()
-    {
-        var currentFontFamily = _config.UiItem.CurrentFontFamily;
-        if (currentFontFamily.IsNullOrEmpty())
-        {
-            return;
-        }
-
-        try
-        {
-            Application.Current!.Resources["AppFontFamily"] = new FontFamily(currentFontFamily);
-        }
-        catch (Exception ex)
-        {
-            Logging.SaveLog("ModifyFontFamily", ex);
-        }
     }
 }

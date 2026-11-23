@@ -1,7 +1,4 @@
 using Avalonia.Controls.Notifications;
-using Avalonia.Controls.Primitives;
-using Avalonia.Layout;
-using DialogHostAvalonia;
 using v2rayN.Desktop.Base;
 using v2rayN.Desktop.Common;
 using v2rayN.Desktop.Manager;
@@ -10,16 +7,17 @@ namespace v2rayN.Desktop.Views;
 
 public partial class MainWindow : WindowBase<MainWindowViewModel>
 {
+    /// <summary>
+    /// How long the window content stays alive after being hidden to the tray before it is released.
+    /// </summary>
+    private static readonly TimeSpan MainViewReleaseDelay = TimeSpan.FromSeconds(10);
+
     private static Config _config;
     private readonly WindowNotificationManager? _manager;
-    private CheckUpdateView? _checkUpdateView;
-    private BackupAndRestoreView? _backupAndRestoreView;
+    private readonly MultipleDisposable _viewSubscriptions = new();
+    private IDisposable? _mainViewReleaseTimer;
     private bool _blCloseByUser = false;
-
-    private MsgView? _msgView;
-    private ProfilesView? _profilesView;
-    private ClashConnectionsView? _clashConnectionsView;
-    private ClashProxiesView? _clashProxiesView;
+    private bool _blInteractionsRegistered = false;
 
     public MainWindow()
     {
@@ -29,156 +27,197 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
         _manager = new WindowNotificationManager(TopLevel.GetTopLevel(this)) { MaxItems = 3, Position = NotificationPosition.TopRight };
 
         KeyDown += MainWindow_KeyDown;
-        menuSettingsSetUWP.Click += MenuSettingsSetUWP_Click;
-        menuPromotion.Click += MenuPromotion_Click;
-        menuCheckUpdate.Click += MenuCheckUpdate_Click;
-        btnNewUpdate.Click += MenuCheckUpdate_Click;
-        menuBackupAndRestore.Click += MenuBackupAndRestore_Click;
-        menuClose.Click += MenuClose_Click;
+        DataContextChanged += (_, _) => RegisterInteractions();
 
-        conTheme.Content ??= new ThemeSettingView();
+        UpdateTitle();
 
-        this.WhenActivated(disposables =>
+        if (Utils.IsWindows() && !Design.IsDesignMode)
         {
-            //servers
-            this.BindCommand(ViewModel, vm => vm.AddVmessServerCmd, v => v.menuAddVmessServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddVlessServerCmd, v => v.menuAddVlessServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddShadowsocksServerCmd, v => v.menuAddShadowsocksServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddSocksServerCmd, v => v.menuAddSocksServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddHttpServerCmd, v => v.menuAddHttpServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddTrojanServerCmd, v => v.menuAddTrojanServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddHysteria2ServerCmd, v => v.menuAddHysteria2Server).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddTuicServerCmd, v => v.menuAddTuicServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddWireguardServerCmd, v => v.menuAddWireguardServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddAnytlsServerCmd, v => v.menuAddAnytlsServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddNaiveServerCmd, v => v.menuAddNaiveServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddMasqueServerCmd, v => v.menuAddMasqueServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddCustomServerCmd, v => v.menuAddCustomServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddCustomOutboundServerCmd, v => v.menuAddCustomOutboundServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddPolicyGroupServerCmd, v => v.menuAddPolicyGroupServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddProxyChainServerCmd, v => v.menuAddProxyChainServer).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddServerViaClipboardCmd, v => v.menuAddServerViaClipboard).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddServerViaScanCmd, v => v.menuAddServerViaScan).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.AddServerViaImageCmd, v => v.menuAddServerViaImage).DisposeWith(disposables);
-
-            //sub
-            this.BindCommand(ViewModel, vm => vm.SubSettingCmd, v => v.menuSubSetting).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.SubUpdateCmd, v => v.menuSubUpdate).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.SubUpdateViaProxyCmd, v => v.menuSubUpdateViaProxy).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.SubGroupUpdateCmd, v => v.menuSubGroupUpdate).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.SubGroupUpdateViaProxyCmd, v => v.menuSubGroupUpdateViaProxy).DisposeWith(disposables);
-
-            //setting
-            this.BindCommand(ViewModel, vm => vm.OptionSettingCmd, v => v.menuOptionSetting).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.RoutingSettingCmd, v => v.menuRoutingSetting).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.DNSSettingCmd, v => v.menuDNSSetting).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.FullConfigTemplateCmd, v => v.menuFullConfigTemplate).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.GlobalHotkeySettingCmd, v => v.menuGlobalHotkeySetting).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.RebootAsAdminCmd, v => v.menuRebootAsAdmin).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.ClearServerStatisticsCmd, v => v.menuClearServerStatistics).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.OpenTheFileLocationCmd, v => v.menuOpenTheFileLocation).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.RegionalPresetDefaultCmd, v => v.menuRegionalPresetsDefault).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.RegionalPresetRussiaCmd, v => v.menuRegionalPresetsRussia).DisposeWith(disposables);
-            this.BindCommand(ViewModel, vm => vm.RegionalPresetIranCmd, v => v.menuRegionalPresetsIran).DisposeWith(disposables);
-
-            this.BindCommand(ViewModel, vm => vm.ReloadCmd, v => v.menuReload).DisposeWith(disposables);
-            this.OneWayBind(ViewModel, vm => vm.BlReloadEnabled, v => v.menuReload.IsEnabled).DisposeWith(disposables);
-            this.OneWayBind(ViewModel, vm => vm.BlNewUpdate, v => v.btnNewUpdate.IsVisible).DisposeWith(disposables);
-
-            this.OneWayBind(ViewModel, vm => vm.StatusBarViewModel, v => v.contentStatusBarView.Content).DisposeWith(disposables);
-
-            var layoutBindings = new SingleReplaceableDisposable().DisposeWith(disposables);
-            this.WhenAnyValue(v => v.ViewModel.MainGirdOrientation)
-                .ObserveOn(RxSchedulers.MainThreadScheduler)
-                .Subscribe(orientation =>
-                {
-                    UpdateLayout(orientation, layoutBindings);
-                })
-                .DisposeWith(disposables);
-
-            ViewModel.ReadTextFromClipboardInteraction.RegisterHandler(async interaction =>
-            {
-                var result = await AvaUtils.GetClipboardData(this);
-                interaction.SetOutput(result);
-            }).DisposeWith(disposables);
-
-            ViewModel.ScanScreenInteraction.RegisterHandler(async interaction =>
-            {
-                ShowHideWindow(false);
-                await Task.Delay(200);
-                var result = QRCodeAvaloniaUtils.CaptureScreen();
-                ShowHideWindow(true);
-                interaction.SetOutput(result);
-            }).DisposeWith(disposables);
-
-            ViewModel.BrowseImageFileInteraction.RegisterHandler(async interaction =>
-            {
-                var result = await UI.OpenFileDialog(null);
-                interaction.SetOutput(result);
-            }).DisposeWith(disposables);
-
-            ViewModel.ShowHideWindowInteraction.RegisterHandler(interaction =>
-            {
-                ShowHideWindow(interaction.Input);
-                interaction.SetOutput(RxVoid.Default);
-            }).DisposeWith(disposables);
-
-            AppEvents.SendSnackMsgRequested
-              .AsObservable()
-              .ObserveOn(RxSchedulers.MainThreadScheduler)
-              .Subscribe(async content => await DelegateSnackMsg(content))
-              .DisposeWith(disposables);
-
-            AppEvents.AppExitRequested
-              .AsObservable()
-              .ObserveOn(RxSchedulers.MainThreadScheduler)
-              .Subscribe(_ => StorageUI())
-              .DisposeWith(disposables);
-
-            AppEvents.ShutdownRequested
-              .AsObservable()
-              .ObserveOn(RxSchedulers.MainThreadScheduler)
-              .Subscribe(Shutdown)
-              .DisposeWith(disposables);
-        });
-
-        if (Utils.IsWindows())
-        {
-            Title = $"{Utils.GetVersion()} - {(Utils.IsAdministrator() ? ResUI.RunAsAdmin : ResUI.NotRunAsAdmin)}";
-
-            if (!Design.IsDesignMode)
-            {
-                ThreadPool.RegisterWaitForSingleObject(Program.ProgramStarted, OnProgramStarted, null, -1, false);
-                HotkeyManager.Instance.Init(_config, OnHotkeyHandler);
-            }
-        }
-        else
-        {
-            Title = $"{Utils.GetVersion()}";
-            menuAddServerViaScan.IsVisible = false;
+            ThreadPool.RegisterWaitForSingleObject(Program.ProgramStarted, OnProgramStarted, null, -1, false);
+            HotkeyManager.Instance.Init(_config, OnHotkeyHandler);
         }
 
         if (_config.UiItem.AutoHideStartup && Utils.IsWindows())
         {
             WindowState = WindowState.Minimized;
         }
-
-        AddHelpMenuItem();
     }
 
-    #region Event
+    #region View lifecycle
 
-    private void OnProgramStarted(object state, bool timeout)
+    /// <summary>
+    /// Rebuilds the recyclable content from <see cref="MainWindowViewModel"/>. Used after view related
+    /// settings changed so that the new resources/culture are picked up without restarting the app.
+    /// </summary>
+    public void RebuildMainView()
     {
-        Dispatcher.UIThread.Post(() =>
-                ShowHideWindow(true),
-            DispatcherPriority.Default);
+        var wasVisible = IsVisible;
+        UpdateTitle();
+        ReleaseMainView(true);
+        if (wasVisible)
+        {
+            EnsureMainView();
+        }
+    }
+
+    /// <summary>
+    /// Creates the window content if it was released while hidden to the tray.
+    /// </summary>
+    public void EnsureMainView()
+    {
+        RegisterInteractions();
+
+        if (contentMain.Content is not null || ViewModel is null)
+        {
+            return;
+        }
+
+        contentMain.Content = new MainView
+        {
+            ViewModel = ViewModel,
+        };
+    }
+
+    private void ReleaseMainView(bool force = false)
+    {
+        CancelMainViewRelease();
+
+        if (!force && IsVisible)
+        {
+            return;
+        }
+
+        if (contentMain.Content is MainView mainView)
+        {
+            mainView.StorageUI();
+        }
+        contentMain.Content = null;
+
+        GC.Collect();
+        GC.WaitForPendingFinalizers();
+        GC.Collect();
+    }
+
+    private void ScheduleMainViewRelease()
+    {
+        CancelMainViewRelease();
+        _mainViewReleaseTimer = DispatcherTimer.RunOnce(() => ReleaseMainView(),
+            MainViewReleaseDelay,
+            DispatcherPriority.Background);
+    }
+
+    private void CancelMainViewRelease()
+    {
+        _mainViewReleaseTimer?.Dispose();
+        _mainViewReleaseTimer = null;
+    }
+
+    #endregion View lifecycle
+
+    #region Init
+
+    private void RegisterInteractions()
+    {
+        if (_blInteractionsRegistered || ViewModel is null)
+        {
+            return;
+        }
+        _blInteractionsRegistered = true;
+
+        ViewModel.ReadTextFromClipboardInteraction.RegisterHandler(async interaction =>
+        {
+            var result = await AvaUtils.GetClipboardData(this);
+            interaction.SetOutput(result);
+        }).DisposeWith(_viewSubscriptions);
+
+        ViewModel.ScanScreenInteraction.RegisterHandler(async interaction =>
+        {
+            ShowHideWindow(false);
+            await Task.Delay(200);
+            var result = QRCodeAvaloniaUtils.CaptureScreen();
+            ShowHideWindow(true);
+            interaction.SetOutput(result);
+        }).DisposeWith(_viewSubscriptions);
+
+        ViewModel.BrowseImageFileInteraction.RegisterHandler(async interaction =>
+        {
+            var result = await UI.OpenFileDialog(null);
+            interaction.SetOutput(result);
+        }).DisposeWith(_viewSubscriptions);
+
+        ViewModel.ShowHideWindowInteraction.RegisterHandler(interaction =>
+        {
+            ShowHideWindow(interaction.Input);
+            interaction.SetOutput(RxVoid.Default);
+        }).DisposeWith(_viewSubscriptions);
+
+        // Tray features must keep working while the window content is released.
+        StatusBarViewModel.Instance.SetClipboardDataInteraction.RegisterHandler(async interaction =>
+        {
+            await AvaUtils.SetClipboardData(this, interaction.Input);
+            interaction.SetOutput(RxVoid.Default);
+        }).DisposeWith(_viewSubscriptions);
+
+        StatusBarViewModel.Instance.DispatcherRefreshIconInteraction.RegisterHandler(interaction =>
+        {
+            Dispatcher.UIThread.Post(RefreshIcon, DispatcherPriority.Default);
+            interaction.SetOutput(RxVoid.Default);
+        }).DisposeWith(_viewSubscriptions);
+
+        AppEvents.SendSnackMsgRequested
+          .AsObservable()
+          .ObserveOn(RxSchedulers.MainThreadScheduler)
+          .Subscribe(async content => await DelegateSnackMsg(content))
+          .DisposeWith(_viewSubscriptions);
+
+        AppEvents.AppExitRequested
+          .AsObservable()
+          .ObserveOn(RxSchedulers.MainThreadScheduler)
+          .Subscribe(_ => StorageUI())
+          .DisposeWith(_viewSubscriptions);
+
+        AppEvents.ShutdownRequested
+          .AsObservable()
+          .ObserveOn(RxSchedulers.MainThreadScheduler)
+          .Subscribe(Shutdown)
+          .DisposeWith(_viewSubscriptions);
+
+        AppEvents.RebuildViewRequested
+          .AsObservable()
+          .ObserveOn(RxSchedulers.MainThreadScheduler)
+          .Subscribe(_ => RebuildMainView())
+          .DisposeWith(_viewSubscriptions);
+    }
+
+    private void UpdateTitle()
+    {
+        Title = Utils.IsWindows()
+            ? $"{Utils.GetVersion()} - {(Utils.IsAdministrator() ? ResUI.RunAsAdmin : ResUI.NotRunAsAdmin)}"
+            : $"{Utils.GetVersion()}";
+    }
+
+    private void RefreshIcon()
+    {
+        Icon = AvaUtils.GetAppIcon(_config.SystemProxyItem.SysProxyType);
+        var iconslist = TrayIcon.GetIcons(Application.Current);
+        if (iconslist is { Count: > 0 })
+        {
+            iconslist[0].Icon = Icon;
+            TrayIcon.SetIcons(Application.Current, iconslist);
+        }
     }
 
     private async Task DelegateSnackMsg(string content)
     {
         _manager?.Show(new Avalonia.Controls.Notifications.Notification(null, content, NotificationType.Information));
         await Task.CompletedTask;
+    }
+
+    private void OnProgramStarted(object state, bool timeout)
+    {
+        Dispatcher.UIThread.Post(() =>
+                ShowHideWindow(true),
+            DispatcherPriority.Default);
     }
 
     private void OnHotkeyHandler(EGlobalHotkey e)
@@ -197,6 +236,10 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
                 break;
         }
     }
+
+    #endregion Init
+
+    #region Event
 
     protected override async void OnClosing(WindowClosingEventArgs e)
     {
@@ -220,6 +263,13 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
         }
 
         base.OnClosing(e);
+    }
+
+    protected override void OnClosed(EventArgs e)
+    {
+        CancelMainViewRelease();
+        _viewSubscriptions.Dispose();
+        base.OnClosed(e);
     }
 
     private async void MainWindow_KeyDown(object? sender, KeyEventArgs e)
@@ -246,16 +296,6 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
         }
     }
 
-    private void MenuPromotion_Click(object? sender, RoutedEventArgs e)
-    {
-        ProcUtils.ProcessStart($"{Utils.Base64Decode(Global.PromotionUrl)}?t={DateTime.Now.Ticks}");
-    }
-
-    private void MenuSettingsSetUWP_Click(object? sender, RoutedEventArgs e)
-    {
-        ProcUtils.ProcessStart(Utils.GetBinPath("EnableLoopback.exe"));
-    }
-
     public async Task AddServerViaClipboardAsync()
     {
         var clipboardData = await AvaUtils.GetClipboardData(this);
@@ -280,23 +320,7 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
         ShowHideWindow(true);
     }
 
-    private void MenuCheckUpdate_Click(object? sender, RoutedEventArgs e)
-    {
-        _checkUpdateView ??= new CheckUpdateView();
-        _checkUpdateView.ViewModel = ViewModel?.CheckUpdateViewModel;
-        DialogHost.Show(_checkUpdateView);
-
-        AppEvents.HasUpdateNotified.Publish(false);
-    }
-
-    private void MenuBackupAndRestore_Click(object? sender, RoutedEventArgs e)
-    {
-        _backupAndRestoreView ??= new BackupAndRestoreView();
-        _backupAndRestoreView.ViewModel = ViewModel?.BackupAndRestoreViewModel;
-        DialogHost.Show(_backupAndRestoreView);
-    }
-
-    private async void MenuClose_Click(object? sender, RoutedEventArgs e)
+    public async Task CloseFromMenuAsync()
     {
         try
         {
@@ -342,6 +366,8 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
                     : !AppManager.Instance.ShowInTaskbar);
         if (bl)
         {
+            CancelMainViewRelease();
+            EnsureMainView();
             Show();
             if (WindowState == WindowState.Minimized)
             {
@@ -358,11 +384,13 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
                 return;
             }
 
+            StorageUI();
             foreach (var ownedWindow in OwnedWindows)
             {
                 ownedWindow.Close();
             }
             Hide();
+            ScheduleMainViewRelease();
         }
 
         AppManager.Instance.ShowInTaskbar = bl;
@@ -377,234 +405,13 @@ public partial class MainWindow : WindowBase<MainWindowViewModel>
         }
     }
 
-    private void RestoreUI()
-    {
-        if (_config.UiItem.MainGirdHeight1 > 0 && _config.UiItem.MainGirdHeight2 > 0)
-        {
-            if (_config.UiItem.MainGirdOrientation == EGirdOrientation.Horizontal)
-            {
-                gridMain.ColumnDefinitions[0].Width = new GridLength(_config.UiItem.MainGirdHeight1, GridUnitType.Star);
-                gridMain.ColumnDefinitions[2].Width = new GridLength(_config.UiItem.MainGirdHeight2, GridUnitType.Star);
-            }
-            else if (_config.UiItem.MainGirdOrientation == EGirdOrientation.Vertical)
-            {
-                gridMain.RowDefinitions[0].Height = new GridLength(_config.UiItem.MainGirdHeight1, GridUnitType.Star);
-                gridMain.RowDefinitions[2].Height = new GridLength(_config.UiItem.MainGirdHeight2, GridUnitType.Star);
-            }
-        }
-    }
-
     private void StorageUI()
     {
         ConfigTextHandler.SaveWindowSizeItem(GetType().Name, Width, Height);
 
-        if (_config.UiItem.MainGirdOrientation == EGirdOrientation.Horizontal)
+        if (contentMain.Content is MainView mainView)
         {
-            ConfigTextHandler.SaveMainGirdHeight(gridMain.ColumnDefinitions[0].ActualWidth, gridMain.ColumnDefinitions[2].ActualWidth);
-        }
-        else if (_config.UiItem.MainGirdOrientation == EGirdOrientation.Vertical)
-        {
-            ConfigTextHandler.SaveMainGirdHeight(gridMain.RowDefinitions[0].ActualHeight, gridMain.RowDefinitions[2].ActualHeight);
-        }
-    }
-
-    private void UpdateLayout(EGirdOrientation orientation, SingleReplaceableDisposable disposable)
-    {
-        var currentLayoutDisposables = new MultipleDisposable();
-        disposable.Create(currentLayoutDisposables);
-        gridMain.IsVisible = true;
-        _msgView ??= new MsgView
-        {
-            DataContext = ViewModel?.MsgViewModel,
-        };
-        _profilesView ??= new ProfilesView
-        {
-            DataContext = ViewModel?.ProfilesViewModel,
-        };
-        _clashProxiesView ??= new ClashProxiesView
-        {
-            DataContext = ViewModel?.ClashProxiesViewModel,
-        };
-        _clashConnectionsView ??= new ClashConnectionsView
-        {
-            DataContext = ViewModel?.ClashConnectionsViewModel,
-        };
-
-        switch (orientation)
-        {
-            case EGirdOrientation.Horizontal:
-            default:
-                gridMain.ColumnDefinitions = new ColumnDefinitions("1*,10,1*");
-                gridMain.RowDefinitions = new RowDefinitions("1*");
-                Grid.SetColumn(tabProfiles, 0);
-                Grid.SetColumn(gridSplitter, 1);
-                Grid.SetColumn(tabDockPanel, 2);
-                Grid.SetRow(tabProfiles, 0);
-                Grid.SetRow(gridSplitter, 0);
-                Grid.SetRow(tabDockPanel, 0);
-                tabStripH.IsVisible = true;
-                tabStripV.IsVisible = false;
-                gridSplitter.IsVisible = true;
-                gridSplitter.HorizontalAlignment = HorizontalAlignment.Stretch;
-                tabContent.Content = null;
-                tabProfiles.Content = _profilesView;
-                this.WhenAnyValue(x => x.ViewModel!.ShowClashUI)
-                    .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(show =>
-                    {
-                        if (show)
-                        {
-                            tabStripH.ItemsSource = new List<string>
-                            {
-                                ResUI.MsgInformationTitle,
-                                ResUI.TbProxies,
-                                ResUI.TbConnections,
-                            };
-                            tabStripH.IsVisible = true;
-                        }
-                        else
-                        {
-                            tabStripH.IsVisible = false;
-                            tabStripH.ItemsSource = new List<string>();
-                        }
-                    }).DisposeWith(currentLayoutDisposables);
-                tabStripH.GetObservable(SelectingItemsControl.SelectedIndexProperty)
-                    .Subscribe(index =>
-                    {
-                        tabContent.Content = index switch
-                        {
-                            1 => _clashProxiesView,
-                            2 => _clashConnectionsView,
-                            _ => _msgView,
-                        };
-                    }).DisposeWith(currentLayoutDisposables);
-                break;
-
-            case EGirdOrientation.Vertical:
-                gridMain.RowDefinitions = new RowDefinitions("1*,10,1*");
-                gridMain.ColumnDefinitions = new ColumnDefinitions("1*");
-                Grid.SetRow(tabProfiles, 0);
-                Grid.SetRow(gridSplitter, 1);
-                Grid.SetRow(tabDockPanel, 2);
-                Grid.SetColumn(tabProfiles, 0);
-                Grid.SetColumn(gridSplitter, 0);
-                Grid.SetColumn(tabDockPanel, 0);
-                tabStripV.IsVisible = true;
-                tabStripH.IsVisible = false;
-                gridSplitter.IsVisible = true;
-                gridSplitter.VerticalAlignment = VerticalAlignment.Stretch;
-                tabContent.Content = null;
-                tabProfiles.Content = _profilesView;
-                this.WhenAnyValue(x => x.ViewModel!.ShowClashUI)
-                    .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(show =>
-                    {
-                        if (show)
-                        {
-                            tabStripV.ItemsSource = new List<string>
-                            {
-                                ResUI.MsgInformationTitle,
-                                ResUI.TbProxies,
-                                ResUI.TbConnections,
-                            };
-                            tabStripV.IsVisible = true;
-                        }
-                        else
-                        {
-                            tabStripV.IsVisible = false;
-                            tabStripV.ItemsSource = new List<string>();
-                        }
-                    }).DisposeWith(currentLayoutDisposables);
-                tabStripV.GetObservable(SelectingItemsControl.SelectedIndexProperty)
-                    .Subscribe(index =>
-                    {
-                        tabContent.Content = index switch
-                        {
-                            1 => _clashProxiesView,
-                            2 => _clashConnectionsView,
-                            _ => _msgView,
-                        };
-                    }).DisposeWith(currentLayoutDisposables);
-                break;
-
-            case EGirdOrientation.Tab:
-                gridMain.RowDefinitions = new RowDefinitions("1*");
-                gridMain.ColumnDefinitions = new ColumnDefinitions("1*");
-                Grid.SetColumn(tabProfiles, 0);
-                Grid.SetColumn(gridSplitter, 0);
-                Grid.SetColumn(tabDockPanel, 0);
-                Grid.SetRow(tabProfiles, 0);
-                Grid.SetRow(gridSplitter, 0);
-                Grid.SetRow(tabDockPanel, 0);
-                tabStripV.IsVisible = true;
-                tabStripH.IsVisible = false;
-                gridSplitter.IsVisible = false;
-                tabContent.Content = null;
-                tabProfiles.Content = null;
-                this.WhenAnyValue(x => x.ViewModel!.ShowClashUI)
-                    .ObserveOn(RxSchedulers.MainThreadScheduler)
-                    .Subscribe(show =>
-                    {
-                        if (show)
-                        {
-                            tabStripV.ItemsSource = new List<string>
-                            {
-                                ResUI.menuServers,
-                                ResUI.MsgInformationTitle,
-                                ResUI.TbProxies,
-                                ResUI.TbConnections,
-                            };
-                            tabStripV.IsVisible = true;
-                        }
-                        else
-                        {
-                            tabStripV.ItemsSource = new List<string>
-                            {
-                                ResUI.menuServers,
-                                ResUI.MsgInformationTitle,
-                            };
-                            tabStripV.IsVisible = true;
-                        }
-                    }).DisposeWith(currentLayoutDisposables);
-                tabStripV.GetObservable(SelectingItemsControl.SelectedIndexProperty)
-                    .Subscribe(index =>
-                    {
-                        tabContent.Content = index switch
-                        {
-                            1 => _msgView,
-                            2 => _clashProxiesView,
-                            3 => _clashConnectionsView,
-                            _ => _profilesView,
-                        };
-                    }).DisposeWith(currentLayoutDisposables);
-                break;
-        }
-
-        RestoreUI();
-    }
-
-    private void AddHelpMenuItem()
-    {
-        var coreInfo = CoreInfoManager.Instance.GetCoreInfo();
-        foreach (var it in coreInfo
-            .Where(t => t.CoreType is not ECoreType.v2fly
-                        and not ECoreType.hysteria))
-        {
-            var item = new MenuItem()
-            {
-                Tag = it.Url?.Replace(@"/releases", ""),
-                Header = string.Format(ResUI.menuWebsiteItem, it.CoreType.ToString().Replace("_", " ")).UpperFirstChar()
-            };
-            item.Click += MenuItem_Click;
-            menuHelp.Items.Add(item);
-        }
-    }
-
-    private void MenuItem_Click(object? sender, RoutedEventArgs e)
-    {
-        if (sender is MenuItem item)
-        {
-            ProcUtils.ProcessStart(item.Tag?.ToString());
+            mainView.StorageUI();
         }
     }
 

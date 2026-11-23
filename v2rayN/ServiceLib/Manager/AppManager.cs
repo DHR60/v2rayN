@@ -33,6 +33,11 @@ public sealed class AppManager
 
     public bool ShowInTaskbar { get; set; }
 
+    /// <summary>
+    /// Whether the UI framework can rebuild views at runtime instead of requiring an app restart.
+    /// </summary>
+    public bool SupportsViewRebuild { get; set; }
+
     public ECoreType RunningCoreType { get; set; }
 
     public bool IsRunningCore(ECoreType type)
